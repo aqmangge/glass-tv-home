@@ -46,7 +46,7 @@
     </queries>
 
     <application
-        android:label="@string/app_name"
+        android:label="Nawfal Syafiqah Home"
         android:icon="@mipmap/ic_launcher"
         android:banner="@drawable/banner"
         android:theme="@style/Theme.TvHome"
