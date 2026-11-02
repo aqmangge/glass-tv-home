@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="12dp"
+    android:height="16dp"
+    android:viewportWidth="12"
+    android:viewportHeight="16">
+    <!-- Thermometer Outline -->
+    <path
+        android:pathData="M6,1 C4.34,1 3,2.34 3,4 L3,9.5 C1.8,10.6 1.3,12.3 2,13.9 C2.7,15.5 4.3,16.5 6,16.5 C7.7,16.5 9.3,15.5 10,13.9 C10.7,12.3 10.2,10.6 9,9.5 L9,4 C9,2.34 7.66,1 6,1 Z"
+        android:strokeWidth="1.2"
+        android:strokeColor="#94A3B8"
+        android:fillColor="#00000000" />
+    <!-- Low Mercury Level (only in bulb) -->
+    <path
+        android:pathData="M6,10 L6,12"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeColor="#94A3B8" />
+    <!-- Bulb -->
+    <path
+        android:pathData="M6,13.5m-1.8,0a1.8,1.8 0 1,0 3.6,0a1.8,1.8 0 1,0 -3.6,0"
+        android:fillColor="#94A3B8" />
+</vector>

@@ -1,0 +1,44 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Back Cloud (Slate Gray) -->
+    <path
+        android:pathData="M24,26 L36,26 A5,5 0 0,0 41,21 A5,5 0 0,0 36,16 L24,16 A5,5 0 0,0 19,21 A5,5 0 0,0 24,26 Z"
+        android:fillColor="#94A3B8" />
+    <path
+        android:pathData="M30,16m-7,0a7,7 0 1,0 14,0a7,7 0 1,0 -14,0"
+        android:fillColor="#94A3B8" />
+
+    <!-- Front Cloud (Pure White) -->
+    <path
+        android:pathData="M14,32 L30,32 A6,6 0 0,0 36,26 A6,6 0 0,0 30,20 L14,20 A6,6 0 0,0 8,26 A6,6 0 0,0 14,32 Z"
+        android:fillColor="#FFFFFF" />
+    <path
+        android:pathData="M21,19m-9,0a9,9 0 1,0 18,0a9,9 0 1,0 -18,0"
+        android:fillColor="#FFFFFF" />
+    <path
+        android:pathData="M13,23m-6,0a6,6 0 1,0 12,0a6,6 0 1,0 -12,0"
+        android:fillColor="#FFFFFF" />
+    <path
+        android:pathData="M29,23m-6,0a6,6 0 1,0 12,0a6,6 0 1,0 -12,0"
+        android:fillColor="#FFFFFF" />
+
+    <!-- 3 Cyan Rain Drops -->
+    <path
+        android:pathData="M15,38 L13,42"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:strokeColor="#38BDF8" />
+    <path
+        android:pathData="M22,38 L20,42"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:strokeColor="#38BDF8" />
+    <path
+        android:pathData="M29,38 L27,42"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:strokeColor="#38BDF8" />
+</vector>

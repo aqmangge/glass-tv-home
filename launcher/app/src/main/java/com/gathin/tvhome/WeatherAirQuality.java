@@ -100,6 +100,7 @@ final class WeatherAirQuality {
         final String aqiParam;
         final double pm25;
         final double pm10;
+        final int pressure;
         final String updatedTime;
         final List<HourlyItem> hourly;
         final List<DailyItem> daily;
@@ -109,7 +110,7 @@ final class WeatherAirQuality {
                     int highTemp, int lowTemp, int humidity, int windSpeed, int uvIndex,
                     int rainChanceToday, String sunrise, String sunset, int aqi,
                     String aqiStatus, int aqiColor, String aqiParam, double pm25, double pm10,
-                    String updatedTime, List<HourlyItem> hourly, List<DailyItem> daily) {
+                    int pressure, String updatedTime, List<HourlyItem> hourly, List<DailyItem> daily) {
             this.location = location;
             this.stationId = stationId;
             this.stationPlace = stationPlace;
@@ -132,6 +133,7 @@ final class WeatherAirQuality {
             this.aqiParam = aqiParam;
             this.pm25 = pm25;
             this.pm10 = pm10;
+            this.pressure = pressure;
             this.updatedTime = updatedTime;
             this.hourly = hourly;
             this.daily = daily;
@@ -168,7 +170,7 @@ final class WeatherAirQuality {
 
                 // 1. Fetch Complete Weather Forecast (Open-Meteo)
                 String weatherUrl = String.format(Locale.ROOT,
-                        "https://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max&timezone=Asia%%2FKuala_Lumpur&forecast_days=7",
+                        "https://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,weather_code,wind_speed_10m,surface_pressure&hourly=temperature_2m,precipitation_probability,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max&timezone=Asia%%2FKuala_Lumpur&forecast_days=7",
                         lat, lon);
                 JSONObject wJson = fetchJson(weatherUrl);
 
@@ -184,6 +186,7 @@ final class WeatherAirQuality {
                     // Tropical Calibration: Filter false daytime drizzle when actual rain < 0.5mm
                     if (day && code >= 51 && code <= 55 && precip < 0.5 && rain < 0.4) {
                         code = 2; // Partly sunny / Sebahagian Cerah
+                        curr.put("weather_code", code);
                     }
                 }
 
@@ -322,6 +325,7 @@ final class WeatherAirQuality {
         int windSpeed = 8;
         int uvIndex = 6;
         int rainChanceToday = 60;
+        int pressure = 1010;
         String sunrise = "6:54 AM";
         String sunset = "6:58 PM";
 
@@ -337,8 +341,18 @@ final class WeatherAirQuality {
                     temp = (int) Math.round(curr.optDouble("temperature_2m", temp));
                     apparentTemp = (int) Math.round(curr.optDouble("apparent_temperature", apparentTemp));
                     code = curr.optInt("weather_code", code);
+                    boolean day = curr.optInt("is_day", 1) == 1;
+                    double precip = curr.optDouble("precipitation", 0.0);
+                    double rain = curr.optDouble("rain", 0.0);
+                    // Tropical Calibration: Filter false daytime drizzle when actual rain < 0.5mm
+                    if (day && code >= 51 && code <= 55 && precip < 0.5 && rain < 0.4) {
+                        code = 2; // Partly sunny / Sebahagian Cerah
+                    }
                     humidity = (int) Math.round(curr.optDouble("relative_humidity_2m", humidity));
                     windSpeed = (int) Math.round(curr.optDouble("wind_speed_10m", windSpeed));
+                    if (curr.has("surface_pressure")) {
+                        pressure = (int) Math.round(curr.optDouble("surface_pressure", pressure));
+                    }
                 }
 
                 if (wJson.has("daily")) {
@@ -364,7 +378,7 @@ final class WeatherAirQuality {
                         int len = Math.min(7, days.length());
                         for (int i = 0; i < len; i++) {
                             String dayStr = days.optString(i, "");
-                            String dayLabel = i == 0 ? "Today" : formatDayName(dayStr);
+                            String dayLabel = i == 0 ? formatTodayLabel(context) : formatDayName(dayStr, context);
                             int c = dailyCodes != null ? dailyCodes.optInt(i, 2) : 2;
                             int mx = maxTemps != null ? (int) Math.round(maxTemps.optDouble(i, 31.0)) : 31;
                             int mn = minTemps != null ? (int) Math.round(minTemps.optDouble(i, 24.0)) : 24;
@@ -449,7 +463,8 @@ final class WeatherAirQuality {
         return new FullWeather(locationName, stationId, stationPlace, isJas, temp, apparentTemp,
                 getWeatherCondition(code, isMalay), getWeatherIcon(code),
                 highTemp, lowTemp, humidity, windSpeed, uvIndex, rainChanceToday,
-                sunrise, sunset, aqi, aqiStatus, aqiColor, aqiParam, pm25, pm10, updated, hourly, daily);
+                sunrise, sunset, aqi, aqiStatus, aqiColor, aqiParam, pm25, pm10,
+                pressure, updated, hourly, daily);
     }
 
     private static String translateAqiStatus(String status) {
@@ -478,13 +493,49 @@ final class WeatherAirQuality {
         return "6:54 AM";
     }
 
-    private static String formatDayName(String ymd) {
+    private static String formatTodayLabel(Context context) {
+        boolean isMalay = AppLanguage.LANG_MS.equals(AppLanguage.getLanguage(context))
+                || AppLanguage.LANG_ID.equals(AppLanguage.getLanguage(context))
+                || Locale.getDefault().getLanguage().startsWith("ms")
+                || Locale.getDefault().getLanguage().startsWith("in")
+                || Locale.getDefault().getLanguage().startsWith("id");
+        boolean isPt = Locale.getDefault().getLanguage().startsWith("pt");
+        if (isMalay) return "Hari ini";
+        if (isPt) return "Hoje";
+        return "Today";
+    }
+
+    private static String formatDayName(String ymd, Context context) {
         try {
             SimpleDateFormat inFmt = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
             Date d = inFmt.parse(ymd);
             if (d != null) {
-                SimpleDateFormat outFmt = new SimpleDateFormat("EEE", Locale.getDefault());
-                return outFmt.format(d);
+                boolean isMalay = AppLanguage.LANG_MS.equals(AppLanguage.getLanguage(context))
+                        || AppLanguage.LANG_ID.equals(AppLanguage.getLanguage(context))
+                        || Locale.getDefault().getLanguage().startsWith("ms")
+                        || Locale.getDefault().getLanguage().startsWith("in")
+                        || Locale.getDefault().getLanguage().startsWith("id");
+
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(d);
+                int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+                if (isMalay) {
+                    switch (dayOfWeek) {
+                        case Calendar.SUNDAY: return "Ahad";
+                        case Calendar.MONDAY: return "Isnin";
+                        case Calendar.TUESDAY: return "Selasa";
+                        case Calendar.WEDNESDAY: return "Rabu";
+                        case Calendar.THURSDAY: return "Khamis";
+                        case Calendar.FRIDAY: return "Jumaat";
+                        case Calendar.SATURDAY: return "Sabtu";
+                    }
+                }
+
+                SimpleDateFormat outFmt = new SimpleDateFormat("EEEE", Locale.getDefault());
+                String name = outFmt.format(d);
+                if (name != null && name.length() > 0) {
+                    return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+                }
             }
         } catch (Exception ignored) {
         }

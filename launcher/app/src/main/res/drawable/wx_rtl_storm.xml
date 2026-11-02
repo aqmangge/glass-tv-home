@@ -1,0 +1,44 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Back Storm Cloud (Slate Gray) -->
+    <path
+        android:pathData="M24,25 L36,25 A5,5 0 0,0 41,20 A5,5 0 0,0 36,15 L24,15 A5,5 0 0,0 19,20 A5,5 0 0,0 24,25 Z"
+        android:fillColor="#94A3B8" />
+    <path
+        android:pathData="M30,15m-7,0a7,7 0 1,0 14,0a7,7 0 1,0 -14,0"
+        android:fillColor="#94A3B8" />
+
+    <!-- Front Cloud (Pure White) -->
+    <path
+        android:pathData="M14,30 L30,30 A6,6 0 0,0 36,24 A6,6 0 0,0 30,18 L14,18 A6,6 0 0,0 8,24 A6,6 0 0,0 14,30 Z"
+        android:fillColor="#FFFFFF" />
+    <path
+        android:pathData="M21,17m-9,0a9,9 0 1,0 18,0a9,9 0 1,0 -18,0"
+        android:fillColor="#FFFFFF" />
+    <path
+        android:pathData="M13,21m-6,0a6,6 0 1,0 12,0a6,6 0 1,0 -12,0"
+        android:fillColor="#FFFFFF" />
+    <path
+        android:pathData="M29,21m-6,0a6,6 0 1,0 12,0a6,6 0 1,0 -12,0"
+        android:fillColor="#FFFFFF" />
+
+    <!-- Electric Yellow Lightning Bolt striking down -->
+    <path
+        android:pathData="M22,27 L18,34 L21,34 L17,43 L25,33 L21.5,33 Z"
+        android:fillColor="#FACC15" />
+
+    <!-- Rain Drops -->
+    <path
+        android:pathData="M13,36 L11,40"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeColor="#FFFFFF" />
+    <path
+        android:pathData="M28,36 L26,40"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeColor="#FFFFFF" />
+</vector>

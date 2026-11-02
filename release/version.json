@@ -1,7 +1,7 @@
 {
-  "versionCode": 43,
-  "versionName": "4.0.3",
+  "versionCode": 44,
+  "versionName": "4.0.4",
   "apkUrl": "https://github.com/aqmangge/glass-tv-home/raw/main/release/glass-tv-home.apk",
-  "changelog": "✨ Glass TV v4.0.3 (Penentukuran Pintar Cuaca Tropika Malaysia):\n• Memperbaiki masalah tersilap tunjuk hujan di waktu siang: Menentukur data Open-Meteo dengan menyemak jumlah kerpasan sebenar (precipitation & rain).\n• Sekiranya cuaca luar cerah/sebahagian berawan (kelembapan model < 0.5mm), TV tidak lagi tersilap mengaktifkan hujan tiruan atau gerimis.\n• Sejajar dengan data cerapan rasmi MET Malaysia (Tiada Hujan / 32°C di Putrajaya) & AccuWeather.\n• Animasi titisan hujan kini hanya aktif apabila hujan nyata turun.",
+  "changelog": "✨ Glass TV v4.0.4 (RTL Weather Icons & São Paulo Widescreen TV Dashboard):\n• Widescreen 16:9 Minimalist TV Weather UI: Rekaan baharu yang diinspirasikan oleh papan pemuka cuaca TV São Paulo dan ikon vektor RTL Lucas Carrascosa.\n• Suhu Karang Merah & Metrik Teras: Paparan suhu 29°C (#FF4545) tipografi Inter moden berserta 3 metrik teras (Suhu Rasa 33°C, Kelembapan 78%, IPU Udara Rasmi JAS).\n• Animasi Vektor 60fps RTL Weather: Animasi cakera matahari keemasan dan awan gebu putih yang beralun secara dinamik di skrin TV.\n• Kad Ramalan 5-Hari TV: Kad mendatar interaktif dengan ikon termometer min/maks dan kawalan fokus D-pad alat kawalan jauh TV yang pantas dan lancar.\n• Penentukuran Cuaca Penuh: Menyelesaikan isu ralat gerimis pada paparan ramalan terperinci, memastikan data cuaca Putrajaya sentiasa tepat seiring Google Weather & MET Malaysia.",
   "releaseDate": "2026-11-02"
 }

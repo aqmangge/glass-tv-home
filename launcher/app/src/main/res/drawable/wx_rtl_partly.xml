@@ -1,0 +1,27 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Golden Sun Disc peaking at top-right -->
+    <path
+        android:pathData="M34,22m-11,0a11,11 0 1,0 22,0a11,11 0 1,0 -22,0"
+        android:fillColor="#FACC15" />
+    <!-- White Puffy Cloud in front -->
+    <!-- Pill base: from x=8 to 36, y=26 to 38, radius 6 -->
+    <path
+        android:pathData="M14,38 L30,38 A6,6 0 0,0 36,32 A6,6 0 0,0 30,26 L14,26 A6,6 0 0,0 8,32 A6,6 0 0,0 14,38 Z"
+        android:fillColor="#FFFFFF" />
+    <!-- Center top puff: cx=22, cy=24, r=10 -->
+    <path
+        android:pathData="M22,24m-10,0a10,10 0 1,0 20,0a10,10 0 1,0 -20,0"
+        android:fillColor="#FFFFFF" />
+    <!-- Left puff: cx=14, cy=28, r=7 -->
+    <path
+        android:pathData="M14,28m-7,0a7,7 0 1,0 14,0a7,7 0 1,0 -14,0"
+        android:fillColor="#FFFFFF" />
+    <!-- Right puff: cx=30, cy=28, r=6.5 -->
+    <path
+        android:pathData="M30,28m-6.5,0a6.5,6.5 0 1,0 13,0a6.5,6.5 0 1,0 -13,0"
+        android:fillColor="#FFFFFF" />
+</vector>
