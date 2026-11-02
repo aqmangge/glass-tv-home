@@ -45,5 +45,6 @@ public class GlassView extends View {
         // A rim only: the slab sits on top of the tile, so any fill would wash the app out.
         rim.fit(rect);
         canvas.drawRoundRect(rect, radius, radius, rim.paint);
+        rim.drawWindowLight(canvas, rect, radius, 1f);
     }
 }

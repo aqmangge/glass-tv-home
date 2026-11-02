@@ -299,6 +299,7 @@ final class Glider extends View {
         rim.fit(shape);
         rim.paint.setAlpha(Math.round(255 * opacity));
         canvas.drawRoundRect(shape, r - half, r - half, rim.paint);
+        rim.drawWindowLight(canvas, shape, r - half, opacity);
     }
 
     private void drawShadow(Canvas canvas, float radius) {

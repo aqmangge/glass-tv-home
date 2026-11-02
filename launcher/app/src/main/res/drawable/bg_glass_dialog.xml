@@ -1,27 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ReactDrops Soap Bubble styled frosted liquid glass dialog -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Deep obsidian frosted glass veil -->
+    <!-- Deep obsidian frosted liquid glass veil -->
     <item>
         <shape android:shape="rectangle">
             <gradient
                 android:type="linear"
                 android:angle="270"
-                android:startColor="#F0181A24"
-                android:centerColor="#E61A1D2A"
-                android:endColor="#E612141C" />
-            <corners android:radius="24dp" />
-            <stroke android:width="2dp" android:color="#66FFFFFF" />
+                android:startColor="#F2131926"
+                android:centerColor="#E6161D2B"
+                android:endColor="#F20D121B" />
+            <corners android:radius="26dp" />
+            <stroke android:width="1.6dp" android:color="#4D67E8F9" />
         </shape>
     </item>
-    <!-- Subtle top sheen -->
-    <item android:top="0dp" android:bottom="220dp">
+    <!-- Soap bubble top window light sheen -->
+    <item android:top="0dp" android:bottom="200dp">
         <shape android:shape="rectangle">
             <gradient
                 android:type="linear"
                 android:angle="270"
-                android:startColor="#1FFFFFFF"
+                android:startColor="#26FFFFFF"
                 android:endColor="#00000000" />
-            <corners android:topLeftRadius="24dp" android:topRightRadius="24dp" />
+            <corners android:topLeftRadius="26dp" android:topRightRadius="26dp" />
         </shape>
     </item>
 </layer-list>

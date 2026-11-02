@@ -19,6 +19,8 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -91,11 +93,13 @@ public final class ModernSettingsDialog {
         root.setClipChildren(false);
         root.setClipToPadding(false);
 
-        // Dark matte rounded container matching screenshot
-        GradientDrawable dialogBg = new GradientDrawable();
-        dialogBg.setColor(0xFF1E2026);
-        dialogBg.setCornerRadius(24 * density);
-        dialogBg.setStroke((int) (1.5f * density), 0xFF2F323B);
+        // ReactDrops Soap Bubble styled translucent liquid glass modal container
+        GradientDrawable dialogBg = new GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[]{0xF4141B28, 0xF40C111A}
+        );
+        dialogBg.setCornerRadius(26 * density);
+        dialogBg.setStroke((int) (1.5f * density), 0x4D67E8F9); // Soap bubble thin-film iridescent rim
         root.setBackground(dialogBg);
         root.setClipToOutline(true);
 
@@ -111,23 +115,26 @@ public final class ModernSettingsDialog {
 
         // Subtle dark translucent background for left pane
         GradientDrawable leftBg = new GradientDrawable();
-        leftBg.setColor(0x5514161C);
+        leftBg.setColor(0x38090D14);
         leftCol.setBackground(leftBg);
 
         final LinearLayout profileCard = new LinearLayout(activity);
         final LinearLayout rightContent = new LinearLayout(activity);
 
-        // 1. Search Bar (Optimized height & margins to prevent clipping)
+        // 1. Search Bar (Optimized Soap Bubble pill container)
         LinearLayout searchBox = new LinearLayout(activity);
         searchBox.setOrientation(LinearLayout.HORIZONTAL);
         searchBox.setGravity(Gravity.CENTER_VERTICAL);
-        searchBox.setPadding((int) (12 * density), 0, (int) (12 * density), 0);
+        searchBox.setPadding((int) (14 * density), 0, (int) (14 * density), 0);
         searchBox.setFocusable(true);
         searchBox.setClickable(true);
 
-        GradientDrawable searchBg = new GradientDrawable();
-        searchBg.setColor(0xFF282A33);
-        searchBg.setCornerRadius(10 * density);
+        GradientDrawable searchBg = new GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[]{0x3328354A, 0x241C2534}
+        );
+        searchBg.setCornerRadius(14 * density);
+        searchBg.setStroke((int) (1 * density), 0x2E67E8F9);
         searchBox.setBackground(searchBg);
 
         ImageView searchIcon = new ImageView(activity);
@@ -145,14 +152,21 @@ public final class ModernSettingsDialog {
         searchBox.addView(searchPrompt);
 
         searchBox.setOnFocusChangeListener((v, hasFocus) -> {
-            GradientDrawable g = new GradientDrawable();
-            g.setColor(hasFocus ? 0xFF353844 : 0xFF282A33);
-            g.setCornerRadius(10 * density);
-            if (hasFocus) g.setStroke((int) (2 * density), 0xFFFFFFFF);
+            GradientDrawable g = new GradientDrawable(
+                    GradientDrawable.Orientation.TOP_BOTTOM,
+                    hasFocus ? new int[]{0x55384B66, 0x4428354A} : new int[]{0x3328354A, 0x241C2534}
+            );
+            g.setCornerRadius(14 * density);
+            g.setStroke((int) ((hasFocus ? 2f : 1f) * density), hasFocus ? 0xFF67E8F9 : 0x2E67E8F9);
             v.setBackground(g);
             searchPrompt.setTextColor(hasFocus ? 0xFFFFFFFF : 0xFF8E929E);
-            searchIcon.setColorFilter(hasFocus ? 0xFFFFFFFF : 0xFF8E929E);
-            v.animate().scaleX(hasFocus ? 1.015f : 1.0f).scaleY(hasFocus ? 1.015f : 1.0f).setDuration(120).start();
+            searchIcon.setColorFilter(hasFocus ? 0xFF67E8F9 : 0xFF8E929E);
+            v.animate()
+                    .scaleX(hasFocus ? 1.02f : 1.0f)
+                    .scaleY(hasFocus ? 1.02f : 1.0f)
+                    .setInterpolator(hasFocus ? new OvershootInterpolator(1.4f) : new DecelerateInterpolator())
+                    .setDuration(hasFocus ? 160 : 100)
+                    .start();
         });
 
         searchBox.setOnClickListener(v -> {
@@ -287,10 +301,12 @@ public final class ModernSettingsDialog {
 
         Runnable updateSidebarSelection = () -> {
             boolean isProfile = (activeTab[0] == TAB_PROFILE);
-            GradientDrawable pcBg = new GradientDrawable();
-            pcBg.setColor(isProfile ? 0xFF333742 : 0xFF22242D);
-            pcBg.setCornerRadius(12 * density);
-            if (isProfile) pcBg.setStroke((int) (1.5f * density), 0x55FFFFFF);
+            GradientDrawable pcBg = new GradientDrawable(
+                    GradientDrawable.Orientation.TOP_BOTTOM,
+                    isProfile ? new int[]{0x55384B66, 0x3D28354A} : new int[]{0x2A28354A, 0x1E1C2534}
+            );
+            pcBg.setCornerRadius(14 * density);
+            pcBg.setStroke((int) (1.5f * density), isProfile ? 0x9967E8F9 : 0x2467E8F9);
             profileCard.setBackground(pcBg);
 
             profileAvatarView.setImageResource(ProfileManager.getAvatarResId(ProfileManager.getAvatarIndex(activity)));
@@ -299,10 +315,12 @@ public final class ModernSettingsDialog {
             for (NavItem item : navItems) {
                 if (item.rowView == null) continue;
                 boolean isSelected = (activeTab[0] == item.tabId);
-                GradientDrawable rbg = new GradientDrawable();
-                rbg.setColor(isSelected ? 0xFF30333D : Color.TRANSPARENT);
-                rbg.setCornerRadius(10 * density);
-                if (isSelected) rbg.setStroke((int) (1 * density), 0x44FFFFFF);
+                GradientDrawable rbg = new GradientDrawable(
+                        GradientDrawable.Orientation.LEFT_RIGHT,
+                        isSelected ? new int[]{0x3D38BDF8, 0x24818CF8} : new int[]{Color.TRANSPARENT, Color.TRANSPARENT}
+                );
+                rbg.setCornerRadius(12 * density);
+                if (isSelected) rbg.setStroke((int) (1.2f * density), 0x9967E8F9);
                 item.rowView.setBackground(rbg);
             }
         };
@@ -321,7 +339,12 @@ public final class ModernSettingsDialog {
                 updateSidebarSelection.run();
                 if (renderRightPane[0] != null) renderRightPane[0].run();
             }
-            v.animate().scaleX(hasFocus ? 1.015f : 1.0f).scaleY(hasFocus ? 1.015f : 1.0f).setDuration(120).start();
+            v.animate()
+                    .scaleX(hasFocus ? 1.02f : 1.0f)
+                    .scaleY(hasFocus ? 1.02f : 1.0f)
+                    .setInterpolator(hasFocus ? new OvershootInterpolator(1.4f) : new DecelerateInterpolator())
+                    .setDuration(hasFocus ? 160 : 100)
+                    .start();
         });
 
         profileCard.setOnKeyListener((v, keyCode, event) -> {
@@ -1037,17 +1060,28 @@ public final class ModernSettingsDialog {
         root.addView(tv);
     }
 
+    private static void applySoapBubbleCardBg(View v, float density, boolean hasFocus) {
+        GradientDrawable g = new GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                hasFocus ? new int[]{0x5533445C, 0x3D223042} : new int[]{0x2E1E2838, 0x22141B26}
+        );
+        g.setCornerRadius(15 * density);
+        if (hasFocus) {
+            g.setStroke((int) (2f * density), 0xFF67E8F9); // Soap bubble luminous cyan glint
+        } else {
+            g.setStroke((int) (1f * density), 0x2E67E8F9); // Subtle iridescent rim
+        }
+        v.setBackground(g);
+    }
+
     private static LinearLayout buildCardRow(Context ctx, float density, Typeface font, String title, String subtitle, Runnable action) {
         LinearLayout card = new LinearLayout(ctx);
         card.setOrientation(LinearLayout.VERTICAL);
-        card.setPadding((int) (16 * density), (int) (10 * density), (int) (16 * density), (int) (10 * density));
+        card.setPadding((int) (18 * density), (int) (12 * density), (int) (18 * density), (int) (12 * density));
         card.setFocusable(true);
         card.setClickable(true);
 
-        GradientDrawable bg = new GradientDrawable();
-        bg.setColor(0xFF272A33);
-        bg.setCornerRadius(12 * density);
-        card.setBackground(bg);
+        applySoapBubbleCardBg(card, density, false);
 
         TextView tvTitle = new TextView(ctx);
         tvTitle.setText(title);
@@ -1067,12 +1101,13 @@ public final class ModernSettingsDialog {
         }
 
         card.setOnFocusChangeListener((v, hasFocus) -> {
-            GradientDrawable g = new GradientDrawable();
-            g.setColor(hasFocus ? 0xFF353844 : 0xFF272A33);
-            g.setCornerRadius(12 * density);
-            if (hasFocus) g.setStroke((int) (2f * density), 0xFFFFFFFF);
-            v.setBackground(g);
-            v.animate().scaleX(hasFocus ? 1.015f : 1.0f).scaleY(hasFocus ? 1.015f : 1.0f).setDuration(120).start();
+            applySoapBubbleCardBg(v, density, hasFocus);
+            v.animate()
+                    .scaleX(hasFocus ? 1.025f : 1.0f)
+                    .scaleY(hasFocus ? 1.025f : 1.0f)
+                    .setInterpolator(hasFocus ? new OvershootInterpolator(1.4f) : new DecelerateInterpolator())
+                    .setDuration(hasFocus ? 160 : 100)
+                    .start();
         });
 
         card.setOnKeyListener((v, keyCode, event) -> {
@@ -1099,14 +1134,11 @@ public final class ModernSettingsDialog {
         LinearLayout card = new LinearLayout(ctx);
         card.setOrientation(LinearLayout.HORIZONTAL);
         card.setGravity(Gravity.CENTER_VERTICAL);
-        card.setPadding((int) (16 * density), (int) (10 * density), (int) (16 * density), (int) (10 * density));
+        card.setPadding((int) (18 * density), (int) (12 * density), (int) (18 * density), (int) (12 * density));
         card.setFocusable(true);
         card.setClickable(true);
 
-        GradientDrawable bg = new GradientDrawable();
-        bg.setColor(0xFF272A33);
-        bg.setCornerRadius(12 * density);
-        card.setBackground(bg);
+        applySoapBubbleCardBg(card, density, false);
 
         LinearLayout textCol = new LinearLayout(ctx);
         textCol.setOrientation(LinearLayout.VERTICAL);
@@ -1137,12 +1169,13 @@ public final class ModernSettingsDialog {
         card.addView(sw);
 
         card.setOnFocusChangeListener((v, hasFocus) -> {
-            GradientDrawable g = new GradientDrawable();
-            g.setColor(hasFocus ? 0xFF353844 : 0xFF272A33);
-            g.setCornerRadius(12 * density);
-            if (hasFocus) g.setStroke((int) (2f * density), 0xFFFFFFFF);
-            v.setBackground(g);
-            v.animate().scaleX(hasFocus ? 1.015f : 1.0f).scaleY(hasFocus ? 1.015f : 1.0f).setDuration(120).start();
+            applySoapBubbleCardBg(v, density, hasFocus);
+            v.animate()
+                    .scaleX(hasFocus ? 1.025f : 1.0f)
+                    .scaleY(hasFocus ? 1.025f : 1.0f)
+                    .setInterpolator(hasFocus ? new OvershootInterpolator(1.4f) : new DecelerateInterpolator())
+                    .setDuration(hasFocus ? 160 : 100)
+                    .start();
         });
 
         card.setOnKeyListener((v, keyCode, event) -> {

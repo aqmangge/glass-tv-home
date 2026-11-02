@@ -1,7 +1,7 @@
 {
-  "versionCode": 41,
-  "versionName": "4.0.1",
+  "versionCode": 42,
+  "versionName": "4.0.2",
   "apkUrl": "https://github.com/aqmangge/glass-tv-home/raw/main/release/glass-tv-home.apk",
-  "changelog": "✨ Glass TV v4.0.1:\n• Pembetulan paparan cuaca: Keadaan gerimis kini dipaparkan tepat sebagai Gerimis (tiada lagi tersilap Cerah/Sunny di skrin penuh).\n• Bahasa Melayu: Indeks pencemaran udara kini diselaraskan kepada format rasmi IPU (bukan API).\n• Terjemahan cuaca diselaraskan sepenuhnya: Gerimis (bukan Drizzle).\n• Ciri Baharu Mod Gelap & Perlindungan OLED (Dark Mode) di bawah Tetapan Appearance: Mati, Automatik (7PM-7AM), Sentiasa Gelap (50%), atau Hitam Pekat OLED.",
+  "changelog": "✨ Glass TV v4.0.2 (ReactDrops Soap Bubble Edition):\n• Naik taraf enjin reka bentuk Kaca Cecair (Soap Bubble): Diinspirasikan daripada reactdrops.dev/components/button/soap-bubble.\n• Rim Kaca Prisma Nipis (Thin-Film Iridescence): Membiaskan kilauan spektrum berlian putih, sian elektrik (#67E8F9), ungu sabun (#C084FC), dan kilauan ambar emas (#FDE047).\n• Pantulan Cahaya Tingkap (Overhead Window Light Glint): Lengkungan pantulan cahaya atas kepala di sepanjang bucu pil dan panel kaca cecair.\n• Maklum balas anjal spring (Squash & Stretch) apabila butang, kad tetapan, dan suis togol dipilih dengan alat kawalan TV (D-pad).\n• Suis togol dan kad tetapan moden dengan sentuhan kaca buih sabun obsidian.",
   "releaseDate": "2026-11-02"
 }

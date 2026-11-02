@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ReactDrops Soap Bubble styled floating dock tray -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">
             <gradient
                 android:type="linear"
                 android:angle="270"
-                android:startColor="#38080C14"
-                android:centerColor="#26121722"
-                android:endColor="#38080C14" />
+                android:startColor="#400A101D"
+                android:centerColor="#26121B2A"
+                android:endColor="#400A101D" />
             <corners android:radius="28dp" />
-            <stroke android:width="1.2dp" android:color="#33FFFFFF" />
+            <stroke android:width="1.2dp" android:color="#4067E8F9" />
         </shape>
     </item>
     <item android:bottom="80dp">
@@ -17,7 +18,7 @@
             <gradient
                 android:type="linear"
                 android:angle="270"
-                android:startColor="#1AFFFFFF"
+                android:startColor="#26FFFFFF"
                 android:endColor="#00000000" />
             <corners android:topLeftRadius="28dp" android:topRightRadius="28dp" />
         </shape>

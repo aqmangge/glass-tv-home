@@ -50,10 +50,12 @@ public final class UserSwitchDialog {
         root.setClipChildren(false);
         root.setClipToPadding(false);
 
-        GradientDrawable bg = new GradientDrawable();
-        bg.setColor(0xFF1E2026);
-        bg.setCornerRadius(24 * density);
-        bg.setStroke((int) (1.5f * density), 0xFF2F323B);
+        GradientDrawable bg = new GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[]{0xF4141B28, 0xF40C111A}
+        );
+        bg.setCornerRadius(26 * density);
+        bg.setStroke((int) (1.5f * density), 0x4D67E8F9); // Soap bubble iridescent rim
         root.setBackground(bg);
 
         // Header Title
