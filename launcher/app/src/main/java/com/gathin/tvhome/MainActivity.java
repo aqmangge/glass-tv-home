@@ -776,6 +776,13 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
         if (btnCandyBox != null) {
             btnCandyBox.setOnClickListener(v -> showCandyBoxPopup());
+            btnCandyBox.setOutlineProvider(new android.view.ViewOutlineProvider() {
+                @Override
+                public void getOutline(View view, android.graphics.Outline outline) {
+                    outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), view.getWidth() / 2f);
+                }
+            });
+            btnCandyBox.setClipToOutline(true);
             updateTopBarUserIcon();
         }
         if (btnSettings != null) {
