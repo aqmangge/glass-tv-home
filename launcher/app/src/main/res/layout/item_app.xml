@@ -52,9 +52,9 @@
             android:shadowRadius="4"
             android:visibility="gone" />
 
-        <!-- EA FC Interactive Focus Border Effect: Orbiting Neon Beam & Glass Rim -->
-        <com.gathin.tvhome.EafcFocusBorderView
-            android:id="@+id/eafcBorder"
+        <!-- Calm Living Room TV Breathing Glow Focus Effect & Glass Rim -->
+        <com.gathin.tvhome.DockBreathingBorderView
+            android:id="@+id/dockBreathingBorder"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone" />

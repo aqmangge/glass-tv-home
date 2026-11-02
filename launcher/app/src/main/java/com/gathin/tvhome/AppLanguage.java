@@ -725,6 +725,8 @@ final class AppLanguage {
                         "🕋 Masjid al-Haram Makkah Adhan (Full)",
                         "🕌 Al-Masjid an-Nabawi Madinah Adhan (Full)",
                         "🇲🇾 KLCC As-Syakirin Mosque Adhan",
+                        "🇸🇬 Singapore Sultan Mosque / Regional Adhan",
+                        "🇮🇩 Indonesia National / Istiqlal Mosque Adzan",
                         "🔔 Soft Chime Tone (Brief ~5s)",
                         "🔕 Silent Mode (Visual Only, No Audio)"
                 };
@@ -733,6 +735,8 @@ final class AppLanguage {
                         "🕋 Adzan Masjidil Haram Makkah (Penuh)",
                         "🕌 Adzan Masjid Nabawi Madinah (Penuh)",
                         "🇲🇾 Adzan Masjid As-Syakirin KLCC",
+                        "🇸🇬 Adzan Singapura (Masjid Sultan)",
+                        "🇮🇩 Adzan Indonesia (Masjid Istiqlal / Nasional)",
                         "🔔 Nada Chime Lembut (Singkat ~5 detik)",
                         "🔕 Mode Hening (Hanya Visual Tanpa Suara)"
                 };
@@ -742,6 +746,8 @@ final class AppLanguage {
                         "🕋 Azan Masjidil Haram Makkah (Penuh)",
                         "🕌 Azan Masjid Nabawi Madinah (Penuh)",
                         "🇲🇾 Azan Masjid As-Syakirin KLCC",
+                        "🇸🇬 Azan Singapura (Masjid Sultan / Jiharkah)",
+                        "🇮🇩 Adzan Indonesia (Masjid Istiqlal / Nasional)",
                         "🔔 Nada Chime Lembut (Ringkas ~5 saat)",
                         "🔕 Mod Senyap (Visual Sahaja Tanpa Audio)"
                 };

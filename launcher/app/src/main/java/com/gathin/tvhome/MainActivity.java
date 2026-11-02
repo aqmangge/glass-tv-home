@@ -574,6 +574,40 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         islamicShelf = findViewById(R.id.islamicShelf);
         if (islamicShelf != null) {
             ayahBlock = findViewById(R.id.ayahBlock);
+            if (ayahBlock != null) {
+                ayahBlock.setFocusable(true);
+                ayahBlock.setClickable(true);
+                ayahBlock.setOnClickListener(v -> {
+                    SoundEffects.playSelect();
+                    showIslamicDetailDialog();
+                });
+                ayahBlock.setOnFocusChangeListener((v, hasFocus) -> {
+                    if (hasFocus) SoundEffects.playNav();
+                    float scale = hasFocus ? 1.03f : 1.0f;
+                    v.animate().scaleX(scale).scaleY(scale).setDuration(150).start();
+                });
+                ayahBlock.setOnKeyListener((v, keyCode, event) -> {
+                    if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
+                    if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                        focusTile(Math.min(adapter != null ? adapter.getItemCount() - 1 : 3, 3));
+                        return true;
+                    }
+                    if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+                        View settings = findViewById(R.id.btnSettings);
+                        if (settings != null) {
+                            settings.requestFocus();
+                            return true;
+                        }
+                    }
+                    if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
+                        if (weatherAirQualityView != null && weatherAirQualityView.getVisibility() == View.VISIBLE) {
+                            weatherAirQualityView.requestFocus();
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+            }
             ayahLabel = findViewById(R.id.ayahLabel);
             ayahArabic = findViewById(R.id.ayahArabic);
             ayahText = findViewById(R.id.ayahText);
@@ -807,6 +841,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             }
             if (keyCode == KeyEvent.KEYCODE_DPAD_UP) return true;
             if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                if (v.getId() == R.id.btnSettings || v.getId() == R.id.btnCandyBox) {
+                    if (ayahBlock != null && ayahBlock.getVisibility() == View.VISIBLE) {
+                        ayahBlock.requestFocus();
+                        return true;
+                    }
+                }
                 // Back to the dock tile Up came from, not wherever the focus finder lands.
                 focusTile(lastFocused % COLUMNS);
                 return true;
@@ -1205,6 +1245,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             showAzanSettingsDialog();
             return;
         }
+        if (intent != null && intent.hasExtra("set_islamic_mode")) {
+            int mode = intent.getIntExtra("set_islamic_mode", MinbarManager.MODE_DOA);
+            MinbarManager.setDisplayMode(this, mode);
+            updateIslamicShelf();
+        }
+        if (intent != null && intent.getBooleanExtra("open_islamic_detail", false)) {
+            if (screensaverActive) dismissScreensaver();
+            showIslamicDetailDialog();
+            return;
+        }
         if (intent != null && intent.getBooleanExtra("open_clean_cache", false)) {
             if (screensaverActive) dismissScreensaver();
             showCleanTvCacheDialog();
@@ -1263,9 +1313,15 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         tilesReady = false;
         promptsPaused = false;
         resuming = true;
-        com.airbnb.lottie.LottieAnimationView lottieAv = (com.airbnb.lottie.LottieAnimationView) findViewById(R.id.lottieHomeAvatar);
-        if (lottieAv != null && !lottieAv.isAnimating()) {
-            lottieAv.resumeAnimation();
+        if (btnCandyBox instanceof FrameLayout) {
+            FrameLayout fb = (FrameLayout) btnCandyBox;
+            for (int i = 0; i < fb.getChildCount(); i++) {
+                View c = fb.getChildAt(i);
+                if (c instanceof com.airbnb.lottie.LottieAnimationView) {
+                    com.airbnb.lottie.LottieAnimationView l = (com.airbnb.lottie.LottieAnimationView) c;
+                    if (!l.isAnimating()) l.resumeAnimation();
+                }
+            }
         }
         reloadApps(true);
         updateShamsiDate();
@@ -1378,9 +1434,15 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onPause() {
         super.onPause();
-        com.airbnb.lottie.LottieAnimationView lottieAv = (com.airbnb.lottie.LottieAnimationView) findViewById(R.id.lottieHomeAvatar);
-        if (lottieAv != null && lottieAv.isAnimating()) {
-            lottieAv.pauseAnimation();
+        if (btnCandyBox instanceof FrameLayout) {
+            FrameLayout fb = (FrameLayout) btnCandyBox;
+            for (int i = 0; i < fb.getChildCount(); i++) {
+                View c = fb.getChildAt(i);
+                if (c instanceof com.airbnb.lottie.LottieAnimationView) {
+                    com.airbnb.lottie.LottieAnimationView l = (com.airbnb.lottie.LottieAnimationView) c;
+                    if (l.isAnimating()) l.pauseAnimation();
+                }
+            }
         }
         unregisterReceiver(packageReceiver);
         handler.removeCallbacks(minuteTick);
@@ -2288,6 +2350,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                     weatherAirQualityView.requestFocus();
                     return true;
                 }
+                if (position >= 2 && ayahBlock != null && ayahBlock.getVisibility() == View.VISIBLE) {
+                    ayahBlock.requestFocus();
+                    return true;
+                }
                 return false;          // dock row: let focus move to the top bar
             }
             target = position - COLUMNS;
@@ -2491,10 +2557,18 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
 
         if (WeeklyAyah.shown(this)) {
-            WeeklyAyah.Ayah a = WeeklyAyah.stored(this);
-            if (a == null) a = WeeklyAyah.last(this);
-            showAyah(a);
-            updateAyah();
+            if (MinbarManager.getDisplayMode(this) == MinbarManager.MODE_MINBAR) {
+                MinbarManager.KhutbahItem k = MinbarManager.getKhutbah(this);
+                showMinbar(k);
+                MinbarManager.refreshIfDue(this, () -> {
+                    if (!isDestroyed()) showMinbar(MinbarManager.getKhutbah(this));
+                });
+            } else {
+                WeeklyAyah.Ayah a = WeeklyAyah.stored(this);
+                if (a == null) a = WeeklyAyah.last(this);
+                showAyah(a);
+                updateAyah();
+            }
         } else if (ayahBlock != null) {
             ayahBlock.setVisibility(View.GONE);
         }
@@ -2537,12 +2611,15 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     void updateAyah() {
         if (ayahBlock == null || ayahRunning || !WeeklyAyah.shown(this) || WeeklyAyah.stored(this) != null) return;
+        if (MinbarManager.getDisplayMode(this) == MinbarManager.MODE_MINBAR) return;
         ayahRunning = true;
         new Thread(() -> {
             WeeklyAyah.Ayah a = WeeklyAyah.refresh(getApplicationContext());
             handler.post(() -> {
                 ayahRunning = false;
-                if (a != null && !isDestroyed()) showAyah(a);
+                if (a != null && !isDestroyed() && MinbarManager.getDisplayMode(MainActivity.this) != MinbarManager.MODE_MINBAR) {
+                    showAyah(a);
+                }
             });
         }, "weekly-ayah").start();
     }
@@ -2572,6 +2649,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             ayahArabic.setSingleLine(true);
             ayahArabic.setMaxLines(1);
             ayahArabic.setEllipsize(TextUtils.TruncateAt.END);
+            ayahArabic.setTextDirection(View.TEXT_DIRECTION_RTL);
+            ayahArabic.setGravity(Gravity.END);
+            try {
+                ayahArabic.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.amiri_quran), Typeface.NORMAL);
+            } catch (Exception ignored) {}
+            ayahArabic.setTextColor(0xFFFFC56B);
 
             float baseSp = is4K ? 18f : 14.5f;
             android.text.TextPaint paint = new android.text.TextPaint(ayahArabic.getPaint());
@@ -2597,6 +2680,133 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             ayahText.setVisibility(tr != null && !tr.trim().isEmpty() ? View.VISIBLE : View.GONE);
         }
         ayahBlock.setVisibility(View.VISIBLE);
+    }
+
+    void showMinbar(MinbarManager.KhutbahItem k) {
+        if (ayahBlock == null) return;
+        if (!WeeklyAyah.shown(this) || (nowPlayingCard != null && nowPlayingCard.getVisibility() == View.VISIBLE)) {
+            ayahBlock.setVisibility(View.GONE);
+            return;
+        }
+        if (k == null || k.title == null || k.title.isEmpty()) {
+            ayahBlock.setVisibility(View.GONE);
+            return;
+        }
+
+        int usable = getResources().getDisplayMetrics().widthPixels - (int) ((55 + 56) * density);
+        int islamicMaxWidth = Math.round(usable * 0.38f);
+        boolean is4K = (getResources().getDisplayMetrics().widthPixels >= 3840 || getResources().getDisplayMetrics().heightPixels >= 2160);
+
+        if (ayahLabel != null) {
+            String datePart = (k.date != null && !k.date.isEmpty()) ? "  •  " + k.date.toUpperCase(Locale.ROOT) : "";
+            ayahLabel.setText("KHUTBAH MINBAR • " + k.authority.toUpperCase(Locale.ROOT) + datePart);
+            ayahLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, is4K ? 11.5f : 9.5f);
+        }
+        if (ayahArabic != null) {
+            String text = k.title.trim();
+            ayahArabic.setMaxWidth(islamicMaxWidth);
+            ayahArabic.setSingleLine(true);
+            ayahArabic.setMaxLines(1);
+            ayahArabic.setEllipsize(TextUtils.TruncateAt.END);
+            ayahArabic.setTextDirection(View.TEXT_DIRECTION_LTR);
+            ayahArabic.setGravity(Gravity.END);
+            try {
+                ayahArabic.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.outfit), Typeface.BOLD);
+            } catch (Exception e) {
+                ayahArabic.setTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD));
+            }
+            ayahArabic.setTextColor(0xFFFFC56B);
+
+            float baseSp = is4K ? 16f : 13.5f;
+            android.text.TextPaint paint = new android.text.TextPaint(ayahArabic.getPaint());
+            paint.setTextSize(baseSp * getResources().getDisplayMetrics().scaledDensity);
+            float textWidth = paint.measureText(text);
+
+            float targetSp = baseSp;
+            float maxAllowed = islamicMaxWidth * 0.95f;
+            while (textWidth > maxAllowed && targetSp > 11.0f) {
+                targetSp -= 0.5f;
+                paint.setTextSize(targetSp * getResources().getDisplayMetrics().scaledDensity);
+                textWidth = paint.measureText(text);
+            }
+            ayahArabic.setTextSize(TypedValue.COMPLEX_UNIT_SP, targetSp);
+            ayahArabic.setText(text);
+        }
+        if (ayahText != null) {
+            ayahText.setMaxWidth(islamicMaxWidth);
+            String summary = (k.subtitle != null && !k.subtitle.isEmpty()) ? k.subtitle + " — " + k.excerpt : k.excerpt;
+            ayahText.setText(summary != null ? summary.trim() : "");
+            ayahText.setTextSize(TypedValue.COMPLEX_UNIT_SP, is4K ? 12.5f : 10.5f);
+            ayahText.setVisibility(summary != null && !summary.trim().isEmpty() ? View.VISIBLE : View.GONE);
+        }
+        ayahBlock.setVisibility(View.VISIBLE);
+    }
+
+    void showIslamicDetailDialog() {
+        int mode = MinbarManager.getDisplayMode(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_TvHome_GlassDialog);
+        if (mode == MinbarManager.MODE_MINBAR) {
+            MinbarManager.KhutbahItem k = MinbarManager.getKhutbah(this);
+            builder.setTitle("🕌 " + k.title);
+            String message = "📍 Sumber: " + k.authority + (k.date != null && !k.date.isEmpty() ? "  •  " + k.date : "") + "\n\n"
+                    + (k.subtitle != null && !k.subtitle.isEmpty() ? "📌 " + k.subtitle + "\n\n" : "")
+                    + k.excerpt;
+            builder.setMessage(message);
+            builder.setPositiveButton("Tukar ke Doa Harian", (d, w) -> {
+                MinbarManager.setDisplayMode(MainActivity.this, MinbarManager.MODE_DOA);
+                SoundEffects.playSelect();
+                updateIslamicShelf();
+                Toast.makeText(MainActivity.this, "Paparan Ditukar ke Doa Harian", Toast.LENGTH_SHORT).show();
+            });
+        } else {
+            WeeklyAyah.Ayah a = WeeklyAyah.stored(this);
+            if (a == null) a = WeeklyAyah.last(this);
+            builder.setTitle("📖 " + a.reference);
+            String message = a.arabic + "\n\n" + a.translation(AppLanguage.getLanguage(this));
+            builder.setMessage(message);
+            builder.setPositiveButton("Tukar ke Teks Minbar", (d, w) -> {
+                MinbarManager.setDisplayMode(MainActivity.this, MinbarManager.MODE_MINBAR);
+                SoundEffects.playSelect();
+                updateIslamicShelf();
+                Toast.makeText(MainActivity.this, "Paparan Ditukar ke Teks Minbar", Toast.LENGTH_SHORT).show();
+            });
+        }
+        builder.setNegativeButton("Tutup", (d, w) -> d.dismiss());
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        styleGlassDialog(dialog);
+    }
+
+    void showDisplayModeChoiceDialog() {
+        showDisplayModeChoiceDialog(null);
+    }
+
+    void showDisplayModeChoiceDialog(Runnable onModeChanged) {
+        int currentMode = MinbarManager.getDisplayMode(this);
+        String[] options = new String[]{
+                "📖 Doa Harian (Ayat Al-Quran & Terjemahan)",
+                "🕌 Teks Minbar (Khutbah Jumaat Mengikut Lokasi)"
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_TvHome_GlassDialog);
+        builder.setTitle("Pilihan Kandungan Paparan");
+        builder.setSingleChoiceItems(options, currentMode, (dialog, which) -> {
+            dialog.dismiss();
+            MinbarManager.setDisplayMode(MainActivity.this, which);
+            SoundEffects.playSelect();
+            updateIslamicShelf();
+            if (onModeChanged != null) onModeChanged.run();
+            String chosen = which == MinbarManager.MODE_MINBAR ? "Teks Minbar (Khutbah)" : "Doa Harian";
+            Toast.makeText(MainActivity.this, "Paparan Ditukar: " + chosen, Toast.LENGTH_SHORT).show();
+        });
+        builder.setNegativeButton("Batal", (dialog, which) -> dialog.dismiss());
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        styleGlassDialog(dialog);
+        if (dialog.getListView() != null) {
+            dialog.getListView().requestFocus();
+            dialog.getListView().setSelection(currentMode);
+        }
     }
 
     private void updateDateAndPeriod() {
@@ -2739,40 +2949,22 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         showMenu(panel, rows, anchor, width, false);
     }
 
-    /** Shows the User Profile & Child Mode quick dialog (formerly Candy Box). */
+    /** Shows the Who's Watching profile selection dialog. */
     public void showCandyBoxPopup() {
         if (openMenu != null) {
             closeMenu(false);
         }
         SoundEffects.playSelect();
-        UserSwitchDialog.show(this);
+        WhoIsWatchingDialog.show(this);
     }
 
     void updateTopBarUserIcon() {
-        com.airbnb.lottie.LottieAnimationView lottie = (com.airbnb.lottie.LottieAnimationView) findViewById(R.id.lottieHomeAvatar);
-        if (lottie != null) {
-            AvatarThemeManager.applyAvatar(lottie, this);
+        if (btnCandyBox instanceof FrameLayout) {
+            FrameLayout candy = (FrameLayout) btnCandyBox;
             ProfileManager.UserProfile active = ProfileManager.getActiveProfile(this);
+            ProfileAvatarHelper.bindAvatar(candy, active, this);
             boolean isChild = ChildModeManager.isChildModeEnabled(this);
-            if (btnCandyBox != null) {
-                btnCandyBox.setContentDescription("Pengguna Semasa: " + active.name + (isChild ? " (Mod Kanak-kanak)" : ""));
-            }
-            return;
-        }
-        if (btnCandyBox instanceof TextView) {
-            TextView tv = (TextView) btnCandyBox;
-            ProfileManager.UserProfile active = ProfileManager.getActiveProfile(this);
-            boolean isChild = ChildModeManager.isChildModeEnabled(this);
-            int size = Math.round(26 * density);
-            android.graphics.drawable.Drawable avDrawable = ProfileManager.getCircularAvatarDrawable(this, active.avatarIndex, size, isChild);
-            if (avDrawable != null) {
-                tv.setCompoundDrawablesWithIntrinsicBounds(avDrawable, null, null, null);
-                tv.setCompoundDrawableTintList(null);
-            } else {
-                tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_shield_child, 0, 0, 0);
-                tv.setCompoundDrawableTintList(android.content.res.ColorStateList.valueOf(isChild ? 0xFFF59E0B : 0xFFFFFFFF));
-            }
-            tv.setContentDescription("Pengguna Semasa: " + active.name + (isChild ? " (Mod Kanak-kanak)" : ""));
+            candy.setContentDescription("Pengguna Semasa: " + active.name + (isChild ? " (Mod Kanak-kanak)" : ""));
         }
     }
 
@@ -2966,6 +3158,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                     Toast.makeText(MainActivity.this, nowOn ? "✅ Popup Azan Diaktifkan" : "⭕ Popup Azan Dimatikan", Toast.LENGTH_SHORT).show();
                 }
         );
+        masterRow.setId(View.generateViewId());
         updateMasterTag(masterStatusTag, Azan.isMasterEnabled(this));
         leftCol.addView(masterRow);
 
@@ -2974,6 +3167,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         int[] prayers = {0, 2, 3, 4, 5};
         String[] localizedPrayerNames = AppLanguage.getPrayerNames(this);
         String[] prayerIcons = {"🌅 ", "☀️ ", "🌤️ ", "🌇 ", "🌙 "};
+        java.util.List<LinearLayout> prayerRowsList = new java.util.ArrayList<>();
 
         for (int i = 0; i < prayers.length; i++) {
             final int pIdx = prayers[i];
@@ -2998,6 +3192,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                         updatePrayerTag(prayerTag, !current);
                     }
             );
+            prayerRow.setId(View.generateViewId());
+            prayerRowsList.add(prayerRow);
             updatePrayerTag(prayerTag, Azan.on(this, pIdx));
             leftCol.addView(prayerRow);
         }
@@ -3035,6 +3231,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                     });
                 }
         );
+        soundRow.setId(View.generateViewId());
+        masterRow.setNextFocusRightId(soundRow.getId());
+        soundRow.setNextFocusLeftId(masterRow.getId());
+        for (LinearLayout pr : prayerRowsList) {
+            pr.setNextFocusRightId(soundRow.getId());
+        }
         soundTag.setText(AppLanguage.strAzanAudioChangeBtn(this));
         soundTag.setTextSize(12.5f);
         soundTag.setTypeface(getResources().getFont(R.font.inter), Typeface.BOLD);
@@ -3144,6 +3346,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 Azan.SOUND_MAKKAH,
                 Azan.SOUND_MADINAH,
                 Azan.SOUND_KLCC,
+                Azan.SOUND_SINGAPORE,
+                Azan.SOUND_INDONESIA,
                 Azan.SOUND_CHIME,
                 Azan.SOUND_SILENT
         };
@@ -3616,7 +3820,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                         if (weatherAirQualityView != null) {
                             weatherAirQualityView.setNextFocusDownId(View.NO_ID);
                         }
-                        showAyah(WeeklyAyah.stored(MainActivity.this) != null ? WeeklyAyah.stored(MainActivity.this) : WeeklyAyah.last(MainActivity.this));
+                        updateIslamicShelf();
                     })
                     .start();
         } else {
@@ -3625,7 +3829,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             if (weatherAirQualityView != null) {
                 weatherAirQualityView.setNextFocusDownId(View.NO_ID);
             }
-            showAyah(WeeklyAyah.stored(this) != null ? WeeklyAyah.stored(this) : WeeklyAyah.last(this));
+            updateIslamicShelf();
         }
     }
 

@@ -198,9 +198,8 @@ public final class ModernSettingsDialog {
         profileCard.setFocusable(true);
         profileCard.setClickable(true);
 
-        ImageView profileAvatarView = new ImageView(activity);
-        int curAvatarIdx = ProfileManager.getAvatarIndex(activity);
-        profileAvatarView.setImageResource(ProfileManager.getAvatarResId(curAvatarIdx));
+        FrameLayout profileAvatarView = new FrameLayout(activity);
+        ProfileAvatarHelper.bindAvatar(profileAvatarView, ProfileManager.getActiveProfile(activity), activity);
         LinearLayout.LayoutParams pavLp = new LinearLayout.LayoutParams((int) (38 * density), (int) (38 * density));
         pavLp.setMarginEnd((int) (10 * density));
         profileCard.addView(profileAvatarView, pavLp);
@@ -309,7 +308,7 @@ public final class ModernSettingsDialog {
             pcBg.setStroke((int) (1.5f * density), isProfile ? 0x9967E8F9 : 0x2467E8F9);
             profileCard.setBackground(pcBg);
 
-            profileAvatarView.setImageResource(ProfileManager.getAvatarResId(ProfileManager.getAvatarIndex(activity)));
+            ProfileAvatarHelper.bindAvatar(profileAvatarView, ProfileManager.getActiveProfile(activity), activity);
             tvProfileName.setText(ProfileManager.getProfileName(activity));
 
             for (NavItem item : navItems) {
@@ -468,82 +467,23 @@ public final class ModernSettingsDialog {
                 tvAvatars.setPadding(0, (int) (14 * density), 0, (int) (8 * density));
                 rightContent.addView(tvAvatars);
 
-                // Horizontal Row of 7 Animal Avatars
-                LinearLayout avatarRow = new LinearLayout(activity);
-                avatarRow.setOrientation(LinearLayout.HORIZONTAL);
-                avatarRow.setGravity(Gravity.CENTER_VERTICAL);
-                avatarRow.setPadding(0, (int) (4 * density), 0, (int) (14 * density));
-                avatarRow.setClipChildren(false);
-                avatarRow.setClipToPadding(false);
-
-                FrameLayout[] avatarFrames = new FrameLayout[7];
-                View[] avatarRings = new View[7];
-
-                int activeAvatar = activeP.avatarIndex;
-
-                for (int i = 0; i < 7; i++) {
-                    final int idx = i;
-                    FrameLayout frame = new FrameLayout(activity);
-                    frame.setFocusable(true);
-                    frame.setClickable(true);
-
-                    int frameDim = (int) (60 * density);
-                    LinearLayout.LayoutParams fLp = new LinearLayout.LayoutParams(frameDim, frameDim);
-                    fLp.setMarginEnd((int) (12 * density));
-                    frame.setLayoutParams(fLp);
-
-                    // Outer White Ring for Selected Avatar
-                    View ring = new View(activity);
-                    GradientDrawable ringBg = new GradientDrawable();
-                    ringBg.setShape(GradientDrawable.OVAL);
-                    ringBg.setColor(Color.TRANSPARENT);
-                    ringBg.setStroke((int) (3f * density), 0xFFFFFFFF);
-                    ring.setBackground(ringBg);
-                    ring.setVisibility(idx == activeAvatar ? View.VISIBLE : View.GONE);
-                    frame.addView(ring, new FrameLayout.LayoutParams(frameDim, frameDim));
-
-                    // Inner Avatar Circle ImageView
-                    ImageView img = new ImageView(activity);
-                    img.setImageResource(ProfileManager.getAvatarResId(idx));
-                    int innerDim = (int) (48 * density);
-                    FrameLayout.LayoutParams imgLp = new FrameLayout.LayoutParams(innerDim, innerDim, Gravity.CENTER);
-                    frame.addView(img, imgLp);
-
-                    avatarFrames[idx] = frame;
-                    avatarRings[idx] = ring;
-
-                    if (idx == 0) {
-                        frame.setOnKeyListener((v, keyCode, event) -> {
-                            if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
-                                if (sDpadLeftTarget != null) {
-                                    sDpadLeftTarget.run();
-                                    return true;
-                                }
-                            }
-                            return false;
-                        });
-                    }
-
-                    frame.setOnFocusChangeListener((v, hasFocus) -> {
-                        v.animate().scaleX(hasFocus ? 1.12f : 1.0f).scaleY(hasFocus ? 1.12f : 1.0f).setDuration(120).start();
-                    });
-
-                    frame.setOnClickListener(v -> {
-                        SoundEffects.playSelect();
-                        ProfileManager.setAvatarIndex(activity, idx);
-                        for (int k = 0; k < 7; k++) {
-                            if (avatarRings[k] != null) {
-                                avatarRings[k].setVisibility(k == idx ? View.VISIBLE : View.GONE);
-                            }
+                // Modern 3 Avatar Options Card
+                LinearLayout avatarSettingsCard = buildCardRow(
+                        activity,
+                        density,
+                        outfit,
+                        "🎨 Kustomisasi Avatar (3 Pilihan)",
+                        "Pilih Watak Tunggal, Cari GIF (Giphy), atau Muat Naik dari Telefon",
+                        () -> {
+                            SoundEffects.playSelect();
+                            ProfileSettingsDialog.show(activity, activeP, () -> {
+                                updateSidebarSelection.run();
+                                if (renderRightPane[0] != null) renderRightPane[0].run();
+                                activity.updateTopBarUserIcon();
+                            });
                         }
-                        profileAvatarView.setImageResource(ProfileManager.getAvatarResId(idx));
-                        activity.updateTopBarUserIcon();
-                        Toast.makeText(activity, "✨ Avatar dipilih: " + ProfileManager.AVATAR_NAMES[idx], Toast.LENGTH_SHORT).show();
-                    });
-
-                    avatarRow.addView(frame);
-                }
-                rightContent.addView(avatarRow);
+                );
+                rightContent.addView(avatarSettingsCard);
 
                 // Edit Active Profile Name Card
                 LinearLayout editNameCard = new LinearLayout(activity);
@@ -647,8 +587,8 @@ public final class ModernSettingsDialog {
                     if (isCur) pBg.setStroke((int) (1.5f * density), 0x77FFFFFF);
                     pRow.setBackground(pBg);
 
-                    ImageView ivP = new ImageView(activity);
-                    ivP.setImageResource(ProfileManager.getAvatarResId(p.avatarIndex));
+                    FrameLayout ivP = new FrameLayout(activity);
+                    ProfileAvatarHelper.bindAvatar(ivP, p, activity);
                     LinearLayout.LayoutParams ivpLp2 = new LinearLayout.LayoutParams((int) (32 * density), (int) (32 * density));
                     ivpLp2.setMarginEnd((int) (10 * density));
                     pRow.addView(ivP, ivpLp2);
@@ -699,12 +639,18 @@ public final class ModernSettingsDialog {
                     pRow.setOnClickListener(v -> {
                         SoundEffects.playSelect();
                         if (isCur) {
-                            Toast.makeText(activity, "Profil " + p.name + " sudah aktif", Toast.LENGTH_SHORT).show();
+                            ProfileSettingsDialog.show(activity, p, () -> {
+                                updateSidebarSelection.run();
+                                if (renderRightPane[0] != null) renderRightPane[0].run();
+                                activity.updateTopBarUserIcon();
+                            });
                         } else {
-                            // Show options: Switch or Delete
+                            // Show options: Switch, Manage/Avatar, or Delete
                             AlertDialog.Builder ob = new AlertDialog.Builder(activity, R.style.Theme_TvHome_GlassDialog);
                             ob.setTitle("Pengguna: " + p.name);
-                            String[] opts = allProfiles.size() > 1 ? new String[]{"✨ Tukar ke Profil Ini", "🗑️ Padam Pengguna"} : new String[]{"✨ Tukar ke Profil Ini"};
+                            String[] opts = allProfiles.size() > 1 
+                                    ? new String[]{"✨ Tukar ke Profil Ini", "⚙️ Urus Profil & Avatar", "🗑️ Padam Pengguna"} 
+                                    : new String[]{"✨ Tukar ke Profil Ini", "⚙️ Urus Profil & Avatar"};
                             ob.setItems(opts, (d, which) -> {
                                 if (which == 0) {
                                     ProfileManager.setActiveProfile(activity, p.id);
@@ -715,6 +661,12 @@ public final class ModernSettingsDialog {
                                     if (renderRightPane[0] != null) renderRightPane[0].run();
                                     Toast.makeText(activity, "✨ Bertukar ke profil: " + p.name, Toast.LENGTH_SHORT).show();
                                 } else if (which == 1) {
+                                    ProfileSettingsDialog.show(activity, p, () -> {
+                                        updateSidebarSelection.run();
+                                        if (renderRightPane[0] != null) renderRightPane[0].run();
+                                        activity.updateTopBarUserIcon();
+                                    });
+                                } else if (which == 2) {
                                     ProfileManager.deleteProfile(activity, p.id);
                                     updateSidebarSelection.run();
                                     if (renderRightPane[0] != null) renderRightPane[0].run();
@@ -767,12 +719,20 @@ public final class ModernSettingsDialog {
 
                 boolean ayahShown = WeeklyAyah.shown(activity);
                 rightContent.addView(buildSwitchRow(activity, density, outfit,
-                        "📖 Paparan Ayat & Doa Harian", "Papar ayat Al-Quran dan doa harian di atas jadual solat",
+                        "📖 Paparan Teks Di Atas Jadual Solat", "Papar Doa Harian atau Teks Minbar di atas jadual solat",
                         ayahShown, isChecked -> {
                             WeeklyAyah.setShown(activity, isChecked);
-                            activity.showAyah(WeeklyAyah.last(activity));
-                            if (isChecked) activity.updateAyah();
+                            activity.updateIslamicShelf();
                         }));
+
+                int displayMode = MinbarManager.getDisplayMode(activity);
+                String modeLabel = displayMode == MinbarManager.MODE_MINBAR ? "Teks Minbar (Khutbah Jumaat)" : "Doa Harian (Ayat Al-Quran)";
+                rightContent.addView(buildCardRow(activity, density, outfit,
+                        "🕌 Pilihan Paparan: " + modeLabel,
+                        "Pilih paparan antara Doa Harian atau Minbar (Khutbah Jumaat mengikut lokasi)",
+                        () -> activity.showDisplayModeChoiceDialog(() -> {
+                            if (renderRightPane[0] != null) renderRightPane[0].run();
+                        })));
 
                 rightContent.addView(buildSwitchRow(activity, density, outfit,
                         "Papan Pemuka Cuaca & Kualiti Udara (AQI)", "Papar suhu live, cuaca dan status jerebu JAS",
@@ -857,25 +817,17 @@ public final class ModernSettingsDialog {
                 // === TAB 5: REMOTE & ACCESSIBILITY ===
                 addHeader(rightContent, outfit, "Remote & Accessibility");
 
+                Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+                homeIntent.addCategory(Intent.CATEGORY_HOME);
+                ResolveInfo resolveInfo = activity.getPackageManager().resolveActivity(homeIntent, PackageManager.MATCH_DEFAULT_ONLY);
+                boolean isDefault = resolveInfo != null && activity.getPackageName().equals(resolveInfo.activityInfo.packageName);
+                String activePkg = resolveInfo != null ? resolveInfo.activityInfo.packageName : "Tiada";
+
+                String homeSub = isDefault ? "✅ Aktif sebagai pelancar utama default TV" : "⚠️ Butang Home masih dikawal oleh: " + activePkg;
                 rightContent.addView(buildCardRow(activity, density, outfit,
                         "🏠 Tetapkan Glass TV Sebagai Default Home",
-                        "Ubah butang Home alat kawalan TV supaya sentiasa membuka Glass TV Home secara automatik",
-                        () -> {
-                            SoundEffects.playSelect();
-                            try {
-                                Intent intent = new Intent(Settings.ACTION_HOME_SETTINGS);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                activity.startActivity(intent);
-                            } catch (Exception e) {
-                                try {
-                                    Intent intent2 = new Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS);
-                                    intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    activity.startActivity(intent2);
-                                } catch (Exception ex) {
-                                    Toast.makeText(activity, "Sila buka Tetapan TV > Apps > Default Apps > Home App", Toast.LENGTH_LONG).show();
-                                }
-                            }
-                        }));
+                        homeSub + " — Klik untuk panduan kunci butang Home",
+                        () -> showDefaultLauncherDialog(activity, density, outfit, isDefault, activePkg)));
 
                 rightContent.addView(buildCardRow(activity, density, outfit,
                         "♿ Buka Tetapan Accessibility TV",
@@ -1412,21 +1364,26 @@ public final class ModernSettingsDialog {
         pickerLayout.addView(sv, svLp);
 
         AlertDialog[] pickerHolder = new AlertDialog[1];
-        Button btnDone = new Button(activity);
+        TextView btnDone = new TextView(activity);
         btnDone.setText("SELESAI (DONE)");
         btnDone.setTextSize(13.5f);
         btnDone.setTextColor(0xFFFFFFFF);
         btnDone.setTypeface(font, Typeface.BOLD);
+        btnDone.setGravity(Gravity.CENTER);
+        btnDone.setIncludeFontPadding(false);
+        btnDone.setFocusable(true);
+        btnDone.setClickable(true);
 
+        int doneRadius = Math.round(12 * density);
         GradientDrawable btnBg = new GradientDrawable();
         btnBg.setColor(0xFF10B981);
-        btnBg.setCornerRadius(10 * density);
+        btnBg.setCornerRadius(doneRadius);
         btnDone.setBackground(btnBg);
 
         btnDone.setOnFocusChangeListener((v, hasFocus) -> {
             GradientDrawable g = new GradientDrawable();
             g.setColor(hasFocus ? 0xFF059669 : 0xFF10B981);
-            g.setCornerRadius(10 * density);
+            g.setCornerRadius(doneRadius);
             if (hasFocus) g.setStroke((int) (2 * density), 0xFFFFFFFF);
             v.setBackground(g);
         });
@@ -1437,7 +1394,7 @@ public final class ModernSettingsDialog {
             activity.reloadTiles();
         });
 
-        pickerLayout.addView(btnDone, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (42 * density)));
+        pickerLayout.addView(btnDone, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (40 * density)));
 
         AlertDialog.Builder pb = new AlertDialog.Builder(activity, R.style.Theme_TvHome_GlassDialog);
         pb.setView(pickerLayout);
@@ -1458,110 +1415,181 @@ public final class ModernSettingsDialog {
         if (activity == null || activity.isFinishing()) return;
         SoundEffects.playSelect();
 
-        ScrollView scroll = new ScrollView(activity);
-        scroll.setFillViewport(true);
+        AlertDialog[] dialogHolder = new AlertDialog[1];
 
-        LinearLayout root = new LinearLayout(activity);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding((int) (24 * density), (int) (20 * density), (int) (24 * density), (int) (20 * density));
+        // Root container with clipChildren disabled
+        FrameLayout dialogWrap = new FrameLayout(activity);
+        dialogWrap.setClipChildren(false);
+        dialogWrap.setClipToPadding(false);
+
+        // Elegant Dark Slate Glass Container
+        LinearLayout dialogBox = new LinearLayout(activity);
+        dialogBox.setOrientation(LinearLayout.VERTICAL);
+        dialogBox.setClipChildren(false);
+        dialogBox.setClipToPadding(false);
 
         GradientDrawable bg = new GradientDrawable();
-        bg.setColor(0xFF1E2026);
-        bg.setCornerRadius(18 * density);
-        bg.setStroke((int) (1.5f * density), 0xFF2F323B);
-        root.setBackground(bg);
+        bg.setColor(0xF4181B24); // Deep translucent glass
+        bg.setCornerRadius(20 * density);
+        bg.setStroke(Math.round(1.5f * density), 0x3367E8F9); // Subtle cyan rim
+        dialogBox.setBackground(bg);
+        dialogBox.setPadding(Math.round(24 * density), Math.round(20 * density), Math.round(24 * density), Math.round(20 * density));
 
+        // Dialog Title
         TextView tvTitle = new TextView(activity);
         tvTitle.setText("🏠 Tetapkan Glass TV Sebagai Default Home");
         tvTitle.setTextSize(18f);
         tvTitle.setTextColor(0xFFFFFFFF);
         tvTitle.setTypeface(font, Typeface.BOLD);
-        tvTitle.setPadding(0, 0, 0, (int) (8 * density));
-        root.addView(tvTitle);
+        tvTitle.setIncludeFontPadding(false);
+        tvTitle.setPadding(0, 0, 0, Math.round(8 * density));
+        dialogBox.addView(tvTitle);
 
+        // Subtitle / Status description
         TextView tvDesc = new TextView(activity);
         String desc = isDefault
                 ? "✅ Tahniah! Glass TV Home kini merupakan pelancar lalai utama peranti anda. Setiap kali butang Home ditekan pada alat kawalan jauh, anda akan terus kembali ke Glass TV."
-                : "⚠️ Pelancar aktif semasa: " + activePkg + "\n\nKebanyakan Android TV dan Google TV menyekat butang Home supaya tetap membuka skrin asal pengeluar. Sila pilih kaedah di bawah untuk mengunci Glass TV sebagai pelancar utama:";
+                : "⚠️ Pelancar aktif semasa: " + activePkg + "\nSila pilih salah satu kaedah di bawah untuk mengunci Glass TV sebagai pelancar utama:";
         tvDesc.setText(desc);
-        tvDesc.setTextSize(13f);
-        tvDesc.setTextColor(isDefault ? 0xFF34D399 : 0xFFCBD5E1);
+        tvDesc.setTextSize(12.5f);
+        tvDesc.setTextColor(isDefault ? 0xFF34D399 : 0xFF94A3B8);
         tvDesc.setTypeface(font, Typeface.NORMAL);
-        tvDesc.setPadding(0, 0, 0, (int) (16 * density));
-        root.addView(tvDesc);
+        tvDesc.setIncludeFontPadding(false);
+        tvDesc.setPadding(0, 0, 0, Math.round(14 * density));
+        dialogBox.addView(tvDesc);
 
-        AlertDialog[] dialogHolder = new AlertDialog[1];
+        // Scrollable container with plenty of breathing room
+        ScrollView scroll = new ScrollView(activity);
+        scroll.setFillViewport(true);
+        scroll.setVerticalScrollBarEnabled(false);
+        scroll.setClipChildren(false);
+        scroll.setClipToPadding(false);
 
-        // Option 1: Open TV Settings
-        LinearLayout btnSettings = buildCardRow(activity, density, font,
+        LinearLayout optionsCol = new LinearLayout(activity);
+        optionsCol.setOrientation(LinearLayout.VERTICAL);
+        optionsCol.setClipChildren(false);
+        optionsCol.setClipToPadding(false);
+        optionsCol.setPadding(Math.round(2 * density), Math.round(4 * density), Math.round(2 * density), Math.round(4 * density));
+
+        // Selection Option 1: Open TV Settings
+        View optSettings = buildSelectionOption(
+                activity, density, font,
                 "⚙️ Buka Tetapan Pemilih Pelancar TV",
                 "Cuba buka menu Android untuk memilih Glass TV sebagai Default Home (jika disokong oleh TV)",
+                "Buka Tetapan ⚙️",
+                0xFF38BDF8,
                 () -> {
+                    SoundEffects.playSelect();
                     try {
                         Intent intent = new Intent(Settings.ACTION_HOME_SETTINGS);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         activity.startActivity(intent);
+                        if (dialogHolder[0] != null) dialogHolder[0].dismiss();
                     } catch (Exception e1) {
                         try {
                             Intent intent = new Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             activity.startActivity(intent);
+                            if (dialogHolder[0] != null) dialogHolder[0].dismiss();
                         } catch (Exception e2) {
                             Toast.makeText(activity, "Menu tetapan pelancar tidak disokong pada firmware ini.", Toast.LENGTH_SHORT).show();
                         }
                     }
-                });
-        root.addView(btnSettings);
+                }
+        );
+        optionsCol.addView(optSettings);
 
-        // Option 2: ADB Command guidance
-        LinearLayout btnAdb = buildCardRow(activity, density, font,
+        // Selection Option 2: ADB Command
+        View optAdb = buildSelectionOption(
+                activity, density, font,
                 "💻 Kunci Kekal Melalui Arahan ADB (Sangat Disyorkan)",
-                "Jalankan arahan ini melalui PC / AI coding assistant:\nadb shell cmd package set-home-activity com.gathin.tvhome/.MainActivity" +
-                (isDefault ? "" : "\n\nJika TV masih menyekat butang Home, nyahdayakan pelancar lama:\nadb shell pm disable-user --user 0 " + activePkg),
+                "Jalankan arahan melalui PC:\nadb shell cmd package set-home-activity com.gathin.tvhome/.MainActivity" +
+                (isDefault ? "" : "\nNyahdayakan pelancar lama: adb shell pm disable-user --user 0 " + activePkg),
+                "Salin ADB 📋",
+                0xFF34D399,
                 () -> {
-                    Toast.makeText(activity, "Arahan: adb shell cmd package set-home-activity com.gathin.tvhome/.MainActivity", Toast.LENGTH_LONG).show();
-                });
-        root.addView(btnAdb);
+                    SoundEffects.playSelect();
+                    try {
+                        android.content.ClipboardManager cm = (android.content.ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+                        if (cm != null) {
+                            cm.setPrimaryClip(android.content.ClipData.newPlainText("ADB Command", "adb shell cmd package set-home-activity com.gathin.tvhome/.MainActivity"));
+                        }
+                        Toast.makeText(activity, "📋 Arahan ADB disalin ke papan keratan", Toast.LENGTH_LONG).show();
+                    } catch (Exception ignored) {
+                        Toast.makeText(activity, "Arahan: adb shell cmd package set-home-activity com.gathin.tvhome/.MainActivity", Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
+        optionsCol.addView(optAdb);
 
-        // Option 3: Phone Installer
-        LinearLayout btnPhone = buildCardRow(activity, density, font,
+        // Selection Option 3: Phone App / Installer
+        View optPhone = buildSelectionOption(
+                activity, density, font,
                 "📱 Tanpa PC: Gunakan Aplikasi Telefon (Glass TV Installer)",
-                "Pasang release/glass-tv-installer.apk pada telefon Android anda di rangkaian Wi-Fi yang sama untuk aktifkan Home secara automatik dalam 1-klik.",
+                "Pasang release/glass-tv-installer.apk pada telefon di Wi-Fi yang sama untuk aktifkan Home dalam 1-klik.",
+                "Buka Panduan 📱",
+                0xFFA78BFA,
                 () -> {
+                    SoundEffects.playSelect();
                     Toast.makeText(activity, "Buka glass-tv-installer.apk di telefon anda pada Wi-Fi sama.", Toast.LENGTH_SHORT).show();
-                });
-        root.addView(btnPhone);
+                }
+        );
+        optionsCol.addView(optPhone);
 
-        // Close button
-        Button btnClose = new Button(activity);
+        scroll.addView(optionsCol, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        LinearLayout.LayoutParams scrollLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f);
+        scrollLp.bottomMargin = Math.round(14 * density);
+        dialogBox.addView(scroll, scrollLp);
+
+        // Bottom Action: Tutup Button (styled as uncropped focusable pill TextView)
+        TextView btnClose = new TextView(activity);
         btnClose.setText("Tutup");
         btnClose.setTextColor(0xFFFFFFFF);
         btnClose.setTypeface(font, Typeface.BOLD);
         btnClose.setTextSize(14f);
-        GradientDrawable closeBg = new GradientDrawable();
-        closeBg.setColor(0xFF374151);
-        closeBg.setCornerRadius(10 * density);
-        btnClose.setBackground(closeBg);
+        btnClose.setGravity(Gravity.CENTER);
+        btnClose.setIncludeFontPadding(false);
         btnClose.setFocusable(true);
-        btnClose.setPadding((int) (16 * density), (int) (8 * density), (int) (16 * density), (int) (8 * density));
+        btnClose.setClickable(true);
+
+        int closeHeight = Math.round(38 * density);
+        int closeRadius = Math.round(19 * density);
+
+        GradientDrawable closeIdle = new GradientDrawable();
+        closeIdle.setShape(GradientDrawable.RECTANGLE);
+        closeIdle.setColor(0xFF2E3440);
+        closeIdle.setCornerRadius(closeRadius);
+        closeIdle.setStroke(Math.round(1f * density), 0x33FFFFFF);
+        btnClose.setBackground(closeIdle);
+        btnClose.setPadding(Math.round(24 * density), 0, Math.round(24 * density), 0);
+
         btnClose.setOnFocusChangeListener((v, hasFocus) -> {
             GradientDrawable g = new GradientDrawable();
-            g.setColor(hasFocus ? 0xFF4B5563 : 0xFF374151);
-            g.setCornerRadius(10 * density);
-            if (hasFocus) g.setStroke((int) (2 * density), 0xFFFFFFFF);
+            g.setShape(GradientDrawable.RECTANGLE);
+            g.setCornerRadius(closeRadius);
+            if (hasFocus) {
+                g.setColor(0xFF434C5E);
+                g.setStroke(Math.round(2f * density), 0xFF67E8F9); // Glowing cyan rim
+            } else {
+                g.setColor(0xFF2E3440);
+                g.setStroke(Math.round(1f * density), 0x33FFFFFF);
+            }
             v.setBackground(g);
         });
+
         btnClose.setOnClickListener(v -> {
             SoundEffects.playSelect();
             if (dialogHolder[0] != null) dialogHolder[0].dismiss();
         });
 
-        LinearLayout.LayoutParams closeLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (42 * density));
-        closeLp.topMargin = (int) (12 * density);
-        root.addView(btnClose, closeLp);
+        LinearLayout.LayoutParams closeLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, closeHeight);
+        dialogBox.addView(btnClose, closeLp);
 
-        scroll.addView(root);
+        dialogWrap.addView(dialogBox, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         AlertDialog.Builder pb = new AlertDialog.Builder(activity, R.style.Theme_TvHome_GlassDialog);
-        pb.setView(scroll);
+        pb.setView(dialogWrap);
         AlertDialog d = pb.create();
         dialogHolder[0] = d;
         d.show();
@@ -1569,13 +1597,132 @@ public final class ModernSettingsDialog {
         Window win = d.getWindow();
         if (win != null) {
             win.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            int dw = Math.min((int) (620 * density), (int) (activity.getResources().getDisplayMetrics().widthPixels * 0.90f));
-            int dh = Math.min((int) (520 * density), (int) (activity.getResources().getDisplayMetrics().heightPixels * 0.88f));
+            int dw = Math.min(Math.round(650 * density), Math.round(activity.getResources().getDisplayMetrics().widthPixels * 0.92f));
+            int dh = Math.min(Math.round(520 * density), Math.round(activity.getResources().getDisplayMetrics().heightPixels * 0.88f));
             win.setLayout(dw, dh);
             win.setGravity(Gravity.CENTER);
         }
 
-        btnSettings.requestFocus();
+        optSettings.requestFocus();
+    }
+
+    private static View buildSelectionOption(
+            Context ctx,
+            float density,
+            Typeface font,
+            String title,
+            String subtitle,
+            String actionLabel,
+            int actionColor,
+            Runnable action
+    ) {
+        LinearLayout row = new LinearLayout(ctx);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setFocusable(true);
+        row.setClickable(true);
+        row.setClipChildren(false);
+        row.setClipToPadding(false);
+        row.setPadding(
+                Math.round(16 * density),
+                Math.round(12 * density),
+                Math.round(16 * density),
+                Math.round(12 * density)
+        );
+
+        int radius = Math.round(14 * density);
+
+        // Idle background
+        GradientDrawable idleBg = new GradientDrawable();
+        idleBg.setColor(0x2E1E2838);
+        idleBg.setCornerRadius(radius);
+        idleBg.setStroke(Math.round(1f * density), 0x2E67E8F9);
+        row.setBackground(idleBg);
+
+        // Text Column (Left)
+        LinearLayout textCol = new LinearLayout(ctx);
+        textCol.setOrientation(LinearLayout.VERTICAL);
+        textCol.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        TextView tvTitle = new TextView(ctx);
+        tvTitle.setText(title);
+        tvTitle.setTextSize(14f);
+        tvTitle.setTextColor(0xFFFFFFFF);
+        tvTitle.setTypeface(font, Typeface.BOLD);
+        tvTitle.setIncludeFontPadding(false);
+        textCol.addView(tvTitle);
+
+        if (subtitle != null && !subtitle.isEmpty()) {
+            TextView tvSub = new TextView(ctx);
+            tvSub.setText(subtitle);
+            tvSub.setTextSize(11.5f);
+            tvSub.setTextColor(0xFF94A3B8);
+            tvSub.setTypeface(font, Typeface.NORMAL);
+            tvSub.setIncludeFontPadding(false);
+            tvSub.setPadding(0, Math.round(4 * density), Math.round(10 * density), 0);
+            textCol.addView(tvSub);
+        }
+        row.addView(textCol);
+
+        // Action Pill Button (Right) - Uncropped focusable indicator pill!
+        TextView btnAction = new TextView(ctx);
+        btnAction.setText(actionLabel);
+        btnAction.setTextSize(12f);
+        btnAction.setTextColor(0xFFFFFFFF);
+        btnAction.setTypeface(font, Typeface.BOLD);
+        btnAction.setIncludeFontPadding(false);
+        btnAction.setGravity(Gravity.CENTER);
+
+        int pillHeight = Math.round(32 * density);
+        int pillRadius = Math.round(16 * density);
+
+        GradientDrawable pillBg = new GradientDrawable();
+        pillBg.setShape(GradientDrawable.RECTANGLE);
+        pillBg.setCornerRadius(pillRadius);
+        pillBg.setColor((actionColor & 0x00FFFFFF) | 0x33000000);
+        pillBg.setStroke(Math.round(1f * density), actionColor);
+        btnAction.setBackground(pillBg);
+        btnAction.setPadding(Math.round(14 * density), 0, Math.round(14 * density), 0);
+
+        LinearLayout.LayoutParams pillLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, pillHeight);
+        pillLp.gravity = Gravity.CENTER_VERTICAL;
+        row.addView(btnAction, pillLp);
+
+        // Focus listener on row
+        row.setOnFocusChangeListener((v, hasFocus) -> {
+            GradientDrawable g = new GradientDrawable();
+            g.setCornerRadius(radius);
+            if (hasFocus) {
+                g.setColor(0x5533445C);
+                g.setStroke(Math.round(2f * density), 0xFF67E8F9); // Luminous cyan glint
+                btnAction.setTextColor(0xFFFFFFFF);
+                GradientDrawable pGlow = new GradientDrawable();
+                pGlow.setShape(GradientDrawable.RECTANGLE);
+                pGlow.setCornerRadius(pillRadius);
+                pGlow.setColor(actionColor);
+                pGlow.setStroke(Math.round(1.5f * density), 0xFFFFFFFF);
+                btnAction.setBackground(pGlow);
+            } else {
+                g.setColor(0x2E1E2838);
+                g.setStroke(Math.round(1f * density), 0x2E67E8F9);
+                btnAction.setTextColor(0xFFE2E8F0);
+                btnAction.setBackground(pillBg);
+            }
+            v.setBackground(g);
+        });
+
+        row.setOnClickListener(v -> {
+            if (action != null) action.run();
+        });
+
+        LinearLayout.LayoutParams rowLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        rowLp.bottomMargin = Math.round(8 * density);
+        row.setLayoutParams(rowLp);
+
+        return row;
     }
 
     interface EditNameCallback {

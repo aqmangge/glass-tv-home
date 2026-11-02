@@ -103,6 +103,13 @@
             android:layout_marginBottom="8dp"
             android:orientation="vertical"
             android:gravity="end"
+            android:focusable="true"
+            android:clickable="true"
+            android:background="@drawable/ayah_block_focus_bg"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
             android:visibility="gone">
 
             <TextView
@@ -716,8 +723,8 @@
 
                     <com.airbnb.lottie.LottieAnimationView
                         android:id="@+id/lottieHomeAvatar"
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:layout_gravity="center"
                         app:lottie_autoPlay="true"
                         app:lottie_loop="true" />

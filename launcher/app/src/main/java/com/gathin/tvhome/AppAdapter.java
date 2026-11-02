@@ -517,7 +517,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         final ImageView icon;
         final TextView label;
         final TextView name;
-        final EafcFocusBorderView eafcBorder;
+        final DockBreathingBorderView breathingBorder;
         final boolean reducedMotion;
 
         Holder(View v, TileListener listener, boolean reducedMotion) {
@@ -527,7 +527,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
             icon = v.findViewById(R.id.icon);
             label = v.findViewById(R.id.label);
             name = v.findViewById(R.id.name);
-            eafcBorder = v.findViewById(R.id.eafcBorder);
+            breathingBorder = v.findViewById(R.id.dockBreathingBorder);
             this.reducedMotion = reducedMotion;
 
             final float density = v.getResources().getDisplayMetrics().density;
@@ -549,13 +549,13 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
             });
 
             card.setOnFocusChangeListener((view, focused) -> {
-                if (eafcBorder != null) {
+                if (breathingBorder != null) {
                     if (focused) {
                         float r = cornerRadius(view.getWidth(), density);
-                        eafcBorder.setCornerRadiusDp(r / density);
-                        eafcBorder.setVisibility(View.VISIBLE);
+                        breathingBorder.setCornerRadiusDp(r / density);
+                        breathingBorder.setVisibility(View.VISIBLE);
                     } else {
-                        eafcBorder.setVisibility(View.GONE);
+                        breathingBorder.setVisibility(View.GONE);
                     }
                 }
                 float s = focused ? FOCUS_SCALE : 1.0f;

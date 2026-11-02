@@ -13,17 +13,33 @@ import java.util.Locale;
 
 /**
  * Manages the Lottie Character Profile Avatar (Eyes 2 Animated / Cute expressive faces),
- * character body recoloring, background recoloring, and continuous loop playback on TV.
+ * single character focus, expressions, character body recoloring, background recoloring,
+ * and continuous loop playback on TV.
  */
 public class AvatarThemeManager {
 
     private static final String PREFS_NAME = "app_avatar_prefs";
     private static final String KEY_BG_COLOR = "avatar_bg_color";
     private static final String KEY_CHAR_COLOR = "avatar_char_color";
+    private static final String KEY_FACE_INDEX = "avatar_face_index";
 
     // Original default colors from the Lottie animation
     public static final int DEFAULT_CHAR_COLOR = 0xFF00A0FF; // Electric Blue character body
     public static final int DEFAULT_BG_COLOR = 0xFF141720;   // Sleek Dark Glass background
+    public static final int DEFAULT_FACE_INDEX = 0;          // 0 = Loop All Expressions, 1..8 = Specific Expression
+
+    // Character expression definitions (each runs 576 frames at 60fps)
+    public static final String[] FACE_NAMES = new String[]{
+            "Semua (Kitaran)", // 0: Frames 0-4608
+            "1: Senyum",        // 1: Frames 0-576
+            "2: Kenyit",        // 2: Frames 576-1152
+            "3: Bersiul",       // 3: Frames 1152-1728
+            "4: Mengantuk",     // 4: Frames 1728-2304
+            "5: Ketawa",        // 5: Frames 2304-2880
+            "6: Ceria",         // 6: Frames 2880-3456
+            "7: Ingin Tahu",    // 7: Frames 3456-4032
+            "8: Terkejut"       // 8: Frames 4032-4608
+    };
 
     // Character body color palette swatches
     public static final int[] CHAR_PALETTE = new int[]{
@@ -61,6 +77,10 @@ public class AvatarThemeManager {
 
     private static String cachedRawJson = null;
 
+    public static synchronized void clearCache() {
+        cachedRawJson = null;
+    }
+
     public static int getBgColor(Context context) {
         SharedPreferences p = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         return p.getInt(KEY_BG_COLOR, DEFAULT_BG_COLOR);
@@ -79,6 +99,16 @@ public class AvatarThemeManager {
     public static void setCharColor(Context context, int color) {
         SharedPreferences p = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         p.edit().putInt(KEY_CHAR_COLOR, color).apply();
+    }
+
+    public static int getFaceIndex(Context context) {
+        SharedPreferences p = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return p.getInt(KEY_FACE_INDEX, DEFAULT_FACE_INDEX);
+    }
+
+    public static void setFaceIndex(Context context, int index) {
+        SharedPreferences p = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        p.edit().putInt(KEY_FACE_INDEX, index).apply();
     }
 
     private static synchronized String getRawJson(Context context) {
@@ -117,17 +147,29 @@ public class AvatarThemeManager {
     public static void applyAvatar(LottieAnimationView view, Context context) {
         int bgColor = getBgColor(context);
         int charColor = getCharColor(context);
-        applyAvatar(view, bgColor, charColor, context);
+        int faceIndex = getFaceIndex(context);
+        applyAvatar(view, bgColor, charColor, faceIndex, context);
     }
 
     public static void applyAvatar(LottieAnimationView view, int bgColor, int charColor, Context context) {
+        applyAvatar(view, bgColor, charColor, getFaceIndex(context), context);
+    }
+
+    public static void applyAvatar(LottieAnimationView view, int bgColor, int charColor, int faceIndex, Context context) {
         if (view == null || context == null) return;
 
-        String cacheKey = String.format(Locale.ROOT, "char_avatar_%08x_%08x", bgColor, charColor);
+        String cacheKey = String.format(Locale.ROOT, "char_avatar_%08x_%08x_f%d", bgColor, charColor, faceIndex);
         String themedJson = buildThemedJson(context, bgColor, charColor);
 
         LottieCompositionFactory.fromJsonString(themedJson, cacheKey).addListener(composition -> {
             view.setComposition(composition);
+            if (faceIndex >= 1 && faceIndex <= 8) {
+                int startFrame = (faceIndex - 1) * 576;
+                int endFrame = faceIndex * 576;
+                view.setMinAndMaxFrame(startFrame, endFrame);
+            } else {
+                view.setMinAndMaxFrame(0, 4608);
+            }
             view.setRepeatCount(LottieDrawable.INFINITE);
             view.setRepeatMode(LottieDrawable.RESTART);
             view.playAnimation();

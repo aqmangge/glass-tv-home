@@ -32,12 +32,16 @@ final class Azan {
     static final String SOUND_MAKKAH = "makkah";
     static final String SOUND_MADINAH = "madinah";
     static final String SOUND_KLCC = "klcc";
+    static final String SOUND_SINGAPORE = "singapore";
+    static final String SOUND_INDONESIA = "indonesia";
     static final String SOUND_CHIME = "chime";
     static final String SOUND_SILENT = "silent";
 
     private static final String SOURCE_MAKKAH = "https://archive.org/download/full-madinah.mp3/full-makkah.mp3.mp3";
     private static final String SOURCE_MADINAH = "https://archive.org/download/full-madinah.mp3/full-madinah.mp3.mp3";
     private static final String SOURCE_KLCC = "https://archive.org/download/AzanZhurMasjidKlcc/CallToPrayer.mp3";
+    private static final String SOURCE_SINGAPORE = "https://archive.org/download/AzanJiharkahUstazFahmi_201711/Azan%20Jiharkah%20Ustaz%20Fahmi%20.mp3";
+    private static final String SOURCE_INDONESIA = "https://archive.org/download/ADZANMaghribDiTrans7/ADZAN%20Maghrib%20di%20Trans%207.mp3";
 
     /** An alarm delivered this late (the TV was asleep) is let go rather than played out of time. */
     static final long LATE_MS = 2 * 60 * 1000L;
@@ -74,6 +78,8 @@ final class Azan {
     static String soundLabel(String choice) {
         if (SOUND_MADINAH.equals(choice)) return "🕌 Azan Masjid Nabawi Madinah";
         if (SOUND_KLCC.equals(choice)) return "🇲🇾 Azan Masjid As-Syakirin KLCC";
+        if (SOUND_SINGAPORE.equals(choice)) return "🇸🇬 Azan Singapura (Masjid Sultan)";
+        if (SOUND_INDONESIA.equals(choice)) return "🇮🇩 Adzan Indonesia (Masjid Istiqlal / Nasional)";
         if (SOUND_CHIME.equals(choice)) return "🔔 Nada Chime Lembut (Ringkas)";
         if (SOUND_SILENT.equals(choice)) return "🔕 Mod Senyap (Visual Sahaja)";
         return "🕋 Azan Masjidil Haram Makkah";
@@ -141,6 +147,8 @@ final class Azan {
         String targetName = "azan-makkah.mp3";
         if (SOUND_MADINAH.equals(soundKey)) targetName = "azan-madinah.mp3";
         else if (SOUND_KLCC.equals(soundKey)) targetName = "azan-klcc.mp3";
+        else if (SOUND_SINGAPORE.equals(soundKey)) targetName = "azan-singapore.mp3";
+        else if (SOUND_INDONESIA.equals(soundKey)) targetName = "azan-indonesia.mp3";
 
         File dir = Config.dir(ctx);
         if (dir != null) {
@@ -183,6 +191,12 @@ final class Azan {
             } else if (SOUND_KLCC.equals(soundKey)) {
                 url = SOURCE_KLCC;
                 fileName = "azan-klcc.mp3";
+            } else if (SOUND_SINGAPORE.equals(soundKey)) {
+                url = SOURCE_SINGAPORE;
+                fileName = "azan-singapore.mp3";
+            } else if (SOUND_INDONESIA.equals(soundKey)) {
+                url = SOURCE_INDONESIA;
+                fileName = "azan-indonesia.mp3";
             }
             File dest = new File(app.getFilesDir(), fileName);
             if (dest.exists() && dest.length() > 100_000) return;
