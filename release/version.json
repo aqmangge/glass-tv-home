@@ -1,7 +1,7 @@
 {
-  "versionCode": 40,
-  "versionName": "4.0.0",
+  "versionCode": 41,
+  "versionName": "4.0.1",
   "apkUrl": "https://github.com/aqmangge/glass-tv-home/raw/main/release/glass-tv-home.apk",
-  "changelog": "🚀 Glass TV v4.0: Tipografi universal Inter merentasi seluruh sistem, butang avatar haiwan pengguna aktif di bar atas, enjin adaptasi kendiri 1080p & 4K UHD, pelayan muat naik wallpaper fail-safe automatik, dan tetapan pengunci Default Home Launcher.",
-  "releaseDate": "2026-10-31"
+  "changelog": "✨ Glass TV v4.0.1:\n• Pembetulan paparan cuaca: Keadaan gerimis kini dipaparkan tepat sebagai Gerimis (tiada lagi tersilap Cerah/Sunny di skrin penuh).\n• Bahasa Melayu: Indeks pencemaran udara kini diselaraskan kepada format rasmi IPU (bukan API).\n• Terjemahan cuaca diselaraskan sepenuhnya: Gerimis (bukan Drizzle).\n• Ciri Baharu Mod Gelap & Perlindungan OLED (Dark Mode) di bawah Tetapan Appearance: Mati, Automatik (7PM-7AM), Sentiasa Gelap (50%), atau Hitam Pekat OLED.",
+  "releaseDate": "2026-11-02"
 }

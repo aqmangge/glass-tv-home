@@ -263,16 +263,24 @@ public class WeatherActivity extends Activity {
         weatherMainTemp.setText(w.temp + "°");
         
         // Display Condition text matching active atmosphere
+        boolean isMalay = AppLanguage.LANG_MS.equals(AppLanguage.getLanguage(this))
+                || AppLanguage.LANG_ID.equals(AppLanguage.getLanguage(this))
+                || Locale.getDefault().getLanguage().startsWith("ms")
+                || Locale.getDefault().getLanguage().startsWith("in")
+                || Locale.getDefault().getLanguage().startsWith("id");
+
         if (conditionType == WeatherBackgroundView.ConditionType.SUNNY) {
-            weatherMainCondition.setText("Cerah");
+            weatherMainCondition.setText(isMalay ? "Cerah" : "Sunny");
         } else if (conditionType == WeatherBackgroundView.ConditionType.NIGHT) {
-            weatherMainCondition.setText("Malam Tenang");
+            weatherMainCondition.setText(isMalay ? "Malam Tenang" : "Clear Night");
         } else if (conditionType == WeatherBackgroundView.ConditionType.THUNDERSTORM) {
-            weatherMainCondition.setText("Ribut Petir");
+            weatherMainCondition.setText(isMalay ? "Ribut Petir" : "Thunderstorm");
         } else if (conditionType == WeatherBackgroundView.ConditionType.RAIN) {
-            weatherMainCondition.setText("Hujan");
+            weatherMainCondition.setText(isMalay ? "Hujan" : "Rain");
+        } else if (conditionType == WeatherBackgroundView.ConditionType.DRIZZLE) {
+            weatherMainCondition.setText(isMalay ? "Gerimis" : "Drizzle");
         } else {
-            weatherMainCondition.setText("Mendung");
+            weatherMainCondition.setText(isMalay ? "Mendung" : "Cloudy");
         }
 
         weatherMainSub.setText(String.format(Locale.ROOT, "H:%d°  L:%d°", w.highTemp, w.lowTemp));
@@ -437,11 +445,16 @@ public class WeatherActivity extends Activity {
             return WeatherBackgroundView.ConditionType.THUNDERSTORM;
         }
 
-        // Real Rain: Heavy rain or showers (codes 61, 63, 65, 80, 81, 82)
+        // Heavy rain or normal rain (codes 61, 63, 65, 81, 82)
         if (cond.contains("heavy") || cond.contains("lebat") || 
-            (cond.contains("hujan") && !cond.contains("renyai")) || 
+            (cond.contains("hujan") && !cond.contains("renyai") && !cond.contains("gerimis")) || 
             (cond.contains("rain") && !cond.contains("drizzle") && !cond.contains("light"))) {
             return WeatherBackgroundView.ConditionType.RAIN;
+        }
+
+        // Drizzle / Gerimis / Renyai (codes 51-57, 80)
+        if (cond.contains("drizzle") || cond.contains("gerimis") || cond.contains("renyai") || cond.contains("light rain") || icon.contains("🌦") || icon.contains("🌧")) {
+            return WeatherBackgroundView.ConditionType.DRIZZLE;
         }
 
         // Night
@@ -449,8 +462,12 @@ public class WeatherActivity extends Activity {
             return WeatherBackgroundView.ConditionType.NIGHT;
         }
 
-        // Daytime: In Malaysia, if condition is trace drizzle or sunny or partly cloudy or clear
-        // default to Sunny with radiant sky and sun lens flare!
+        // Cloudy / Mendung (code 3)
+        if (cond.contains("cloud") || cond.contains("mendung") || cond.contains("overcast") || icon.contains("☁")) {
+            return WeatherBackgroundView.ConditionType.CLOUDY;
+        }
+
+        // Daytime: clear or mainly clear
         return WeatherBackgroundView.ConditionType.SUNNY;
     }
 

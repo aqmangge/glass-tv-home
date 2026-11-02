@@ -184,7 +184,11 @@ final class WeatherAirQuality {
                 String jasUrl = "https://eqms.doe.gov.my/api3/publicportalapims/currentapicurrentlocation?stationid=" + stationId;
                 JSONObject jasJson = fetchJson(jasUrl);
 
-                boolean isMalay = Locale.getDefault().getLanguage().startsWith("ms");
+                boolean isMalay = AppLanguage.LANG_MS.equals(AppLanguage.getLanguage(context))
+                || AppLanguage.LANG_ID.equals(AppLanguage.getLanguage(context))
+                || Locale.getDefault().getLanguage().startsWith("ms")
+                || Locale.getDefault().getLanguage().startsWith("in")
+                || Locale.getDefault().getLanguage().startsWith("id");
                 int aqi = 50;
                 String aqiStatus = "Moderate";
                 String aqiParam = "PM2.5";
@@ -257,7 +261,11 @@ final class WeatherAirQuality {
         int code = prefs.getInt(KEY_CODE, 2);
         int aqi = prefs.getInt(KEY_AQI, 50);
 
-        boolean isMalay = Locale.getDefault().getLanguage().startsWith("ms");
+        boolean isMalay = AppLanguage.LANG_MS.equals(AppLanguage.getLanguage(context))
+                || AppLanguage.LANG_ID.equals(AppLanguage.getLanguage(context))
+                || Locale.getDefault().getLanguage().startsWith("ms")
+                || Locale.getDefault().getLanguage().startsWith("in")
+                || Locale.getDefault().getLanguage().startsWith("id");
 
         String icon = getWeatherIcon(code);
         String condition = getWeatherCondition(code, isMalay);
@@ -418,7 +426,11 @@ final class WeatherAirQuality {
         double pm25 = aqi * 0.45;
         double pm10 = aqi * 0.55;
 
-        boolean isMalay = Locale.getDefault().getLanguage().startsWith("ms");
+        boolean isMalay = AppLanguage.LANG_MS.equals(AppLanguage.getLanguage(context))
+                || AppLanguage.LANG_ID.equals(AppLanguage.getLanguage(context))
+                || Locale.getDefault().getLanguage().startsWith("ms")
+                || Locale.getDefault().getLanguage().startsWith("in")
+                || Locale.getDefault().getLanguage().startsWith("id");
         if (isMalay) {
             aqiStatus = translateAqiStatus(aqiStatus);
         }
@@ -493,7 +505,9 @@ final class WeatherAirQuality {
             case 51:
             case 53:
             case 55:
-                return isMalay ? "Hujan Renyai" : "Light drizzle";
+            case 56:
+            case 57:
+                return isMalay ? "Gerimis" : "Drizzle";
             case 61:
             case 63:
             case 65:

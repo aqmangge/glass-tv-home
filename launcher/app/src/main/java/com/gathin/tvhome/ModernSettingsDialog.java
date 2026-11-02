@@ -789,6 +789,21 @@ public final class ModernSettingsDialog {
                         "🌐 Pilihan Bahasa (Language Selection)", "Bahasa Melayu 🇲🇾, English 🇬🇧, Bahasa Indonesia 🇮🇩",
                         activity::showLanguageDialog));
 
+                String darkSubtitle;
+                int curDark = activity.getSharedPreferences("appearance_prefs", Context.MODE_PRIVATE).getInt("dark_mode_style", MainActivity.DARK_MODE_OFF);
+                if (curDark == MainActivity.DARK_MODE_ALWAYS) {
+                    darkSubtitle = "Sentiasa Gelap (Obsidian Dimming 50%)";
+                } else if (curDark == MainActivity.DARK_MODE_AUTO) {
+                    darkSubtitle = "Automatik (7:00 PM – 7:00 AM)";
+                } else if (curDark == MainActivity.DARK_MODE_OLED_BLACK) {
+                    darkSubtitle = "Hitam Pekat OLED (Pure Black • 0% Wallpaper)";
+                } else {
+                    darkSubtitle = "Mati (Kecerahan Asal Wallpaper)";
+                }
+                rightContent.addView(buildCardRow(activity, density, outfit,
+                        "🌙 Mod Gelap & Perlindungan OLED", darkSubtitle,
+                        activity::showDarkModeDialog));
+
             } else if (tab == TAB_STATUS_WEATHER) {
                 // === TAB 3: STATUS BAR & WEATHER ===
                 addHeader(rightContent, outfit, "Status Bar & Weather");

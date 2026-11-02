@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -1026,6 +1027,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             root.setBackground(null);
             getWindow().setBackgroundDrawable(null);
         }
+        applyDarkModeFilter();
     }
 
     /** Hands the picture now on screen to the glass, which blurs it once, off the main thread. */
@@ -1265,6 +1267,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         updateInputsButton();
         updateTopBarUserIcon();
         updateSettingsBadge();
+        applyDarkModeFilter();
         handler.postDelayed(() -> AppUpdateManager.checkForUpdates(this, false), 1500);
         Location.Zone chosenPlace = Location.chosen(this);
         String zoneCode = (chosenPlace != null) ? chosenPlace.code : "WLY01";
@@ -2840,6 +2843,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             AppLanguage.setLanguage(MainActivity.this, chosenLang);
             WeeklyAyah.setEnglish(MainActivity.this, AppLanguage.LANG_EN.equals(chosenLang));
             WeeklyAyah.clearCache(MainActivity.this);
+            HomeWeather.forget(MainActivity.this);
+            showHomeWeather(HomeWeather.last(MainActivity.this));
+            updateHomeWeather();
             updateIslamicShelf();
             updateDateAndPeriod();
             Toast.makeText(MainActivity.this, AppLanguage.strLanguageChangedToast(MainActivity.this, chosenLang), Toast.LENGTH_SHORT).show();
@@ -4286,6 +4292,235 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             d.dismiss();
             showWallpaperDialog();
         });
+        AlertDialog dialog = builder.create();
+        dialogHolder[0] = dialog;
+        dialog.show();
+        styleGlassDialog(dialog);
+
+        if (dialog.getWindow() != null) {
+            int w = Math.min((int) (520 * density), getResources().getDisplayMetrics().widthPixels - (int) (120 * density));
+            int h = Math.min((int) (470 * density), (int) (getResources().getDisplayMetrics().heightPixels * 0.85f));
+            dialog.getWindow().setLayout(w, h);
+        }
+
+        if (viewToFocus[0] != null) {
+            viewToFocus[0].requestFocus();
+        } else if (list.getChildCount() > 0) {
+            list.getChildAt(0).requestFocus();
+        }
+    }
+
+    public static final int DARK_MODE_OFF = 0;
+    public static final int DARK_MODE_AUTO = 1;
+    public static final int DARK_MODE_ALWAYS = 2;
+    public static final int DARK_MODE_OLED_BLACK = 3;
+
+    public void applyDarkModeFilter() {
+        if (wallView == null) return;
+        SharedPreferences sp = getSharedPreferences("appearance_prefs", Context.MODE_PRIVATE);
+        int mode = sp.getInt("dark_mode_style", DARK_MODE_OFF);
+
+        if (mode == DARK_MODE_OLED_BLACK) {
+            wallView.setVisibility(View.GONE);
+            if (root != null) root.setBackgroundColor(0xFF000000);
+            return;
+        }
+
+        wallView.setVisibility(View.VISIBLE);
+        boolean isDark = false;
+        if (mode == DARK_MODE_ALWAYS) {
+            isDark = true;
+        } else if (mode == DARK_MODE_AUTO) {
+            int h = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+            isDark = (h < 7 || h >= 19);
+        }
+
+        if (isDark) {
+            wallView.setColorFilter(0xFF4A4A4A, android.graphics.PorterDuff.Mode.MULTIPLY);
+        } else if (placesMode) {
+            wallView.setColorFilter(0xFF7A7A7A, android.graphics.PorterDuff.Mode.MULTIPLY);
+        } else {
+            wallView.clearColorFilter();
+        }
+    }
+
+    void showDarkModeDialog() {
+        SoundEffects.playSelect();
+        class DarkModeOption {
+            final int mode;
+            final String title;
+            final String subtitle;
+            DarkModeOption(int mode, String title, String subtitle) {
+                this.mode = mode;
+                this.title = title;
+                this.subtitle = subtitle;
+            }
+        }
+
+        String curLang = AppLanguage.getLanguage(this);
+        boolean isMalay = AppLanguage.LANG_MS.equals(curLang) || AppLanguage.LANG_ID.equals(curLang);
+
+        List<DarkModeOption> options = new ArrayList<>();
+        options.add(new DarkModeOption(DARK_MODE_OFF,
+                isMalay ? "⚪ Mati (Kecerahan Asal)" : "⚪ Off (Default Wallpaper Brightness)",
+                isMalay ? "Paparkan wallpaper dengan warna & kecerahan asal tanpa penapis" : "Display wallpapers with standard colors without darkening filter"));
+        options.add(new DarkModeOption(DARK_MODE_AUTO,
+                isMalay ? "🌙 Automatik (7:00 PM – 7:00 AM)" : "🌙 Automatic (7:00 PM – 7:00 AM)",
+                isMalay ? "Menggelapkan wallpaper secara automatik pada waktu malam sahaja" : "Automatically dims wallpapers at night to prevent eye fatigue"));
+        options.add(new DarkModeOption(DARK_MODE_ALWAYS,
+                isMalay ? "🕶️ Sentiasa Gelap (Obsidian 50%)" : "🕶️ Always Dark (Obsidian 50%)",
+                isMalay ? "Penapis gelap obsidian redup untuk teks berkontras tinggi dan perlindungan mata" : "Deep obsidian dimming filter for maximum text contrast and comfort"));
+        options.add(new DarkModeOption(DARK_MODE_OLED_BLACK,
+                isMalay ? "⬛ Hitam Pekat OLED (Pure Black)" : "⬛ Pure Black OLED (0% Wallpaper)",
+                isMalay ? "Matikan wallpaper sepenuhnya, 100% piksel hitam untuk TV OLED" : "Disable wallpapers completely for 100% pure black OLED panels"));
+
+        SharedPreferences sp = getSharedPreferences("appearance_prefs", Context.MODE_PRIVATE);
+        int currentMode = sp.getInt("dark_mode_style", DARK_MODE_OFF);
+
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding((int) (22 * density), (int) (18 * density), (int) (22 * density), (int) (18 * density));
+
+        TextView titleView = new TextView(this);
+        titleView.setText("🌙 " + (isMalay ? "Mod Gelap & Perlindungan OLED" : "Dark Mode & OLED Dimming"));
+        titleView.setTextSize(18);
+        titleView.setTextColor(0xFFFFFFFF);
+        titleView.setTypeface(getResources().getFont(R.font.inter), Typeface.BOLD);
+        titleView.setFontVariationSettings("'wght' 700");
+        titleView.setShadowLayer(4 * density, 0, 1 * density, 0xDD000000);
+        layout.addView(titleView);
+
+        TextView subView = new TextView(this);
+        subView.setText(isMalay ? "Pilih gaya kecerahan skrin utama mengikut persekitaran ruang tamu anda." : "Choose homescreen dimming mode to match your living room lighting.");
+        subView.setTextSize(12.5f);
+        subView.setTextColor(0xBBFFFFFF);
+        subView.setTypeface(getResources().getFont(R.font.inter), Typeface.NORMAL);
+        subView.setFontVariationSettings("'wght' 500");
+        subView.setPadding(0, (int) (3 * density), 0, (int) (12 * density));
+        layout.addView(subView);
+
+        ScrollView scroll = new ScrollView(this);
+        scroll.setVerticalScrollBarEnabled(false);
+        LinearLayout list = new LinearLayout(this);
+        list.setOrientation(LinearLayout.VERTICAL);
+
+        AlertDialog[] dialogHolder = new AlertDialog[1];
+        View[] viewToFocus = new View[1];
+
+        for (int i = 0; i < options.size(); i++) {
+            DarkModeOption opt = options.get(i);
+            boolean isActive = (opt.mode == currentMode);
+
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.VERTICAL);
+            row.setFocusable(true);
+            row.setClickable(true);
+            row.setPadding((int) (16 * density), (int) (10 * density), (int) (16 * density), (int) (10 * density));
+
+            StateListDrawable bg = new StateListDrawable();
+            GradientDrawable on = new GradientDrawable();
+            on.setColor(0xFFFFFFFF);
+            on.setCornerRadius(10 * density);
+            GradientDrawable off = new GradientDrawable();
+            off.setColor(isActive ? 0x334A90E2 : 0x1AFFFFFF);
+            if (isActive) {
+                off.setStroke((int) (1.8f * density), 0xFF38BDF8);
+            }
+            off.setCornerRadius(10 * density);
+            bg.addState(new int[]{android.R.attr.state_focused}, on);
+            bg.addState(new int[]{}, off);
+            row.setBackground(bg);
+
+            LinearLayout headerRow = new LinearLayout(this);
+            headerRow.setOrientation(LinearLayout.HORIZONTAL);
+            headerRow.setGravity(Gravity.CENTER_VERTICAL);
+
+            TextView rowTitle = new TextView(this);
+            rowTitle.setText(opt.title);
+            rowTitle.setTextSize(15);
+            rowTitle.setTextColor(0xFFFFFFFF);
+            rowTitle.setTypeface(getResources().getFont(R.font.inter), Typeface.BOLD);
+            rowTitle.setFontVariationSettings("'wght' 700");
+            headerRow.addView(rowTitle, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+            TextView activeTag = null;
+            if (isActive) {
+                activeTag = new TextView(this);
+                activeTag.setText("✓ " + (isMalay ? "AKTIF" : "ACTIVE"));
+                activeTag.setTextSize(11);
+                activeTag.setTextColor(0xFF38BDF8);
+                activeTag.setTypeface(getResources().getFont(R.font.inter), Typeface.BOLD);
+                activeTag.setFontVariationSettings("'wght' 700");
+                headerRow.addView(activeTag);
+            }
+            row.addView(headerRow);
+
+            TextView rowSub = new TextView(this);
+            rowSub.setText(opt.subtitle);
+            rowSub.setTextSize(12.5f);
+            rowSub.setTextColor(0xD9FFFFFF);
+            rowSub.setTypeface(getResources().getFont(R.font.inter), Typeface.NORMAL);
+            rowSub.setFontVariationSettings("'wght' 500");
+            rowSub.setPadding(0, (int) (2 * density), 0, 0);
+            row.addView(rowSub);
+
+            final TextView fTitle = rowTitle;
+            final TextView fSub = rowSub;
+            final TextView fActive = activeTag;
+            row.setOnFocusChangeListener((v, hasFocus) -> {
+                if (hasFocus) {
+                    fTitle.setTextColor(0xFF0F172A);
+                    fTitle.setShadowLayer(0, 0, 0, 0);
+                    fSub.setTextColor(0xFF334155);
+                    fSub.setShadowLayer(0, 0, 0, 0);
+                    if (fActive != null) {
+                        fActive.setTextColor(0xFF0284C7);
+                        fActive.setShadowLayer(0, 0, 0, 0);
+                    }
+                } else {
+                    fTitle.setTextColor(0xFFFFFFFF);
+                    fTitle.setShadowLayer(3 * density, 0, 1 * density, 0xCC000000);
+                    fSub.setTextColor(0xD9FFFFFF);
+                    fSub.setShadowLayer(2 * density, 0, 1 * density, 0xAA000000);
+                    if (fActive != null) {
+                        fActive.setTextColor(0xFF38BDF8);
+                        fActive.setShadowLayer(2 * density, 0, 1 * density, 0xAA000000);
+                    }
+                }
+            });
+
+            final int chosenMode = opt.mode;
+            row.setOnClickListener(v -> {
+                if (dialogHolder[0] != null) dialogHolder[0].dismiss();
+                SoundEffects.playSelect();
+                sp.edit().putInt("dark_mode_style", chosenMode).apply();
+                applyDarkModeFilter();
+                Toast.makeText(MainActivity.this, isMalay ? "✅ Pilihan mod gelap berjaya disimpan" : "✅ Dark mode preference saved", Toast.LENGTH_SHORT).show();
+            });
+
+            LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            rlp.bottomMargin = (int) (5 * density);
+            list.addView(row, rlp);
+
+            if (isActive && viewToFocus[0] == null) {
+                viewToFocus[0] = row;
+                rowTitle.setTextColor(0xFF0F172A);
+                rowTitle.setShadowLayer(0, 0, 0, 0);
+                rowSub.setTextColor(0xFF334155);
+                rowSub.setShadowLayer(0, 0, 0, 0);
+                if (activeTag != null) {
+                    activeTag.setTextColor(0xFF0284C7);
+                    activeTag.setShadowLayer(0, 0, 0, 0);
+                }
+            }
+        }
+
+        scroll.addView(list);
+        layout.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_TvHome_GlassDialog);
+        builder.setView(layout);
+        builder.setNegativeButton(AppLanguage.strClose(this), (d, w) -> d.dismiss());
         AlertDialog dialog = builder.create();
         dialogHolder[0] = dialog;
         dialog.show();

@@ -22,10 +22,11 @@ final class HomeWeather {
     private static final String TAG = "TvHome.Weather";
     static final long REFRESH_MS = 15 * 60_000L;
     private static final String DOE = "https://eqms.doe.gov.my/api3/publicportalapims/mapcaqm";
-    /** Malaysian API bands, with DOE's colours: blue, green, yellow, orange, red. */
+    /** Malaysian API/IPU bands, with DOE's colours: blue, green, yellow, orange, red. */
     private static final int[] API_TOP = {50, 100, 200, 300, 9999};
     static final int[] API_COLOR = {0xFF3D8BFF, 0xFF34C759, 0xFFFFD60A, 0xFFFF9F0A, 0xFFFF453A};
-    private static final String[] API_NAME = {"Good", "Moderate", "Unhealthy", "Very unhealthy", "Hazardous"};
+    private static final String[] API_NAME_EN = {"Good", "Moderate", "Unhealthy", "Very unhealthy", "Hazardous"};
+    private static final String[] API_NAME_MS = {"Baik", "Sederhana", "Tidak Sihat", "Sangat Tidak Sihat", "Berbahaya"};
 
     /** What the line says: the weather part, the API part and its colour; either part may be empty. */
     static final class Line {
@@ -51,7 +52,7 @@ final class HomeWeather {
         return Math.abs(System.currentTimeMillis() - prefs(ctx).getLong("at", 0)) >= REFRESH_MS;
     }
 
-    /** The last line fetched, or null before the first. Reads storage only. */
+    /** The last line fetched, or null before the first. Reads storage only and re-localizes dynamically. */
     static Line last(Context ctx) {
         SharedPreferences p = prefs(ctx);
         String w = p.getString("weather", null), a = p.getString("api", "");
@@ -60,8 +61,36 @@ final class HomeWeather {
             w = "";
             p.edit().putLong("at", 0).putString("weather", "").apply();
         }
+        int iconCode = p.getInt("icon_code", -1);
+        if (w != null && !w.isEmpty() && iconCode >= 0) {
+            int degIdx = w.indexOf('°');
+            if (degIdx > 0) {
+                try {
+                    int temp = Integer.parseInt(w.substring(0, degIdx).trim());
+                    w = temp + "°  " + describe(iconCode, ctx);
+                } catch (Exception ignored) {}
+            }
+        }
+        if (!a.isEmpty()) {
+            boolean isMalay = isMalayLanguage(ctx);
+            if (isMalay && a.startsWith("API ")) {
+                a = "IPU " + a.substring(4);
+                for (int i = 0; i < API_NAME_EN.length; i++) {
+                    if (a.contains(API_NAME_EN[i])) {
+                        a = a.replace(API_NAME_EN[i], API_NAME_MS[i]);
+                    }
+                }
+            } else if (!isMalay && a.startsWith("IPU ")) {
+                a = "API " + a.substring(4);
+                for (int i = 0; i < API_NAME_MS.length; i++) {
+                    if (a.contains(API_NAME_MS[i])) {
+                        a = a.replace(API_NAME_MS[i], API_NAME_EN[i]);
+                    }
+                }
+            }
+        }
         return w == null && a.isEmpty() ? null : new Line(w == null ? "" : w, a, p.getInt("api_color", 0),
-                p.getInt("icon_code", -1) < 0 ? 0 : icon(p.getInt("icon_code", 3), p.getBoolean("icon_day", true)));
+                iconCode < 0 ? 0 : icon(iconCode, p.getBoolean("icon_day", true)));
     }
 
     /** Fetches both parts. Network; never on the UI thread. Returns null when neither could be read. */
@@ -74,7 +103,7 @@ final class HomeWeather {
                     + "&current=temperature_2m,weather_code,is_day&timezone=Asia%2FKuala_Lumpur")).getJSONObject("current");
             code = now.optInt("weather_code");
             day = now.optInt("is_day", 1) == 1;
-            weather = Math.round(now.optDouble("temperature_2m")) + "°  " + describe(code);
+            weather = Math.round(now.optDouble("temperature_2m")) + "°  " + describe(code, ctx);
         } catch (Exception e) {
             Log.w(TAG, "weather failed: " + e.getMessage());
         }
@@ -96,7 +125,10 @@ final class HomeWeather {
             if (near != null && best < 0.5) {
                 int value = near.getInt("API"), band = 0;
                 while (band < API_TOP.length - 1 && value > API_TOP[band]) band++;
-                api = "API " + value + " " + API_NAME[band];
+                boolean isMalay = isMalayLanguage(ctx);
+                String prefix = isMalay ? "IPU " : "API ";
+                String[] apiNames = isMalay ? API_NAME_MS : API_NAME_EN;
+                api = prefix + value + " " + apiNames[band];
                 color = API_COLOR[band];
             }
         } catch (Exception e) {
@@ -113,16 +145,26 @@ final class HomeWeather {
         return new Line(weather, api, color, code < 0 ? 0 : icon(code, day));
     }
 
-    private static String describe(int code) {
-        if (code == 0) return "Clear";
-        if (code == 1) return "Mainly clear";
-        if (code == 2) return "Partly cloudy";
-        if (code == 3) return "Cloudy";
-        if (code == 45 || code == 48) return "Haze";
-        if (code >= 51 && code <= 57) return "Drizzle";
-        if (code >= 61 && code <= 67) return code >= 65 ? "Heavy rain" : "Rain";
-        if (code >= 80 && code <= 82) return "Showers";
-        if (code >= 95) return "Thunderstorm";
+    static boolean isMalayLanguage(Context ctx) {
+        if (ctx == null) return true;
+        String lang = AppLanguage.getLanguage(ctx);
+        return AppLanguage.LANG_MS.equals(lang) || AppLanguage.LANG_ID.equals(lang)
+                || java.util.Locale.getDefault().getLanguage().startsWith("ms")
+                || java.util.Locale.getDefault().getLanguage().startsWith("in")
+                || java.util.Locale.getDefault().getLanguage().startsWith("id");
+    }
+
+    private static String describe(int code, Context ctx) {
+        boolean isMalay = isMalayLanguage(ctx);
+        if (code == 0) return isMalay ? "Cerah" : "Clear";
+        if (code == 1) return isMalay ? "Sebahagiannya cerah" : "Mainly clear";
+        if (code == 2) return isMalay ? "Sebahagiannya mendung" : "Partly cloudy";
+        if (code == 3) return isMalay ? "Mendung" : "Cloudy";
+        if (code == 45 || code == 48) return isMalay ? "Kabus" : "Haze";
+        if (code >= 51 && code <= 57) return isMalay ? "Gerimis" : "Drizzle";
+        if (code >= 61 && code <= 67) return code >= 65 ? (isMalay ? "Hujan lebat" : "Heavy rain") : (isMalay ? "Hujan" : "Rain");
+        if (code >= 80 && code <= 82) return isMalay ? "Hujan renyai" : "Showers";
+        if (code >= 95) return isMalay ? "Ribut petir" : "Thunderstorm";
         return "";
     }
 
