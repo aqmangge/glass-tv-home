@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Modern TV Weather Forecast Card matching RTL / São Paulo TV UI design -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="154dp"
-    android:layout_height="124dp"
-    android:layout_marginEnd="12dp"
+    android:layout_width="0dp"
+    android:layout_height="126dp"
+    android:layout_weight="1"
+    android:layout_marginEnd="14dp"
     android:background="@drawable/weather_card_bg"
     android:clickable="true"
     android:focusable="true"
     android:orientation="vertical"
-    android:paddingStart="14dp"
+    android:paddingStart="16dp"
     android:paddingTop="14dp"
-    android:paddingEnd="14dp"
+    android:paddingEnd="16dp"
     android:paddingBottom="14dp">
 
     <!-- Day Header (e.g. Quarta-feira, Isnin, Tuesday) -->
@@ -24,20 +25,21 @@
         android:singleLine="true"
         android:text="Quarta-feira"
         android:textColor="#A1A1AA"
-        android:textSize="14sp" />
+        android:textSize="14.5sp" />
 
     <!-- Bottom Content: Left Thermometer Temp Stack + Right Weather Icon -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:gravity="bottom"
+        android:gravity="bottom|center_vertical"
         android:orientation="horizontal">
 
         <!-- Temp Stack with Thermometer Vectors -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="vertical">
 
             <!-- High Temp with High Thermometer -->
@@ -99,33 +101,12 @@
             android:layout_height="1dp"
             android:layout_weight="1" />
 
-        <!-- Weather Icon + Rain Chance -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="end|bottom"
-            android:orientation="vertical">
-
-            <ImageView
-                android:id="@+id/dailyIcon"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/wx_rtl_partly" />
-
-            <TextView
-                android:id="@+id/dailyRain"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:fontFamily="@font/inter"
-                android:fontVariationSettings="'wght' 700"
-                android:includeFontPadding="false"
-                android:singleLine="true"
-                android:text="70%"
-                android:textColor="#38BDF8"
-                android:textSize="9.5sp"
-                android:visibility="gone" />
-        </LinearLayout>
+        <!-- Weather Icon -->
+        <ImageView
+            android:id="@+id/dailyIcon"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/wx_rtl_partly" />
     </LinearLayout>
 </LinearLayout>

@@ -321,16 +321,16 @@ public class WeatherActivity extends Activity {
             }
         }
 
-        // 4. Horizontal Daily Forecast Cards (RTL / São Paulo TV UI design)
+        // 4. Horizontal Daily Forecast Cards (5 Cards matching São Paulo TV UI design)
         if (dailyContainer != null) {
             dailyContainer.removeAllViews();
             LayoutInflater inflater = LayoutInflater.from(this);
-            for (int i = 0; i < w.daily.size(); i++) {
+            int dayCount = Math.min(5, w.daily.size());
+            for (int i = 0; i < dayCount; i++) {
                 WeatherAirQuality.DailyItem item = w.daily.get(i);
                 View v = inflater.inflate(R.layout.item_weather_forecast_card, dailyContainer, false);
                 TextView dayView = v.findViewById(R.id.dailyDay);
                 ImageView iconView = v.findViewById(R.id.dailyIcon);
-                TextView rainView = v.findViewById(R.id.dailyRain);
                 TextView minTempView = v.findViewById(R.id.dailyMinTemp);
                 TextView maxTempView = v.findViewById(R.id.dailyMaxTemp);
 
@@ -339,16 +339,15 @@ public class WeatherActivity extends Activity {
                 if (minTempView != null) minTempView.setText(item.minTemp + "°C");
                 if (maxTempView != null) maxTempView.setText(item.maxTemp + "°C");
 
-                if (rainView != null) {
-                    if (item.rainChance > 0) {
-                        rainView.setVisibility(View.VISIBLE);
-                        rainView.setText(item.rainChance + "%");
-                    } else {
-                        rainView.setVisibility(View.GONE);
+                if (i == dayCount - 1) {
+                    LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) v.getLayoutParams();
+                    if (lp != null) {
+                        lp.setMarginEnd(0);
+                        v.setLayoutParams(lp);
                     }
                 }
 
-                setupFocusAnimation(v, 1.06f);
+                setupFocusAnimation(v, 1.04f);
                 dailyContainer.addView(v);
 
                 if (i == 0) {
