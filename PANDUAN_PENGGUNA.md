@@ -20,8 +20,8 @@ Glass TV Home ialah pengganti skrin utama (*launcher*) untuk Android TV dan Goog
 Sila muat turun fail pemasangan rasmi mengikut peranti anda:
 * 📱 **Untuk Telefon / Tablet Android (Aplikasi Pembantu Pemasangan — Disyorkan)**:  
   [**`glass-tv-installer.apk`** (5.2 MB)](https://github.com/aqmangge/glass-tv-home/raw/main/release/glass-tv-installer.apk) — **Pilihan Utama!** Pasang terus ke TV dan kunci butang Home melalui Wi-Fi tanpa perlukan komputer (PC) atau kabel.
-* 📺 **Untuk Android TV / Google TV (Launcher Utama v4.0)**:  
-  [**`glass-tv-home.apk`** (800 KB)](https://github.com/aqmangge/glass-tv-home/raw/main/release/glass-tv-home.apk) — Versi terkini `v4.0.0` (Tipografi universal Inter, ikon avatar profil aktif di bar atas, enjin adaptasi kendiri 1080p/4K, pelayan muat naik wallpaper fail-safe).
+* 📺 **Untuk Android TV / Google TV (Launcher Utama v4.1)**:  
+  [**`glass-tv-home.apk`** (2.0 MB)](https://github.com/aqmangge/glass-tv-home/raw/main/release/glass-tv-home.apk) — Versi terkini `v4.1.0` (Khutbah Minbar tempatan, pilihan paparan Doa/Minbar, dialog perincian kaca, navigasi alat kawalan jauh DPAD dua hala).
 
 > [!CAUTION]
 > ### ⚠️ JANGAN PASANG APK SECARA SIDELOAD BIASA TANPA INSTALLER / AI!
@@ -196,10 +196,27 @@ Pengguna yang memasang fail APK secara manual atau berpindah rumah **TIDAK PERLU
 4. Gunakan butang **Atas / Bawah** remote untuk memilih stesen anda, lalu tekan **OK**.
 5. Serta-merta bacaan Indeks Pencemaran Udara (JAS IPU) dan zon waktu solat (JAKIM) akan dikemaskini mengikut bandar pilihan anda!
 
-### B. Waktu Solat & Ayat Al-Quran Harian
+### B. Waktu Solat, Ayat Al-Quran Harian & Khutbah Minbar Tempatan 🕌
 * **Jadual Solat 6 Waktu**: Subuh, Syuruk, Zohor, Asar, Maghrib, Isyak mengikut zon waktu Malaysia secara tepat.
-* **Warna Hijau Zamrud**: Waktu solat yang sedang berlangsung akan automatik bertukar warna hijau terang supaya anda sentiasa peka waktu ibadah.
-* **Ayat Al-Quran Pilihan**: Ayat al-Quran harian berserta teks Arab yang indah dan terjemahan maksud.
+* **Warna Emas / Hijau Zamrud**: Waktu solat yang sedang berlangsung akan automatik bertukar warna terang supaya anda sentiasa peka waktu ibadah.
+* **🕌 Khutbah Minbar Tempatan (Ciri Baharu v4.1)**:
+  - Paparan intipati dan tema khutbah Jumaat mingguan mengikut pihak berkuasa agama negeri masing-masing:
+    - **JAWI W.P. Putrajaya & Kuala Lumpur**
+    - **JAIS Selangor**
+    - **JAINJ Johor**
+    - **JAIPP Pulau Pinang**
+    - **MUIS Singapura**
+    - **Kemenag RI & NU Online (Indonesia)**
+    - Dan seluruh negeri di Malaysia.
+  - Teks diperolehi terus daripada sumber rasmi melalui `minbar.gosolat.com` dan `islam.nu.or.id` berserta sandaran luar talian automatik.
+* **🎛️ Pilihan Kandungan Paparan (Doa Harian vs Teks Minbar)**:
+  - Anda boleh memilih sama ada ingin memaparkan **Doa Harian (Ayat Al-Quran & Terjemahan)** atau **Khutbah Minbar** melalui menu **Tetapan Moden (⚙️)** $\rightarrow$ **Skrin Utama** $\rightarrow$ **Pilihan Paparan**.
+* **🔍 Dialog Interaktif Kaca (Frosted Glass Detail Modal)**:
+  - Tekan butang **OK** pada remote TV semasa berada di rak solat/khutbah untuk membuka tetingkap kaca penuh. Anda boleh membaca teks khutbah yang lengkap, melihat tarikh & sumber rasmi, serta menukar mod paparan secara terus melalui butang tindakan pantas.
+* **🎮 Kawalan Jauh DPAD Dua Hala**:
+  - Tekan **Atas (▲)** dari ikon aplikasi Dock $\rightarrow$ fokus akan mendarat di atas rak Ayah/Minbar dengan bingkai bercahaya cyan (*luminous cyan glow*).
+  - Tekan **Atas (▲)** sekali lagi $\rightarrow$ terus naik ke butang Tetapan (*Settings Cog*) di bar atas.
+  - Tekan **Bawah (▼)** dari bar atas $\rightarrow$ turun semula ke rak Ayah/Minbar $\rightarrow$ dan turun ke Dock aplikasi.
 
 ### C. Gambar Latar Belakang & Pilihan Kategori Wallpaper (4K Dynamic)
 * **Koleksi Tema Pelbagai**: Kini anda boleh memilih kategori tema wallpaper kegemaran anda secara langsung dari skrin utama melalui menu Tetapan (ikon ⚙️):

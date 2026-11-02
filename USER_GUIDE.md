@@ -21,8 +21,8 @@ Glass TV Home is a modern, lightweight home launcher replacement for Android TV 
 Download the official release APKs based on your setup:
 * 📱 **For Android Phones & Tablets (Companion Installer App — Recommended)**:  
   [**`glass-tv-installer.apk`** (5.2 MB)](https://github.com/aqmangge/glass-tv-home/raw/main/release/glass-tv-installer.apk) — **Primary Recommendation!** Install directly to your TV and permanently lock the remote HOME button over Wi-Fi without needing a PC or cables.
-* 📺 **For Android TV & Google TV (Main Launcher v4.0)**:  
-  [**`glass-tv-home.apk`** (800 KB)](https://github.com/aqmangge/glass-tv-home/raw/main/release/glass-tv-home.apk) — Latest release `v4.0.0` (Universal Inter typography, dynamic top-bar user animal avatar, self-adapting 1080p/4K engine, fail-safe wallpaper HTTP uploader).
+* 📺 **For Android TV & Google TV (Main Launcher v4.1)**:  
+  [**`glass-tv-home.apk`** (2.0 MB)](https://github.com/aqmangge/glass-tv-home/raw/main/release/glass-tv-home.apk) — Latest release `v4.1.0` (Localized Khutbah Minbar, Doa Harian switch, frosted glass detail dialog, bi-directional DPAD remote focus).
 
 > [!CAUTION]
 > ### ⚠️ DO NOT RAW-SIDELOAD THE APK WITHOUT PROPER LAUNCHER SETUP!
@@ -193,10 +193,27 @@ Users who install the APK manually or relocate **DO NOT NEED A COMPUTER OR AI** 
 4. Scroll with the remote **UP / DOWN** arrows to select your station and press **OK**.
 5. Both the official JAS IPU readings and the JAKIM prayer timetable immediately calibrate to your chosen city!
 
-### B. Islamic Prayer Timetable & Daily Ayat
+### B. Islamic Prayer Timetable, Daily Ayat & Localized Khutbah Minbar 🕌
 * **6-Phase Prayer Timetable**: Subuh, Syuruk, Zohor, Asar, Maghrib, and Isyak synchronized with your local time zone.
-* **Active Window Glow**: The current active prayer window illuminates in emerald green.
-* **Daily Quranic Verse**: Rotating daily ayat with Arabic calligraphy and translations.
+* **Active Window Glow**: The current active prayer window illuminates in bright gold/emerald green.
+* **🕌 Localized Friday Sermons (Khutbah Minbar)**:
+  - Weekly official Friday sermon excerpts automatically tailored to your state/authority:
+    - **JAWI W.P. Putrajaya & Kuala Lumpur**
+    - **JAIS Selangor**
+    - **JAINJ Johor**
+    - **JAIPP Penang**
+    - **MUIS Singapore**
+    - **Kemenag RI & NU Online (Indonesia)**
+    - All Malaysian states (Perak, Kedah, Perlis, N. Sembilan, Terengganu, Kelantan, Sabah, Sarawak).
+  - Fetched dynamically from `minbar.gosolat.com` and `islam.nu.or.id` with a rich offline fallback database.
+* **🎛️ Dual Display Mode Switcher**:
+  - Choose between **Doa Harian (Daily Quranic Ayat & Translation)** and **Khutbah Minbar (Friday Sermon)** anytime from **Modern Settings (⚙️)** $\rightarrow$ **Skrin Utama** $\rightarrow$ **Pilihan Paparan**.
+* **🔍 Frosted Glass Detail Dialog**:
+  - Press **OK** on the remote while focused on the Ayah/Minbar shelf to view the full sermon excerpt, source authority, date, and toggle display modes instantly with one click.
+* **🎮 Bi-Directional DPAD Navigation**:
+  - `▲ (Up)` from Dock apps slides directly onto the Ayah/Minbar shelf (highlighted in luminous cyan glass).
+  - `▲ (Up)` from Ayah/Minbar ascends straight to the Top Bar Settings cog.
+  - `▼ (Down)` steps back down through the shelf and onto your dock tiles.
 
 ### C. Dynamic 4K Wallpapers & Category Switcher
 * **Curated Themes**: Switch your home background between curated 4K categories directly from the remote:

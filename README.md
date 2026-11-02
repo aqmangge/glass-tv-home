@@ -9,7 +9,7 @@ and come home to just your apps, with a new place to visit behind them every wee
 
 <p align="center">
   <a href="https://github.com/aqmangge/glass-tv-home/raw/main/release/glass-tv-home.apk">
-    <img src="https://img.shields.io/badge/Download_TV_Launcher-glass--tv--home.apk_(v4.0.0)-success?style=for-the-badge&logo=android" alt="Download Glass TV Home">
+    <img src="https://img.shields.io/badge/Download_TV_Launcher-glass--tv--home.apk_(v4.1.0)-success?style=for-the-badge&logo=android" alt="Download Glass TV Home">
   </a>
   &nbsp;
   <a href="https://github.com/aqmangge/glass-tv-home/raw/main/release/glass-tv-installer.apk">
@@ -28,8 +28,8 @@ and come home to just your apps, with a new place to visit behind them every wee
 > 2. 📱 **Kaedah 2 (Tanpa PC — Aplikasi Telefon Android)**: Pasang [**`release/glass-tv-installer.apk`**](https://github.com/aqmangge/glass-tv-home/raw/main/release/glass-tv-installer.apk) di telefon pintar anda. Sambung ke Wi-Fi sama, dan tekan *Pasang Terus ke TV* untuk kunci butang Home dalam 1-klik tanpa komputer!
 
 > 📦 **Official APK Downloads**:
-> - 📺 **Android TV / Google TV Launcher**: [**`release/glass-tv-home.apk`**](https://github.com/aqmangge/glass-tv-home/raw/main/release/glass-tv-home.apk) (**v4.0.0** • ~800 KB)
-> - 📱 **Phone / Tablet Companion Installer**: [**`release/glass-tv-installer.apk`**](https://github.com/aqmangge/glass-tv-home/raw/main/release/glass-tv-installer.apk) (**v1.0.0** • ~5.2 MB) — Kunci butang Home TV terus dari telefon tanpa sebarang PC!
+> - 📺 **Android TV / Google TV Launcher**: [**`release/glass-tv-home.apk`**](https://github.com/aqmangge/glass-tv-home/raw/main/release/glass-tv-home.apk) (**v4.1.0** • ~2.0 MB)
+> - 📱 **Phone / Tablet Companion Installer**: [**`release/glass-tv-installer.apk`**](https://github.com/aqmangge/glass-tv-home/raw/main/release/glass-tv-installer.apk) (**v1.0.0** • ~6.8 MB) — Kunci butang Home TV terus dari telefon tanpa sebarang PC!
 >
 > 🤖 **AI Prompt & Audit Guide**:
 > - ⚡ **[AI_INSTALL_PROMPT.md](AI_INSTALL_PROMPT.md)**: Arahan lengkap AI untuk audit TV (1080p vs 4K, DPI, IP LAN, stock launcher), debloat, dan kunci butang Home.
@@ -44,12 +44,36 @@ swaps the ad-filled home screen for a light one in frosted glass, with a new set
 every week.
 
 <p align="center">
-  <img src="docs/screenshots/home-live.png" width="19%" alt="Live Home Screen">
-  <img src="docs/screenshots/weather-live.png" width="19%" alt="Apple Weather Bento Dashboard">
-  <img src="docs/screenshots/azan-popup-live.png" width="19%" alt="16:9 Azan Floating Settings">
-  <img src="docs/screenshots/screensaver-live.png" width="19%" alt="StandBy Screensaver">
-  <img src="docs/screenshots/wallpaper-dialog-live.png" width="19%" alt="4K Wallpapers & Phone QR Upload">
+  <img src="docs/screenshots/khutbah-minbar-live.png" width="32%" alt="Live Khutbah Minbar W.P. Putrajaya">
+  <img src="docs/screenshots/khutbah-detail-dialog.png" width="32%" alt="Interactive Glass Khutbah Dialog">
+  <img src="docs/screenshots/khutbah-settings-toggle.png" width="32%" alt="Display Mode Choice Dialog">
 </p>
+<p align="center">
+  <img src="docs/screenshots/khutbah-selangor-jais.png" width="32%" alt="JAIS Selangor Khutbah">
+  <img src="docs/screenshots/khutbah-johor-jainj.png" width="32%" alt="JAINJ Johor Khutbah">
+  <img src="docs/screenshots/khutbah-singapore-muis.png" width="32%" alt="MUIS Singapore Khutbah">
+</p>
+
+## What's New in Version 4.1 (Khutbah Minbar & Dynamic Navigation Edition)
+
+- **🕌 Localized Weekly Friday Sermons (Khutbah Minbar Tempatan)**:
+  - Automatically fetches and displays official localized Friday sermon excerpts based on the selected TV prayer zone / state.
+  - Multi-region official sources supported:
+    - **Malaysia**: JAWI (W.P. Putrajaya & Kuala Lumpur), JAIS (Selangor), JAINJ (Johor), JAIPP (Pulau Pinang), Perak, Kedah, Perlis, Negeri Sembilan, Terengganu, MAIK (Kelantan), Sabah, and Sarawak via `minbar.gosolat.com`.
+    - **Singapore**: MUIS (Majlis Ugama Islam Singapura).
+    - **Indonesia**: Kemenag RI (Kementerian Agama RI) & NU Online via `islam.nu.or.id`.
+  - Built-in comprehensive offline fallback database ensures the sermon shelf is never blank even with slow or offline network connections.
+- **🎛️ Dual Display Mode Switcher (Pilihan Kandungan Paparan)**:
+  - Toggle anytime between **Doa Harian (Daily Ayat & Translation)** and **Khutbah Minbar (Weekly Friday Sermon)** in Modern Settings under *Skrin Utama*.
+- **🔍 Interactive Frosted Glass Detail Dialog**:
+  - Clicking or pressing `DPAD Center (OK)` on the Ayah/Minbar shelf pops up a rich frosted glass modal displaying the sermon's full title, authority badge, date, theme, and complete sermon excerpt, with an instant 1-click toggle button.
+- **🎮 Seamless Remote DPAD Navigation Flow**:
+  - Smooth bi-directional TV remote control:
+    - `▲ (Up)` from Dock apps slides directly onto the Ayah/Minbar shelf with an animated luminous cyan focus glow.
+    - `▲ (Up)` from Ayah/Minbar shelf steps straight onto the Top Bar Settings cog (`⚙️`).
+    - `▼ (Down)` from Settings steps down to the Ayah/Minbar shelf, and down again to the Dock tiles.
+- **👤 Animated Character Avatars & Multi-Profile Customizer**:
+  - Expressive animated Lottie character avatar faces, custom theme colors, Tenor GIF avatar search, and local Wi-Fi mobile photo uploader.
 
 ## What's New in Version 4.0
 
