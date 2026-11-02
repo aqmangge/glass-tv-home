@@ -115,13 +115,13 @@ def main():
     # Load Project Screenshots (100% strictly from this project)
     img_home = Image.open(f"{assets_dir}/home-live.png").convert("RGBA")
     img_weather = Image.open(f"{assets_dir}/weather-live.png").convert("RGBA")
-    img_azan = Image.open(f"{assets_dir}/azan-popup-live.png").convert("RGBA")
-    img_screensaver = Image.open(f"{assets_dir}/screensaver-live.png").convert("RGBA")
-    img_wallpaper = Image.open(f"{assets_dir}/wallpaper-dialog-live.png").convert("RGBA")
+    img_khutbah = Image.open(f"{assets_dir}/khutbah-detail-dialog.png").convert("RGBA")
+    img_avatar = Image.open(f"{assets_dir}/avatar-customizer-live.png").convert("RGBA")
+    img_child = Image.open(f"{assets_dir}/child-mode-live.png").convert("RGBA")
     
     # --- HEADER SECTION ---
     # Top Pill Badge
-    badge_text = "GLASS OS 3.0 • LIVING ROOM OPERATING SYSTEM • ANDROID TV 9-12"
+    badge_text = "GLASS OS 4.1 • MINDFUL TV OPERATING SYSTEM • ANDROID TV & GOOGLE TV"
     bbox_b = font_badge.getbbox(badge_text)
     bw = bbox_b[2] - bbox_b[0] + 32
     bh = 28
@@ -133,34 +133,53 @@ def main():
     img.alpha_composite(badge_img, (70, 40))
     
     # Title & Subtitle
-    draw.text((70, 76), "Glass TV Home", font=font_title, fill=(255, 255, 255, 255))
-    draw.text((70, 132), "Mindful living room OS featuring Apple Weather Bento, 16:9 Azan Floating Modal & StandBy Clock", font=font_subtitle, fill=(148, 163, 184, 255))
+    draw.text((70, 76), "Glass TV Home v4.1", font=font_title, fill=(255, 255, 255, 255))
+    draw.text((70, 132), "Mindful living room OS featuring Localized Khutbah Minbar, Widescreen Weather, Animated Avatars & Child Mode", font=font_subtitle, fill=(148, 163, 184, 255))
     
     # Right Header Metric Chips
     chips = [
-        ("644 KB", "Ultralight Footprint", (52, 211, 153)),
-        ("100% Leanback", "D-Pad Remote Ergonomics", (56, 189, 248)),
-        ("E-Solat & JAKIM", "Sub-Second Sync", (251, 191, 36))
+        ("v4.1.0", "Latest Release", (52, 211, 153)),
+        ("100% Leanback", "D-Pad Remote Flow", (56, 189, 248)),
+        ("Khutbah & Solat", "JAKIM, MUIS, Kemenag", (251, 191, 36)),
+        ("Child Mode", "PIN & App Security", (244, 63, 94))
     ]
-    chip_x = 1260
+    chip_x = 1110
     for val, lbl, col in chips:
-        c_box = Image.new('RGBA', (190, 68), (0, 0, 0, 0))
+        c_box = Image.new('RGBA', (175, 68), (0, 0, 0, 0))
         cdraw = ImageDraw.Draw(c_box)
-        cdraw.rounded_rectangle([(0, 0), (190, 68)], radius=12, fill=(15, 23, 42, 170), outline=(255, 255, 255, 25), width=1)
-        cdraw.text((16, 11), val, font=font_stat_val, fill=col)
-        cdraw.text((16, 40), lbl, font=font_stat_lbl, fill=(148, 163, 184, 230))
+        cdraw.rounded_rectangle([(0, 0), (175, 68)], radius=12, fill=(15, 23, 42, 170), outline=(255, 255, 255, 25), width=1)
+        cdraw.text((14, 11), val, font=font_stat_val, fill=col)
+        cdraw.text((14, 40), lbl, font=font_stat_lbl, fill=(148, 163, 184, 230))
         img.alpha_composite(c_box, (chip_x, 80))
-        chip_x += 202
+        chip_x += 185
         
     # Divider line
     draw.line([(70, 172), (WIDTH - 70, 172)], fill=(255, 255, 255, 30), width=1)
     
     # --- COMPOSITION OF PROJECT SCREENS ---
-    # 1. Left Flanking Display: Weather Dashboard (Apple Weather Bento UI)
+    # 1. Left Flanking Display: Weather Dashboard (São Paulo Widescreen & Hourly Curve)
     draw_bezel_window(
         base_img=img,
         screen_img=img_weather,
         pos=(70, 204),
+        size=(610, 343),
+        radius=14,
+        border_color=(56, 189, 248, 120),
+        border_width=2,
+        shadow_offset=18,
+        shadow_blur=28,
+        shadow_alpha=180,
+        badge_text="Widescreen TV Weather • Hourly Curve & 5-Day",
+        badge_pos="bottom_left",
+        badge_font=font_pill,
+        accent_color=(56, 189, 248)
+    )
+    
+    # 2. Right Flanking Display: Khutbah Minbar Glass Dialog
+    draw_bezel_window(
+        base_img=img,
+        screen_img=img_khutbah,
+        pos=(1240, 204),
         size=(610, 343),
         radius=14,
         border_color=(251, 191, 36, 120),
@@ -168,28 +187,10 @@ def main():
         shadow_offset=18,
         shadow_blur=28,
         shadow_alpha=180,
-        badge_text="Apple Weather Bento • Doppler Radar & 10-Day",
-        badge_pos="bottom_left",
-        badge_font=font_pill,
-        accent_color=(251, 191, 36)
-    )
-    
-    # 2. Right Flanking Display: Azan Floating Settings (16:9 Modal)
-    draw_bezel_window(
-        base_img=img,
-        screen_img=img_azan,
-        pos=(1240, 204),
-        size=(610, 343),
-        radius=14,
-        border_color=(74, 222, 128, 120),
-        border_width=2,
-        shadow_offset=18,
-        shadow_blur=28,
-        shadow_alpha=180,
-        badge_text="16:9 Azan & Solat Floating Settings",
+        badge_text="Khutbah Minbar • JAWI, JAIS, JAINJ & MUIS",
         badge_pos="bottom_right",
         badge_font=font_pill,
-        accent_color=(74, 222, 128)
+        accent_color=(251, 191, 36)
     )
     
     # 3. Main Center Hero Screen: Home Launcher Screen (Elevated & Prominent)
@@ -204,46 +205,46 @@ def main():
         shadow_offset=26,
         shadow_blur=42,
         shadow_alpha=220,
-        badge_text="Primary TV Home • Jambatan Angkat Terengganu • Live Dock",
+        badge_text="Glass TV Home v4.1 • Live Khutbah Minbar & Dynamic Dock",
         badge_pos="bottom_right",
         badge_font=font_pill,
         accent_color=(56, 189, 248)
     )
     
-    # 4. Bottom-Left Card: StandBy OLED Clock Screensaver
+    # 4. Bottom-Left Card: Animated Avatar Customizer
     draw_bezel_window(
         base_img=img,
-        screen_img=img_screensaver,
+        screen_img=img_avatar,
         pos=(70, 640),
         size=(360, 202),
         radius=12,
-        border_color=(147, 197, 253, 90),
+        border_color=(168, 85, 247, 100),
         border_width=2,
         shadow_offset=14,
         shadow_blur=20,
         shadow_alpha=160,
-        badge_text="StandBy OLED Clock",
+        badge_text="Multi-Profile & Animated Avatars",
         badge_pos="bottom_left",
         badge_font=font_pill,
-        accent_color=(147, 197, 253)
+        accent_color=(168, 85, 247)
     )
     
-    # 5. Bottom-Right Card: 4K Wallpapers & Phone QR Code Upload
+    # 5. Bottom-Right Card: Child Mode Security & PIN Lock
     draw_bezel_window(
         base_img=img,
-        screen_img=img_wallpaper,
+        screen_img=img_child,
         pos=(1490, 640),
         size=(360, 202),
         radius=12,
-        border_color=(251, 146, 60, 110),
+        border_color=(244, 63, 94, 110),
         border_width=2,
         shadow_offset=14,
         shadow_blur=20,
         shadow_alpha=160,
-        badge_text="Koleksi Wallpaper 4K & Phone QR",
+        badge_text="Child Mode • PIN & App Security",
         badge_pos="bottom_right",
         badge_font=font_pill,
-        accent_color=(251, 146, 60)
+        accent_color=(244, 63, 94)
     )
     
     # --- FOOTER FEATURE BAR (Bottom 915 to 1010) ---
@@ -252,9 +253,9 @@ def main():
     fdraw.rounded_rectangle([(0, 0), (WIDTH - 140, 94)], radius=16, fill=(15, 23, 42, 180), outline=(255, 255, 255, 24), width=1)
     
     features = [
-        ("WEATHER ENGINE 3.0", "Open-Meteo live sync, APIMS JAS Air Quality, interactive rain radar, hourly pills, dynamic animated skies."),
-        ("ISLAMIC LIVING ROOM", "E-Solat Malaysia JAKIM auto zone, 6-phase timetable, 16:9 floating settings dialog with individual prayer toggle."),
-        ("4K MALAYSIA & PHONE QR", "Curated 14 Malaysian states, Pexels UHD collections, phone QR photo upload server without external cloud.")
+        ("KHUTBAH MINBAR & E-SOLAT", "Official weekly Friday sermon sync (JAWI, JAIS, MUIS, Kemenag), prayer timetable & interactive glass modal."),
+        ("WEATHER & AIR QUALITY 4.0", "São Paulo TV layout, hourly temperature curve, 5-day forecast cards, and official DOE APIMS AQI."),
+        ("FAMILY PROFILES & CHILD MODE", "Animated Lottie avatars, Tenor GIF search, Wi-Fi photo uploader, 4-digit PIN & app lockdown.")
     ]
     
     fx = 32
@@ -277,8 +278,8 @@ def main():
     img.alpha_composite(footer_bar, (70, 915))
     
     # Bottom subtle watermark
-    draw.text((70, 1030), "Glass TV OS • Version 3.0.0 Release Architecture • All UI captures taken directly from live Android TV build", font=font_pill, fill=(100, 116, 139, 220))
-    draw.text((WIDTH - 380, 1030), "Designed for Xiaomi Mi Box & Android TV 9+", font=font_pill, fill=(100, 116, 139, 220))
+    draw.text((70, 1030), "Glass TV OS • Version 4.1.0 Release Architecture • All UI captures taken directly from live Android TV build", font=font_pill, fill=(100, 116, 139, 220))
+    draw.text((WIDTH - 380, 1030), "Designed for Android TV & Google TV 9+", font=font_pill, fill=(100, 116, 139, 220))
     
     # Save as high-quality JPEG
     rgb_img = img.convert('RGB')

@@ -2,6 +2,10 @@
 
 Welcome to **Glass TV Home**! This guide is crafted specifically for everyday users and beginners so you can easily install, debloat your TV for blazing-fast performance without ads, navigate seamlessly with your TV remote, and enjoy all smart ambient features effortlessly.
 
+<p align="center">
+  <img src="docs/screenshots/glass_tv_os_showcase_poster.jpg" width="100%" alt="Glass TV OS Showcase Poster">
+</p>
+
 ---
 
 ## 🌟 1. What is Glass TV Home?
@@ -292,6 +296,49 @@ Glass TV Home features a built-in OTA update system so you can update directly o
 * **Silent Startup Check**: The launcher quietly checks for new versions in the background when booted. If a new patch is found, a changelog dialog is presented.
 * **1-Click Download & Install**: Clicking **Muat Turun & Pasang** downloads the update file locally and launches Android TV's native package installer.
 * **Data Preserved**: Updating preserves all apps, dock layout, and custom configurations.
+
+### I. Multi-User Profiles & Animated Avatar Customizer 👤✨
+Manage up to 10 family member profiles with custom themes and unique avatars:
+* **Expressive Avatar Options**:
+  - **Leanback Animal Suite**: Fox, Panda, Tiger, Lion, Frog, Koala, Octopus with circular status glow (Cyan for adult, Amber for child mode).
+  - **Animated Character Face Customizer (Lottie)**: 8 expressive emotional animations (*Smile, Wink, Whistle, Sleepy, Laugh, Cheerful, Curious, Surprised*), 8 body palette colors, and 8 background colors.
+  - **Tenor GIF Search**: Search and assign animated GIF memes or character icons directly from the web.
+  - **Mobile Wi-Fi Photo Upload**: Scan a QR code to upload personal profile headshots from any phone.
+
+<p align="center">
+  <img src="docs/screenshots/avatar-customizer-live.png" width="49%" alt="Animated Character Avatar Customizer">
+  <img src="docs/screenshots/profile-dialog-live.png" width="49%" alt="Multi-User Family Profile Manager">
+</p>
+
+### J. Child Mode Security (PIN Lock & App Blocker) 🛡️👶
+Keep TV entertainment safe for children with built-in parental security:
+* **Master Child Mode Switch**: Toggle child-safe mode on or off in seconds.
+* **4-Digit Security PIN**: Requires a private PIN to exit Child Mode or access locked app configuration.
+* **App Blocker & Drawer Hiding**: Conceal mature streaming apps, web browsers, or sensitive tools from both the home dock and app drawer, preventing unauthorized launching by kids.
+
+<p align="center">
+  <img src="docs/screenshots/child-mode-live.png" width="80%" alt="Child Mode Security Settings">
+</p>
+
+### K. Next-Gen Leanback Weather & Air Quality Hub ⛅📊
+Full-screen widescreen weather experience crafted specifically for couch-distance viewing:
+* **24-Hour Temperature Curve Graph**: Continuous visual curve illustrating hourly temperature trends.
+* **Interactive Metric Curve Tabs**: Toggle smoothly between **Suhu (Temp)**, **Kerpasan (Precipitation %)**, and **Angin (Wind Speed)** curves using the remote D-pad.
+* **Official Malaysian Air Quality Index (JAS APIMS / IPU)**: Multi-color spectrum bar, PM2.5 / PM10 readings, and official health advisories.
+* **5-Day Daily Outlook & Core Bento Metrics**: Daily forecast cards alongside Apparent Temp ("Feels Like"), Humidity, and Wind Velocity.
+
+<p align="center">
+  <img src="docs/screenshots/weather-live.png" width="80%" alt="Leanback Weather Hub">
+</p>
+
+### L. Modern 2-Column Frosted Glass Settings ⚙️🪟
+Navigate system preferences effortlessly with a dual-pane Apple tvOS-style interface:
+* **Left Category Rail**: Rapid jumping between Wallpapers, Audio & Console Sounds, Display & Khutbah, Location & Prayer Zones, Profiles, Child Mode, and TV & System.
+* **Right Interactive Action Pane**: Live toggles, sliders, radio options, and instant action buttons without leaving the screen.
+
+<p align="center">
+  <img src="docs/screenshots/settings-dropdown.jpg" width="80%" alt="Modern 2-Column Frosted Glass Settings">
+</p>
 
 ---
 

@@ -2,6 +2,10 @@
 
 Selamat datang ke **Glass TV Home**! Panduan ini khas untuk pengguna baru (*beginner-friendly*) supaya anda boleh memasang, mengoptimumkan TV agar laju tanpa iklan, menggunakan remote TV, dan menikmati semua ciri menarik dengan mudah tanpa pening kepala.
 
+<p align="center">
+  <img src="docs/screenshots/glass_tv_os_showcase_poster.jpg" width="100%" alt="Poster Pembentangan Glass TV OS">
+</p>
+
 ---
 
 ## 🌟 1. Apa Itu Glass TV Home?
@@ -295,6 +299,49 @@ Glass TV Home dilengkapi dengan enjin kemas kini pintar tanpa perlu komputer ata
 * **Semakan Automatik Latar Belakang**: Setiap kali aplikasi Glass TV dibuka, ia akan memeriksa secara senyap di latar belakang. Jika versi baharu ditemui, dialog kemas kini dengan senarai pembaharuan (*changelog*) akan dipaparkan.
 * **Muat Turun & Pasang 1-Klik**: Klik butang **Muat Turun & Pasang**, TV akan memuat turun fail APK terus ke peranti dan membuka pemasang rasmi Android TV untuk anda sahkan dengan remote.
 * **Selamat & Kekal**: Proses kemas kini tidak memadamkan fail data, susunan aplikasi, atau tetapan peribadi anda.
+
+### I. Profil Pengguna & Penyesuai Avatar Beranimasi (Multi-User Profiles) 👤✨
+Urus sehingga 10 profil ahli keluarga dengan tema dan avatar tersendiri:
+* **Pilihan Avatar Ekspresif**:
+  - **Koleksi Haiwan Leanback**: Fox, Panda, Tiger, Lion, Frog, Koala, Octopus dengan lingkaran status bercahaya (Cyan untuk dewasa, Amber untuk kanak-kanak).
+  - **Penyesuai Muka Watak Beranimasi (Lottie Customizer)**: 8 ekspresi emosi comel (*Senyum, Kenyit, Bersiul, Mengantuk, Ketawa, Ceria, Ingin Tahu, Terkejut*), 8 pilihan warna badan, dan 8 warna latar belakang.
+  - **Carian Tenor GIF**: Cari animasi GIF langsung dari internet untuk avatar profil anda.
+  - **Muat Naik Foto Telefon**: Imbas kod QR untuk memuat naik gambar muka dari telefon pintar melalui Wi-Fi tempatan.
+
+<p align="center">
+  <img src="docs/screenshots/avatar-customizer-live.png" width="49%" alt="Penyesuai Avatar Watak Beranimasi">
+  <img src="docs/screenshots/profile-dialog-live.png" width="49%" alt="Pengurus Profil Keluarga">
+</p>
+
+### J. Mod Kanak-Kanak & Keselamatan PIN (Child Mode Security) 🛡️👶
+Pastikan kandungan TV selamat untuk anak-anak dengan sistem kawalan ibu bapa terbina:
+* **Suis Utama Mod Kanak-Kanak**: Aktifkan atau nyahaktifkan mod kanak-kanak dengan mudah.
+* **Kunci PIN Keselamatan 4-Digit**: Memerlukan kod PIN rahsia untuk keluar daripada Mod Kanak-Kanak atau mengubah tetapan aplikasi.
+* **Penyekat & Penyorok Aplikasi**: Sorok aplikasi dewasa, pelayar web, atau aplikasi sensitif daripada paparan dok utama dan senarai laci aplikasi agar tidak boleh diakses oleh kanak-kanak.
+
+<p align="center">
+  <img src="docs/screenshots/child-mode-live.png" width="80%" alt="Menu Keselamatan Mod Kanak-Kanak">
+</p>
+
+### K. Dashboard Cuaca Penuh Leanback & Indeks Udara IPU ⛅📊
+Paparan cuaca skrin lebar bertaraf Apple tvOS yang direka khas untuk tontonan sofa TV:
+* **Graf Keluk Suhu 24 Jam**: Visualisasi keluk suhu berterusan sepanjang hari dengan penanda waktu.
+* **Tab Keluk Interaktif**: Tukar pandangan antara keluk **Suhu**, **Kerpasan (Hujan %)**, dan **Angin (km/j)** secara langsung menggunakan remote TV.
+* **Kualiti Udara JAS APIMS**: Bar spektrum IPU dengan bacaan PM2.5, PM10, dan nasihat kesihatan mengikut indeks rasmi Malaysia.
+* **Ramalan 5 Hari & Metrik Teras**: Kad ramalan harian berserta paparan Suhu Rasa (*Feels Like*), Kelembapan, dan Halaju Angin.
+
+<p align="center">
+  <img src="docs/screenshots/weather-live.png" width="80%" alt="Dashboard Cuaca Penuh Leanback">
+</p>
+
+### L. Tetapan Moden 2-Lajur Kaca Frosted (Modern 2-Column Settings) ⚙️🪟
+Navigasi tetapan TV dengan pantas melalui reka bentuk 2-lajur moden:
+* **Lajur Kategori Kiri**: Navigasi pantas antara Wallpaper, Suara, Skrin Utama, Lokasi, Profil, Kunci Kanak-Kanak, dan Sistem.
+* **Lajur Tindakan Kanan**: Panel kawalan interaktif dengan suis togol, butang tindakan segera, dan dialog pilihan tanpa meninggalkan skrin.
+
+<p align="center">
+  <img src="docs/screenshots/settings-dropdown.jpg" width="80%" alt="Menu Tetapan Moden 2-Lajur">
+</p>
 
 ---
 

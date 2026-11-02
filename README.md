@@ -54,7 +54,7 @@ every week.
   <img src="docs/screenshots/khutbah-singapore-muis.png" width="32%" alt="MUIS Singapore Khutbah">
 </p>
 
-## What's New in Version 4.1 (Khutbah Minbar & Dynamic Navigation Edition)
+## What's New in Version 4.1 (Khutbah Minbar, Weather Hub & Profile Security Edition)
 
 - **🕌 Localized Weekly Friday Sermons (Khutbah Minbar Tempatan)**:
   - Automatically fetches and displays official localized Friday sermon excerpts based on the selected TV prayer zone / state.
@@ -67,13 +67,40 @@ every week.
   - Toggle anytime between **Doa Harian (Daily Ayat & Translation)** and **Khutbah Minbar (Weekly Friday Sermon)** in Modern Settings under *Skrin Utama*.
 - **🔍 Interactive Frosted Glass Detail Dialog**:
   - Clicking or pressing `DPAD Center (OK)` on the Ayah/Minbar shelf pops up a rich frosted glass modal displaying the sermon's full title, authority badge, date, theme, and complete sermon excerpt, with an instant 1-click toggle button.
+- **⛅ Next-Gen Leanback Weather & Air Quality Hub**:
+  - Full-screen widescreen Leanback weather hub (`WeatherActivity`) featuring 24-hour temperature curve graphs, tab switching between Temperature, Precipitation, and Wind curves, 5-day daily forecast cards, and official Malaysian DOE (JAS APIMS / IPU) air quality indices with color spectrum gauges and health advisories.
+- **⚙️ Modern 2-Column Frosted Glass Settings Engine**:
+  - Dual-column Leanback layout with frosted glass backdrop: left categories (*Wallpaper, Suara & Konsol, Skrin Utama, Lokasi & Waktu Solat, Profil, Kunci Kanak-Kanak, TV & Sistem*) and dynamic real-time action panes on the right.
+- **👤 Multi-User Profiles & Animated Lottie Avatar Customizer**:
+  - Expressive animated Lottie character avatar faces with 8 emotions (Senyum, Kenyit, Bersiul, Mengantuk, Ketawa, Ceria, Ingin Tahu, Terkejut), 8 customizable body palette colors, 8 background palette colors, Tenor GIF avatar search, and local Wi-Fi mobile photo upload.
+- **🛡️ Child Mode Security (4-Digit PIN Lock & App Hiding)**:
+  - Complete parental control suite: master activation switch, 4-digit security PIN lock, app drawer hiding, and direct launch blocking for adult or restricted applications.
 - **🎮 Seamless Remote DPAD Navigation Flow**:
   - Smooth bi-directional TV remote control:
     - `▲ (Up)` from Dock apps slides directly onto the Ayah/Minbar shelf with an animated luminous cyan focus glow.
     - `▲ (Up)` from Ayah/Minbar shelf steps straight onto the Top Bar Settings cog (`⚙️`).
     - `▼ (Down)` from Settings steps down to the Ayah/Minbar shelf, and down again to the Dock tiles.
-- **👤 Animated Character Avatars & Multi-Profile Customizer**:
-  - Expressive animated Lottie character avatar faces, custom theme colors, Tenor GIF avatar search, and local Wi-Fi mobile photo uploader.
+
+---
+
+### 📸 Live Screen Showcase (v4.1.0)
+
+<p align="center">
+  <img src="docs/screenshots/home-live.png" width="49%" alt="Glass TV Home v4.1.0 Live Screen">
+  <img src="docs/screenshots/weather-live.png" width="49%" alt="Widescreen Leanback Weather Hub">
+</p>
+<p align="center">
+  <img src="docs/screenshots/settings-dropdown.jpg" width="49%" alt="Modern 2-Column Frosted Glass Settings">
+  <img src="docs/screenshots/child-mode-live.png" width="49%" alt="Child Mode PIN Lock & App Blocker">
+</p>
+<p align="center">
+  <img src="docs/screenshots/avatar-customizer-live.png" width="49%" alt="Animated Lottie Character Avatar Customizer">
+  <img src="docs/screenshots/profile-dialog-live.png" width="49%" alt="Multi-User Family Profile Manager">
+</p>
+<p align="center">
+  <img src="docs/screenshots/khutbah-minbar-live.png" width="49%" alt="Live Khutbah Minbar Shelf">
+  <img src="docs/screenshots/khutbah-detail-dialog.png" width="49%" alt="Interactive Frosted Glass Khutbah Modal">
+</p>
 
 ## What's New in Version 4.0
 
