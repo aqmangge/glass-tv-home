@@ -266,19 +266,61 @@
         android:layout_height="0dp"
         android:visibility="gone">
 
-        <View android:id="@+id/btnChangeLocation" />
-        <LinearLayout android:id="@+id/hourlyContainer" />
-        <com.gathin.tvhome.WindCompassView android:id="@+id/windCompassView" />
-        <com.gathin.tvhome.MoonPhaseView android:id="@+id/moonPhaseView" />
-        <com.gathin.tvhome.SunArcView android:id="@+id/sunArcView" />
-        <com.gathin.tvhome.RadarMapView android:id="@+id/radarMapView" />
-        <com.gathin.tvhome.PressureGaugeView android:id="@+id/pressureGaugeView" />
-        <TextView android:id="@+id/sunsetText" />
-        <TextView android:id="@+id/uvValText" />
-        <TextView android:id="@+id/uvDescText" />
-        <TextView android:id="@+id/aqiStatus" />
-        <com.gathin.tvhome.AqiSpectrumBarView android:id="@+id/aqiBar" />
-        <TextView android:id="@+id/aqiStation" />
-        <TextView android:id="@+id/weatherFooter" />
+        <View
+            android:id="@+id/btnChangeLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <LinearLayout
+            android:id="@+id/hourlyContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <com.gathin.tvhome.WindCompassView
+            android:id="@+id/windCompassView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <com.gathin.tvhome.MoonPhaseView
+            android:id="@+id/moonPhaseView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <com.gathin.tvhome.SunArcView
+            android:id="@+id/sunArcView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <com.gathin.tvhome.RadarMapView
+            android:id="@+id/radarMapView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <com.gathin.tvhome.PressureGaugeView
+            android:id="@+id/pressureGaugeView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/sunsetText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/uvValText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/uvDescText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/aqiStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <com.gathin.tvhome.AqiSpectrumBarView
+            android:id="@+id/aqiBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/aqiStation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/weatherFooter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 </FrameLayout>

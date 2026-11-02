@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Modern TV Weather Forecast Card matching RTL / São Paulo TV UI design -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="168dp"
+    android:layout_width="154dp"
     android:layout_height="124dp"
-    android:layout_marginEnd="14dp"
+    android:layout_marginEnd="12dp"
     android:background="@drawable/weather_card_bg"
     android:clickable="true"
     android:focusable="true"
     android:orientation="vertical"
-    android:paddingStart="16dp"
+    android:paddingStart="14dp"
     android:paddingTop="14dp"
-    android:paddingEnd="16dp"
+    android:paddingEnd="14dp"
     android:paddingBottom="14dp">
 
     <!-- Day Header (e.g. Quarta-feira, Isnin, Tuesday) -->

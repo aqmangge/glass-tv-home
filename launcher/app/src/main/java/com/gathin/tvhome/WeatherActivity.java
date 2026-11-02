@@ -335,7 +335,7 @@ public class WeatherActivity extends Activity {
                 TextView maxTempView = v.findViewById(R.id.dailyMaxTemp);
 
                 if (dayView != null) dayView.setText(item.day);
-                if (iconView != null) iconView.setImageResource(getIconDrawable(item.icon, "12:00"));
+                if (iconView != null) iconView.setImageResource(getIconDrawable(item.icon, false));
                 if (minTempView != null) minTempView.setText(item.minTemp + "°C");
                 if (maxTempView != null) maxTempView.setText(item.maxTemp + "°C");
 
@@ -457,35 +457,7 @@ public class WeatherActivity extends Activity {
         return WeatherBackgroundView.ConditionType.SUNNY;
     }
 
-    private int getIconDrawable(String icon, String timeText) {
-        boolean isNight = false;
-        if (timeText != null) {
-            String lower = timeText.trim().toLowerCase(Locale.ROOT);
-            if ("now".equals(lower)) {
-                int h = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-                isNight = (h < 7 || h >= 19);
-            } else {
-                try {
-                    boolean isPm = lower.contains("pm");
-                    boolean isAm = lower.contains("am");
-                    String digits = lower.replaceAll("[^0-9]", "");
-                    if (!digits.isEmpty()) {
-                        int hourNum = Integer.parseInt(digits);
-                        int hour24;
-                        if (isPm) {
-                            hour24 = (hourNum == 12) ? 12 : hourNum + 12;
-                        } else if (isAm) {
-                            hour24 = (hourNum == 12) ? 0 : hourNum;
-                        } else {
-                            hour24 = hourNum;
-                        }
-                        isNight = (hour24 < 7 || hour24 >= 19);
-                    }
-                } catch (Exception ignored) {
-                }
-            }
-        }
-
+    private int getIconDrawable(String icon, boolean isNight) {
         if (icon == null) return isNight ? R.drawable.wx_rtl_night : R.drawable.wx_rtl_partly;
         if (icon.contains("☀")) return isNight ? R.drawable.wx_rtl_night : R.drawable.wx_rtl_sun;
         if (icon.contains("⛅")) return isNight ? R.drawable.wx_rtl_night : R.drawable.wx_rtl_partly;
@@ -495,6 +467,27 @@ public class WeatherActivity extends Activity {
         if (icon.contains("☁")) return R.drawable.wx_rtl_cloud;
         if (icon.contains("🌫")) return R.drawable.wx_fog;
         return isNight ? R.drawable.wx_rtl_night : R.drawable.wx_rtl_partly;
+    }
+
+    private int getIconDrawable(String icon, String timeText) {
+        boolean isNight = false;
+        if (timeText != null) {
+            String lower = timeText.trim().toLowerCase(Locale.ROOT);
+            if ("now".equals(lower)) {
+                int h = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+                isNight = (h < 7 || h >= 19);
+            } else if (lower.contains(":")) {
+                try {
+                    String[] parts = lower.split(":");
+                    int hourNum = Integer.parseInt(parts[0].replaceAll("[^0-9]", ""));
+                    if (lower.contains("pm") && hourNum < 12) hourNum += 12;
+                    else if (lower.contains("am") && hourNum == 12) hourNum = 0;
+                    isNight = (hourNum < 7 || hourNum >= 19);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        return getIconDrawable(icon, isNight);
     }
 
     private void setupFocusAnimation(View v, float scale) {
