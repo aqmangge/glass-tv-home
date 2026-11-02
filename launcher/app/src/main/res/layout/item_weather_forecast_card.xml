@@ -35,67 +35,37 @@
         android:gravity="bottom|center_vertical"
         android:orientation="horizontal">
 
-        <!-- Temp Stack with Thermometer Vectors -->
+        <!-- Temp Stack matching São Paulo TV UI design (↑ Max / ↓ Min) -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="vertical">
 
-            <!-- High Temp with High Thermometer -->
-            <LinearLayout
+            <TextView
+                android:id="@+id/dailyMaxTemp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:fontFamily="@font/inter"
+                android:fontVariationSettings="'wght' 700"
+                android:includeFontPadding="false"
+                android:singleLine="true"
+                android:text="↑ 30°C"
+                android:textColor="#FFFFFF"
+                android:textSize="17sp" />
 
-                <ImageView
-                    android:layout_width="12dp"
-                    android:layout_height="16dp"
-                    android:layout_marginEnd="6dp"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/ic_temp_high" />
-
-                <TextView
-                    android:id="@+id/dailyMaxTemp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/inter"
-                    android:fontVariationSettings="'wght' 700"
-                    android:includeFontPadding="false"
-                    android:singleLine="true"
-                    android:text="30°C"
-                    android:textColor="#FFFFFF"
-                    android:textSize="17sp" />
-            </LinearLayout>
-
-            <!-- Low Temp with Low Thermometer -->
-            <LinearLayout
+            <TextView
+                android:id="@+id/dailyMinTemp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="12dp"
-                    android:layout_height="16dp"
-                    android:layout_marginEnd="6dp"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/ic_temp_low" />
-
-                <TextView
-                    android:id="@+id/dailyMinTemp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/inter"
-                    android:fontVariationSettings="'wght' 500"
-                    android:includeFontPadding="false"
-                    android:singleLine="true"
-                    android:text="21°C"
-                    android:textColor="#94A3B8"
-                    android:textSize="14sp" />
-            </LinearLayout>
+                android:layout_marginTop="3dp"
+                android:fontFamily="@font/inter"
+                android:fontVariationSettings="'wght' 500"
+                android:includeFontPadding="false"
+                android:singleLine="true"
+                android:text="↓ 21°C"
+                android:textColor="#94A3B8"
+                android:textSize="14.5sp" />
         </LinearLayout>
 
         <View

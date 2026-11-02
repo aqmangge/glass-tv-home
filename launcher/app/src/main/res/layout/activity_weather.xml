@@ -248,6 +248,87 @@
             android:layout_height="0dp"
             android:layout_weight="0.8" />
 
+        <!-- Google Weather Subtabs: Temperature | Precipitation | Wind -->
+        <LinearLayout
+            android:id="@+id/weatherSubTabs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginStart="32dp"
+            android:layout_marginBottom="4dp"
+            android:gravity="center_vertical">
+
+            <!-- Tab 1: Temperature / Suhu (Active) -->
+            <LinearLayout
+                android:id="@+id/tabTemperature"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginEnd="28dp">
+
+                <TextView
+                    android:id="@+id/tabTempTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/inter"
+                    android:fontVariationSettings="'wght' 600"
+                    android:includeFontPadding="false"
+                    android:singleLine="true"
+                    android:text="Suhu"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14.5sp" />
+
+                <!-- Google Weather yellow underline indicator -->
+                <View
+                    android:id="@+id/tabTempIndicator"
+                    android:layout_width="match_parent"
+                    android:layout_height="2.5dp"
+                    android:layout_marginTop="3dp"
+                    android:background="#FBBF24" />
+            </LinearLayout>
+
+            <!-- Tab 2: Precipitation / Kerpasan -->
+            <LinearLayout
+                android:id="@+id/tabPrecipitation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginEnd="28dp">
+
+                <TextView
+                    android:id="@+id/tabPrecipTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/inter"
+                    android:fontVariationSettings="'wght' 400"
+                    android:includeFontPadding="false"
+                    android:singleLine="true"
+                    android:text="Kerpasan"
+                    android:textColor="#94A3B8"
+                    android:textSize="14.5sp" />
+            </LinearLayout>
+
+            <!-- Tab 3: Wind / Angin -->
+            <LinearLayout
+                android:id="@+id/tabWind"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tabWindTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/inter"
+                    android:fontVariationSettings="'wght' 400"
+                    android:includeFontPadding="false"
+                    android:singleLine="true"
+                    android:text="Angin"
+                    android:textColor="#94A3B8"
+                    android:textSize="14.5sp" />
+            </LinearLayout>
+        </LinearLayout>
+
         <!-- Middle Section: Google Weather Style Smooth Hourly Temperature Curve -->
         <com.gathin.tvhome.HourlyWeatherGraphView
             android:id="@+id/hourlyGraphView"

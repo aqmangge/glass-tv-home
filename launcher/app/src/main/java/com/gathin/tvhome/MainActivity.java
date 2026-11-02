@@ -1256,6 +1256,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         tilesReady = false;
         promptsPaused = false;
         resuming = true;
+        com.airbnb.lottie.LottieAnimationView lottieAv = (com.airbnb.lottie.LottieAnimationView) findViewById(R.id.lottieHomeAvatar);
+        if (lottieAv != null && !lottieAv.isAnimating()) {
+            lottieAv.resumeAnimation();
+        }
         reloadApps(true);
         updateShamsiDate();
         updatePrayerTimes();
@@ -1367,6 +1371,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onPause() {
         super.onPause();
+        com.airbnb.lottie.LottieAnimationView lottieAv = (com.airbnb.lottie.LottieAnimationView) findViewById(R.id.lottieHomeAvatar);
+        if (lottieAv != null && lottieAv.isAnimating()) {
+            lottieAv.pauseAnimation();
+        }
         unregisterReceiver(packageReceiver);
         handler.removeCallbacks(minuteTick);
         handler.removeCallbacks(wallTick);
@@ -2734,6 +2742,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     }
 
     void updateTopBarUserIcon() {
+        com.airbnb.lottie.LottieAnimationView lottie = (com.airbnb.lottie.LottieAnimationView) findViewById(R.id.lottieHomeAvatar);
+        if (lottie != null) {
+            AvatarThemeManager.applyAvatar(lottie, this);
+            ProfileManager.UserProfile active = ProfileManager.getActiveProfile(this);
+            boolean isChild = ChildModeManager.isChildModeEnabled(this);
+            if (btnCandyBox != null) {
+                btnCandyBox.setContentDescription("Pengguna Semasa: " + active.name + (isChild ? " (Mod Kanak-kanak)" : ""));
+            }
+            return;
+        }
         if (btnCandyBox instanceof TextView) {
             TextView tv = (TextView) btnCandyBox;
             ProfileManager.UserProfile active = ProfileManager.getActiveProfile(this);

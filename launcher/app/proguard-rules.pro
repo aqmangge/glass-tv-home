@@ -2,3 +2,6 @@
 # AndroidX code, not from renaming, and readable stack traces matter more in a sideloaded app
 # where crash reports arrive as screenshots.
 -dontobfuscate
+-dontwarn javax.annotation.Nullable
+-dontwarn javax.annotation.**
+-keep class com.airbnb.lottie.** { *; }

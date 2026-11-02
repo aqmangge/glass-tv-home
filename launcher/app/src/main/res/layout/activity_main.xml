@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -702,15 +703,25 @@
                     android:contentDescription="Google Assistant"
                     android:drawableStart="@drawable/ic_mic" />
 
-                <TextView
+                <FrameLayout
                     android:id="@+id/btnCandyBox"
-                    style="@style/TopMenuButton"
                     android:layout_width="42dp"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="0dp"
-                    android:drawablePadding="0dp"
+                    android:layout_height="42dp"
+                    android:layout_marginStart="10dp"
+                    android:focusable="true"
+                    android:clickable="true"
                     android:contentDescription="Select User &amp; Child Mode"
-                    android:drawableStart="@drawable/ic_shield_child" />
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
+
+                    <com.airbnb.lottie.LottieAnimationView
+                        android:id="@+id/lottieHomeAvatar"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_gravity="center"
+                        app:lottie_autoPlay="true"
+                        app:lottie_loop="true" />
+                </FrameLayout>
 
                 <FrameLayout
                     android:id="@+id/btnSettingsContainer"

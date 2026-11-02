@@ -406,6 +406,52 @@ public final class UserSwitchDialog {
         lcLp.bottomMargin = (int) (10 * density);
         root.addView(lockCard, lcLp);
 
+        // Section: Ubah Warna Avatar (Lottie Color Customizer)
+        LinearLayout avatarColorCard = new LinearLayout(activity);
+        avatarColorCard.setOrientation(LinearLayout.HORIZONTAL);
+        avatarColorCard.setGravity(Gravity.CENTER_VERTICAL);
+        avatarColorCard.setPadding((int) (16 * density), (int) (12 * density), (int) (16 * density), (int) (12 * density));
+        avatarColorCard.setFocusable(true);
+        avatarColorCard.setClickable(true);
+
+        GradientDrawable acBg = new GradientDrawable();
+        acBg.setColor(0xFF242731);
+        acBg.setCornerRadius(12 * density);
+        acBg.setStroke((int) (1.2f * density), 0x33FFFFFF);
+        avatarColorCard.setBackground(acBg);
+
+        TextView tvAcTitle = new TextView(activity);
+        tvAcTitle.setText("🎨 Tukar Warna Avatar (Animasi Bergerak)");
+        tvAcTitle.setTextSize(14f);
+        tvAcTitle.setTextColor(0xFF38BDF8); // Cyan
+        tvAcTitle.setTypeface(outfit, Typeface.BOLD);
+        avatarColorCard.addView(tvAcTitle, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        TextView tvAcArrow = new TextView(activity);
+        tvAcArrow.setText("→");
+        tvAcArrow.setTextSize(16);
+        tvAcArrow.setTextColor(0xFF38BDF8);
+        avatarColorCard.addView(tvAcArrow);
+
+        avatarColorCard.setOnFocusChangeListener((v, hasFocus) -> {
+            GradientDrawable g = new GradientDrawable();
+            g.setColor(hasFocus ? 0xFF333744 : 0xFF242731);
+            g.setCornerRadius(12 * density);
+            g.setStroke((int) (2 * density), hasFocus ? 0xFF67E8F9 : 0x33FFFFFF);
+            v.setBackground(g);
+            v.animate().scaleX(hasFocus ? 1.02f : 1.0f).scaleY(hasFocus ? 1.02f : 1.0f).setDuration(120).start();
+        });
+
+        avatarColorCard.setOnClickListener(v -> {
+            SoundEffects.playSelect();
+            if (dialogHolder[0] != null) dialogHolder[0].dismiss();
+            AvatarCustomizerDialog.show(activity, () -> activity.updateTopBarUserIcon());
+        });
+
+        LinearLayout.LayoutParams acLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        acLp.bottomMargin = (int) (10 * density);
+        root.addView(avatarColorCard, acLp);
+
         // Close / Batal Button
         Button btnClose = new Button(activity);
         btnClose.setText("Tutup");

@@ -207,8 +207,8 @@ public class HourlyWeatherGraphView extends View {
             canvas.drawCircle(xs[i], ys[i], 5.0f * density, pointHaloPaint);
             canvas.drawCircle(xs[i], ys[i], 3.2f * density, pointPaint);
 
-            // Temperature text above point
-            canvas.drawText(item.temp + "°", xs[i], ys[i] - (8.0f * density), tempTextPaint);
+            // Temperature text above point (clean Google Weather styling)
+            canvas.drawText(String.valueOf(item.temp), xs[i], ys[i] - (8.0f * density), tempTextPaint);
 
             // Time label below baseline
             String label = item.time != null ? item.time.toLowerCase(Locale.ROOT) : "";

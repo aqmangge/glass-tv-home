@@ -51,6 +51,13 @@
             android:shadowDy="1"
             android:shadowRadius="4"
             android:visibility="gone" />
+
+        <!-- EA FC Interactive Focus Border Effect: Orbiting Neon Beam & Glass Rim -->
+        <com.gathin.tvhome.EafcFocusBorderView
+            android:id="@+id/eafcBorder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
     </FrameLayout>
 
     <TextView

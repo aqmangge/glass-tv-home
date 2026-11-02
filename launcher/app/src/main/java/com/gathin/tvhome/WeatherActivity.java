@@ -318,6 +318,14 @@ public class WeatherActivity extends Activity {
             }
         }
 
+        // 3.4. Google Weather Subtabs Localization
+        TextView tabTemp = findViewById(R.id.tabTempTitle);
+        TextView tabPrecip = findViewById(R.id.tabPrecipTitle);
+        TextView tabWind = findViewById(R.id.tabWindTitle);
+        if (tabTemp != null) tabTemp.setText(isMalay ? "Suhu" : (isPortuguese ? "Temperatura" : "Temperature"));
+        if (tabPrecip != null) tabPrecip.setText(isMalay ? "Kerpasan" : (isPortuguese ? "Precipitação" : "Precipitation"));
+        if (tabWind != null) tabWind.setText(isMalay ? "Angin" : (isPortuguese ? "Vento" : "Wind"));
+
         // 3.5. Middle Section: Google Weather Style Hourly Temperature Curve
         if (hourlyGraphView != null) {
             List<WeatherAirQuality.HourlyItem> hList = (!w.daily.isEmpty() && w.daily.get(0).hourly != null && !w.daily.get(0).hourly.isEmpty())
@@ -341,8 +349,8 @@ public class WeatherActivity extends Activity {
 
                 if (dayView != null) dayView.setText(item.day);
                 if (iconView != null) iconView.setImageResource(getIconDrawable(item.icon, false));
-                if (minTempView != null) minTempView.setText(item.minTemp + "°C");
-                if (maxTempView != null) maxTempView.setText(item.maxTemp + "°C");
+                if (minTempView != null) minTempView.setText("↓ " + item.minTemp + "°C");
+                if (maxTempView != null) maxTempView.setText("↑ " + item.maxTemp + "°C");
 
                 if (i == dayCount - 1) {
                     LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) v.getLayoutParams();
