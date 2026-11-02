@@ -357,11 +357,30 @@ public final class AppUpdateManager {
         }
 
         try {
-            Uri apkUri = FileProvider.getUriForFile(activity, activity.getPackageName() + ".fileprovider", apkFile);
+            apkFile.setReadable(true, false);
+            Uri apkUri;
+            try {
+                apkUri = FileProvider.getUriForFile(activity, activity.getPackageName() + ".fileprovider", apkFile);
+            } catch (Exception fpe) {
+                Log.e(TAG, "FileProvider failed, attempting fallback: " + fpe.getMessage());
+                apkUri = Uri.fromFile(apkFile);
+            }
+
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            try {
+                PackageManager pm = activity.getPackageManager();
+                java.util.List<android.content.pm.ResolveInfo> resInfoList = pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+                for (android.content.pm.ResolveInfo resolveInfo : resInfoList) {
+                    String packageName = resolveInfo.activityInfo.packageName;
+                    activity.grantUriPermission(packageName, apkUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                }
+            } catch (Exception ignored) {
+            }
+
             activity.startActivity(intent);
         } catch (Exception e) {
             Log.e(TAG, "Install error: " + e.getMessage());
