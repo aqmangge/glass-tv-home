@@ -168,7 +168,7 @@ final class WeatherAirQuality {
 
                 // 1. Fetch Complete Weather Forecast (Open-Meteo)
                 String weatherUrl = String.format(Locale.ROOT,
-                        "https://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max&timezone=Asia%%2FKuala_Lumpur&forecast_days=7",
+                        "https://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max&timezone=Asia%%2FKuala_Lumpur&forecast_days=7",
                         lat, lon);
                 JSONObject wJson = fetchJson(weatherUrl);
 
@@ -178,6 +178,13 @@ final class WeatherAirQuality {
                     JSONObject curr = wJson.getJSONObject("current");
                     temp = (int) Math.round(curr.optDouble("temperature_2m", 29.0));
                     code = curr.optInt("weather_code", 2);
+                    boolean day = curr.optInt("is_day", 1) == 1;
+                    double precip = curr.optDouble("precipitation", 0.0);
+                    double rain = curr.optDouble("rain", 0.0);
+                    // Tropical Calibration: Filter false daytime drizzle when actual rain < 0.5mm
+                    if (day && code >= 51 && code <= 55 && precip < 0.5 && rain < 0.4) {
+                        code = 2; // Partly sunny / Sebahagian Cerah
+                    }
                 }
 
                 // 2. Fetch Official Air Quality from Jabatan Alam Sekitar Malaysia (APIMS)

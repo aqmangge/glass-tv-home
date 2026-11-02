@@ -100,9 +100,18 @@ final class HomeWeather {
         boolean day = true;
         try {
             JSONObject now = new JSONObject(get("https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon
-                    + "&current=temperature_2m,weather_code,is_day&timezone=Asia%2FKuala_Lumpur")).getJSONObject("current");
+                    + "&current=temperature_2m,weather_code,is_day,precipitation,rain&timezone=Asia%2FKuala_Lumpur")).getJSONObject("current");
             code = now.optInt("weather_code");
             day = now.optInt("is_day", 1) == 1;
+            double precip = now.optDouble("precipitation", 0.0);
+            double rain = now.optDouble("rain", 0.0);
+
+            // Tropical Calibration: Open-Meteo European models often simulate 0.1-0.3mm trace moisture
+            // as code 51-55 in Malaysia during hot sunny days. If precipitation < 0.5mm, it is partly sunny / clear.
+            if (day && code >= 51 && code <= 55 && precip < 0.5 && rain < 0.4) {
+                code = 2; // Partly sunny / Sebahagian Cerah
+            }
+
             weather = Math.round(now.optDouble("temperature_2m")) + "°  " + describe(code, ctx);
         } catch (Exception e) {
             Log.w(TAG, "weather failed: " + e.getMessage());
