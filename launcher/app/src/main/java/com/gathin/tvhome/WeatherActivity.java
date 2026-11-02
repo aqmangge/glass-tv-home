@@ -268,7 +268,9 @@ public class WeatherActivity extends Activity {
             weatherSubtitle.setText(isMalay ? "Sekarang di" : (isPortuguese ? "Agora em" : "Now in"));
         }
 
+        int tempColor = getConditionTempColor(conditionType, w.temp);
         weatherMainTemp.setText(w.temp + "°C");
+        weatherMainTemp.setTextColor(tempColor);
 
         if (weatherMainCondition != null) {
             if (conditionType == WeatherBackgroundView.ConditionType.SUNNY) {
@@ -301,6 +303,7 @@ public class WeatherActivity extends Activity {
         }
         if (feelsLikeVal != null) {
             feelsLikeVal.setText(w.apparentTemp + "°C");
+            feelsLikeVal.setTextColor(getConditionTempColor(conditionType, w.apparentTemp));
         }
 
         if (humidityLabel != null) {
@@ -308,6 +311,7 @@ public class WeatherActivity extends Activity {
         }
         if (humidityValText != null) {
             humidityValText.setText(w.humidity + "%");
+            humidityValText.setTextColor(0xFF38BDF8); // Water Cyan
         }
 
         if (aqiLabel != null) {
@@ -316,8 +320,10 @@ public class WeatherActivity extends Activity {
         if (aqiValue != null) {
             if (isMalay) {
                 aqiValue.setText(w.aqi + " " + w.aqiStatus);
+                aqiValue.setTextColor(w.aqiColor); // Official JAS APIMS status color
             } else {
                 aqiValue.setText((w.pressure > 0 ? w.pressure : 1010) + "hPa");
+                aqiValue.setTextColor(tempColor);
             }
         }
 
@@ -454,6 +460,27 @@ public class WeatherActivity extends Activity {
 
         // Daytime: clear or mainly clear
         return WeatherBackgroundView.ConditionType.SUNNY;
+    }
+
+    private int getConditionTempColor(WeatherBackgroundView.ConditionType type, int temp) {
+        if (type == WeatherBackgroundView.ConditionType.THUNDERSTORM) {
+            return 0xFFFDE047; // Electric Yellow (#FDE047)
+        } else if (type == WeatherBackgroundView.ConditionType.RAIN || type == WeatherBackgroundView.ConditionType.DRIZZLE) {
+            return 0xFF38BDF8; // Refreshing Rain Sky Blue (#38BDF8)
+        } else if (type == WeatherBackgroundView.ConditionType.NIGHT) {
+            return 0xFFBAE6FD; // Ice Blue Moonlight (#BAE6FD)
+        } else if (type == WeatherBackgroundView.ConditionType.CLOUDY) {
+            return 0xFFE2E8F0; // Modern Silver Slate (#E2E8F0)
+        } else {
+            // SUNNY / CERAH
+            if (temp >= 33) {
+                return 0xFFFF4545; // Coral Flame Red (#FF4545) for heatwave
+            } else if (temp >= 28) {
+                return 0xFFFBBF24; // Solar Amber Gold (#FBBF24) for warm sunshine
+            } else {
+                return 0xFFFACC15; // Bright Sunny Yellow (#FACC15)
+            }
+        }
     }
 
     private int getIconDrawable(String icon, boolean isNight) {

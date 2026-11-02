@@ -50,9 +50,10 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="10dp"
-                    android:layout_height="14dp"
-                    android:layout_marginEnd="5dp"
+                    android:layout_width="12dp"
+                    android:layout_height="16dp"
+                    android:layout_marginEnd="6dp"
+                    android:scaleType="fitCenter"
                     android:src="@drawable/ic_temp_high" />
 
                 <TextView
@@ -77,9 +78,10 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="10dp"
-                    android:layout_height="14dp"
-                    android:layout_marginEnd="5dp"
+                    android:layout_width="12dp"
+                    android:layout_height="16dp"
+                    android:layout_marginEnd="6dp"
+                    android:scaleType="fitCenter"
                     android:src="@drawable/ic_temp_low" />
 
                 <TextView
