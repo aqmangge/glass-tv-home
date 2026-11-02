@@ -2377,7 +2377,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (line.icon != 0) {
             Drawable d = getDrawable(line.icon);
             int px = Math.round(20 * density);
-            d.setBounds(0, 0, px, px);
+            int yOffset = 0;
+            d.setBounds(0, yOffset, px, px + yOffset);
             weatherAirQualityView.setCompoundDrawables(d, null, null, null);
             weatherAirQualityView.setCompoundDrawablePadding(Math.round(8 * density));
         } else {

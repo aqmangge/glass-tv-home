@@ -52,6 +52,7 @@ public class WeatherActivity extends Activity {
 
     private TextView humidityValText;
     private TextView weatherFooter;
+    private HourlyWeatherGraphView hourlyGraphView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +73,7 @@ public class WeatherActivity extends Activity {
 
         hourlyContainer = findViewById(R.id.hourlyContainer);
         dailyContainer = findViewById(R.id.dailyContainer);
+        hourlyGraphView = findViewById(R.id.hourlyGraphView);
 
         windCompassView = findViewById(R.id.windCompassView);
         moonPhaseView = findViewById(R.id.moonPhaseView);
@@ -272,25 +274,14 @@ public class WeatherActivity extends Activity {
         weatherMainTemp.setText(w.temp + "°C");
         weatherMainTemp.setTextColor(tempColor);
 
+        String initialCond = getConditionString(conditionType, w.condition, isMalay, isPortuguese);
         if (weatherMainCondition != null) {
-            if (conditionType == WeatherBackgroundView.ConditionType.SUNNY) {
-                weatherMainCondition.setText(isMalay ? "Cerah" : (isPortuguese ? "Céu Limpo" : "Sunny"));
-            } else if (conditionType == WeatherBackgroundView.ConditionType.NIGHT) {
-                weatherMainCondition.setText(isMalay ? "Malam Tenang" : (isPortuguese ? "Céu Limpo" : "Clear Night"));
-            } else if (conditionType == WeatherBackgroundView.ConditionType.THUNDERSTORM) {
-                weatherMainCondition.setText(isMalay ? "Ribut Petir" : (isPortuguese ? "Tempestade" : "Thunderstorm"));
-            } else if (conditionType == WeatherBackgroundView.ConditionType.RAIN) {
-                weatherMainCondition.setText(isMalay ? "Hujan" : (isPortuguese ? "Chuva" : "Rain"));
-            } else if (conditionType == WeatherBackgroundView.ConditionType.DRIZZLE) {
-                weatherMainCondition.setText(isMalay ? "Gerimis" : (isPortuguese ? "Garoa" : "Drizzle"));
-            } else {
-                weatherMainCondition.setText(isMalay ? "Sebahagian Berawan" : (isPortuguese ? "Alguma nebulosidade" : "Mostly cloudy"));
-            }
+            weatherMainCondition.setText(initialCond);
         }
 
         if (rtlWeatherIcon != null) {
             boolean isNight = (conditionType == WeatherBackgroundView.ConditionType.NIGHT);
-            rtlWeatherIcon.setCondition(w.condition, w.icon, isNight);
+            rtlWeatherIcon.setCondition(initialCond, w.icon, isNight);
         }
 
         if (weatherMainSub != null) {
@@ -327,13 +318,21 @@ public class WeatherActivity extends Activity {
             }
         }
 
+        // 3.5. Middle Section: Google Weather Style Hourly Temperature Curve
+        if (hourlyGraphView != null) {
+            List<WeatherAirQuality.HourlyItem> hList = (!w.daily.isEmpty() && w.daily.get(0).hourly != null && !w.daily.get(0).hourly.isEmpty())
+                    ? w.daily.get(0).hourly : w.hourly;
+            hourlyGraphView.setData(hList, tempColor);
+        }
+
         // 4. Horizontal Daily Forecast Cards (5 Cards matching São Paulo TV UI design)
         if (dailyContainer != null) {
             dailyContainer.removeAllViews();
             LayoutInflater inflater = LayoutInflater.from(this);
             int dayCount = Math.min(5, w.daily.size());
             for (int i = 0; i < dayCount; i++) {
-                WeatherAirQuality.DailyItem item = w.daily.get(i);
+                final int dayIdx = i;
+                final WeatherAirQuality.DailyItem item = w.daily.get(i);
                 View v = inflater.inflate(R.layout.item_weather_forecast_card, dailyContainer, false);
                 TextView dayView = v.findViewById(R.id.dailyDay);
                 ImageView iconView = v.findViewById(R.id.dailyIcon);
@@ -353,7 +352,7 @@ public class WeatherActivity extends Activity {
                     }
                 }
 
-                setupFocusAnimation(v, 1.04f);
+                setupForecastCard(v, w, item, dayIdx, isMalay, isPortuguese);
                 dailyContainer.addView(v);
 
                 if (i == 0) {
@@ -453,12 +452,124 @@ public class WeatherActivity extends Activity {
             return WeatherBackgroundView.ConditionType.NIGHT;
         }
 
-        // Cloudy / Mendung (code 3)
-        if (cond.contains("cloud") || cond.contains("mendung") || cond.contains("overcast") || icon.contains("☁")) {
+        // Cloudy / Mendung (code 1, 2, 3)
+        if (cond.contains("cloud") || cond.contains("mendung") || cond.contains("berawan") || cond.contains("overcast") || icon.contains("☁") || icon.contains("⛅")) {
             return WeatherBackgroundView.ConditionType.CLOUDY;
         }
 
         // Daytime: clear or mainly clear
+        return WeatherBackgroundView.ConditionType.SUNNY;
+    }
+
+    private String getConditionString(WeatherBackgroundView.ConditionType type, String rawCond, boolean isMalay, boolean isPortuguese) {
+        if (type == WeatherBackgroundView.ConditionType.THUNDERSTORM) {
+            return isMalay ? "Ribut Petir" : (isPortuguese ? "Tempestade" : "Thunderstorm");
+        } else if (type == WeatherBackgroundView.ConditionType.RAIN) {
+            return isMalay ? "Hujan" : (isPortuguese ? "Chuva" : "Rain");
+        } else if (type == WeatherBackgroundView.ConditionType.DRIZZLE) {
+            return isMalay ? "Gerimis" : (isPortuguese ? "Garoa" : "Drizzle");
+        } else if (type == WeatherBackgroundView.ConditionType.NIGHT) {
+            return isMalay ? "Malam Tenang" : (isPortuguese ? "Céu Limpo" : "Clear Night");
+        } else if (type == WeatherBackgroundView.ConditionType.CLOUDY) {
+            return isMalay ? "Sebahagiannya mendung" : (isPortuguese ? "Alguma nebulosidade" : "Mostly cloudy");
+        } else {
+            return isMalay ? "Cerah" : (isPortuguese ? "Céu Limpo" : "Sunny");
+        }
+    }
+
+    private void setupForecastCard(View v, WeatherAirQuality.FullWeather w, WeatherAirQuality.DailyItem item, int dayIndex, boolean isMalay, boolean isPortuguese) {
+        v.setOnFocusChangeListener((view, hasFocus) -> {
+            float s = hasFocus ? 1.04f : 1.0f;
+            float elev = hasFocus ? 8f : 0f;
+            view.animate().scaleX(s).scaleY(s).translationZ(elev).setDuration(160).start();
+            if (hasFocus) {
+                updateHeroForDay(w, item, dayIndex, isMalay, isPortuguese);
+            }
+        });
+        v.setOnClickListener(view -> updateHeroForDay(w, item, dayIndex, isMalay, isPortuguese));
+    }
+
+    private void updateHeroForDay(WeatherAirQuality.FullWeather w, WeatherAirQuality.DailyItem item, int dayIndex, boolean isMalay, boolean isPortuguese) {
+        if (item == null) return;
+
+        int temp = (dayIndex == 0) ? w.temp : item.maxTemp;
+        int apparent = (dayIndex == 0) ? w.apparentTemp : (item.maxTemp + 3);
+        int high = (dayIndex == 0) ? w.highTemp : item.maxTemp;
+        int low = (dayIndex == 0) ? w.lowTemp : item.minTemp;
+
+        WeatherBackgroundView.ConditionType cType;
+        String conditionText;
+
+        if (dayIndex == 0) {
+            cType = determineCondition(w);
+            conditionText = getConditionString(cType, w.condition, isMalay, isPortuguese);
+            if (weatherSubtitle != null) {
+                weatherSubtitle.setText(isMalay ? "Sekarang di" : (isPortuguese ? "Agora em" : "Now in"));
+            }
+        } else {
+            cType = mapCodeToConditionType(item.code);
+            conditionText = getConditionString(cType, null, isMalay, isPortuguese);
+            if (weatherSubtitle != null) {
+                weatherSubtitle.setText(item.day + (isPortuguese ? " em" : (isMalay ? " di" : " in")));
+            }
+        }
+
+        int tempColor = getConditionTempColor(cType, temp);
+        if (weatherMainTemp != null) {
+            weatherMainTemp.setText(temp + "°C");
+            weatherMainTemp.setTextColor(tempColor);
+        }
+
+        if (weatherMainCondition != null) {
+            weatherMainCondition.setText(conditionText);
+        }
+
+        if (rtlWeatherIcon != null) {
+            boolean isNight = (dayIndex == 0 && cType == WeatherBackgroundView.ConditionType.NIGHT);
+            rtlWeatherIcon.setCondition(conditionText, item.icon, isNight);
+        }
+
+        if (weatherMainSub != null) {
+            weatherMainSub.setText(String.format(Locale.ROOT, "Max: %d°C  ·  Min: %d°C", high, low));
+        }
+
+        if (feelsLikeVal != null) {
+            feelsLikeVal.setText(apparent + "°C");
+            feelsLikeVal.setTextColor(getConditionTempColor(cType, apparent));
+        }
+
+        if (humidityLabel != null) {
+            if (dayIndex == 0) {
+                humidityLabel.setText(isMalay ? "KELEMBAPAN" : (isPortuguese ? "UMIDADE" : "HUMIDITY"));
+            } else {
+                humidityLabel.setText(isMalay ? "KEBARANGKALIAN HUJAN" : (isPortuguese ? "CHANCE DE CHUVA" : "RAIN CHANCE"));
+            }
+        }
+
+        if (humidityValText != null) {
+            if (dayIndex == 0) {
+                humidityValText.setText(w.humidity + "%");
+            } else {
+                humidityValText.setText(item.rainChance + "%");
+            }
+            humidityValText.setTextColor(0xFF38BDF8);
+        }
+
+        if (hourlyGraphView != null) {
+            List<WeatherAirQuality.HourlyItem> hList = (item.hourly != null && !item.hourly.isEmpty()) ? item.hourly : w.hourly;
+            hourlyGraphView.setData(hList, tempColor);
+        }
+
+        if (weatherBgView != null) {
+            weatherBgView.setCondition(cType);
+        }
+    }
+
+    private WeatherBackgroundView.ConditionType mapCodeToConditionType(int code) {
+        if (code >= 95) return WeatherBackgroundView.ConditionType.THUNDERSTORM;
+        if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return WeatherBackgroundView.ConditionType.RAIN;
+        if (code >= 51 && code <= 57) return WeatherBackgroundView.ConditionType.DRIZZLE;
+        if (code == 1 || code == 2 || code == 3) return WeatherBackgroundView.ConditionType.CLOUDY;
         return WeatherBackgroundView.ConditionType.SUNNY;
     }
 
@@ -470,7 +581,7 @@ public class WeatherActivity extends Activity {
         } else if (type == WeatherBackgroundView.ConditionType.NIGHT) {
             return 0xFFBAE6FD; // Ice Blue Moonlight (#BAE6FD)
         } else if (type == WeatherBackgroundView.ConditionType.CLOUDY) {
-            return 0xFFE2E8F0; // Modern Silver Slate (#E2E8F0)
+            return (temp >= 28) ? 0xFFFBBF24 : 0xFFE2E8F0; // Amber Gold or Slate
         } else {
             // SUNNY / CERAH
             if (temp >= 33) {
