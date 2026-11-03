@@ -161,6 +161,9 @@ public class AvatarThemeManager {
         String cacheKey = String.format(Locale.ROOT, "char_avatar_%08x_%08x_f%d", bgColor, charColor, faceIndex);
         String themedJson = buildThemedJson(context, bgColor, charColor);
 
+        boolean animEnabled = !context.getSharedPreferences("theme_prefs", Context.MODE_PRIVATE)
+                .getBoolean("reduced_motion", false);
+
         LottieCompositionFactory.fromJsonString(themedJson, cacheKey).addListener(composition -> {
             view.setComposition(composition);
             if (faceIndex >= 1 && faceIndex <= 8) {
@@ -170,9 +173,14 @@ public class AvatarThemeManager {
             } else {
                 view.setMinAndMaxFrame(0, 4608);
             }
-            view.setRepeatCount(LottieDrawable.INFINITE);
-            view.setRepeatMode(LottieDrawable.RESTART);
-            view.playAnimation();
+            if (animEnabled) {
+                view.setRepeatCount(LottieDrawable.INFINITE);
+                view.setRepeatMode(LottieDrawable.RESTART);
+                view.playAnimation();
+            } else {
+                view.setFrame(faceIndex >= 1 && faceIndex <= 8 ? (faceIndex - 1) * 576 : 0);
+                view.pauseAnimation();
+            }
         });
     }
 }

@@ -42,6 +42,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.text.Layout;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextPaint;
@@ -52,6 +53,11 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
+import android.animation.ValueAnimator;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.widget.FrameLayout;
@@ -185,6 +191,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private TextView shamsiDate;
     private TextView prayerTimesView;
     private TextView weatherAirQualityView;
+    private View weatherWarningPill;
+    private ImageView weatherWarningIcon;
+    private TextView weatherWarningText;
+    private ObjectAnimator warningIconAnimator;
     private View nowPlayingCard;
     private ImageView cardAlbumArt;
     private View cardTrackInfo;
@@ -354,6 +364,128 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
     }
 
+    public int getDockColumns() {
+        return COLUMNS;
+    }
+
+    public void setDockColumns(int count) {
+        if (count < 3 || count > 8) return;
+        COLUMNS = count;
+        getSharedPreferences("theme_prefs", MODE_PRIVATE).edit().putInt("dock_columns", count).apply();
+
+        if (grid != null && grid.getLayoutManager() instanceof GridLayoutManager) {
+            ((GridLayoutManager) grid.getLayoutManager()).setSpanCount(COLUMNS);
+        }
+
+        if (grid != null) {
+            if (tray != null) {
+                grid.removeItemDecoration(tray);
+            }
+            tray = new DockDecoration(COLUMNS, density);
+            tray.setGlider(glider);
+            grid.addItemDecoration(tray);
+            grid.getRecycledViewPool().clear();
+        }
+
+        Config cfg = Config.load(this);
+        adapter = new AppAdapter(this, this, COLUMNS, cfg);
+        if (grid != null) {
+            grid.setAdapter(adapter);
+        }
+
+        reloadTiles();
+        parkDock();
+
+        root.post(() -> {
+            alignTopButtons();
+            if (grid != null) {
+                grid.invalidateItemDecorations();
+                grid.requestLayout();
+            }
+            restoreFocus();
+        });
+    }
+
+    public boolean isAnimationsEnabled() {
+        return !reducedMotion;
+    }
+
+    public void setAnimationsEnabled(boolean enabled) {
+        reducedMotion = !enabled;
+        getSharedPreferences("theme_prefs", MODE_PRIVATE).edit().putBoolean("reduced_motion", !enabled).apply();
+        if (glider != null) {
+            glider.setReducedMotion(!enabled);
+        }
+        if (adapter != null) {
+            adapter.setReducedMotion(!enabled);
+        }
+        if (weatherWarningPill != null && weatherWarningPill.getVisibility() == View.VISIBLE) {
+            if (enabled) {
+                startWarningAnimation();
+            } else {
+                stopWarningAnimation();
+            }
+        }
+        updateWeatherOverlay(HomeWeather.last(this));
+        updateTopBarUserIcon();
+    }
+
+    public boolean isWeatherWarningEnabled() {
+        return getSharedPreferences("theme_prefs", MODE_PRIVATE).getBoolean("weather_warning_enabled", true);
+    }
+
+    public void setWeatherWarningEnabled(boolean enabled) {
+        getSharedPreferences("theme_prefs", MODE_PRIVATE).edit().putBoolean("weather_warning_enabled", enabled).apply();
+        updateWeatherWarning();
+    }
+
+    public boolean isWeatherWarningTestMode() {
+        return getSharedPreferences("theme_prefs", MODE_PRIVATE).getBoolean("weather_warning_test_mode", false);
+    }
+
+    public void setWeatherWarningTestMode(boolean test) {
+        android.content.SharedPreferences.Editor edit = getSharedPreferences("theme_prefs", MODE_PRIVATE).edit()
+                .putBoolean("weather_warning_test_mode", test);
+        if (test) {
+            edit.putLong("weather_warning_dismissed_ts", 0);
+        }
+        edit.apply();
+        updateWeatherWarning();
+    }
+
+    void showDockColumnsDialog(Runnable onDismiss) {
+        SoundEffects.playSelect();
+        final String[] columnOptions = new String[]{
+                "4 Aplikasi (Ikon Besar & Luas)",
+                "5 Aplikasi (Seimbang • Pilihan Asal)",
+                "6 Aplikasi (Maksimum 6 Ikon Dok)"
+        };
+        final int[] columnValues = new int[]{4, 5, 6};
+
+        int currentCols = getDockColumns();
+        int selectedIndex = 1; // default to 5
+        for (int i = 0; i < columnValues.length; i++) {
+            if (columnValues[i] == currentCols) {
+                selectedIndex = i;
+                break;
+            }
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_TvHome_GlassDialog);
+        builder.setTitle("📱 Bilangan Aplikasi Dok (Maksimum 6)");
+        builder.setSingleChoiceItems(columnOptions, selectedIndex, (dialog, which) -> {
+            dialog.dismiss();
+            int chosen = columnValues[which];
+            setDockColumns(chosen);
+            Toast.makeText(MainActivity.this, "Kapasiti dok ditukar kepada " + chosen + " aplikasi.", Toast.LENGTH_SHORT).show();
+            if (onDismiss != null) onDismiss.run();
+        });
+        builder.setNegativeButton(AppLanguage.strCancel(this), (dialog, which) -> dialog.dismiss());
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        styleGlassDialog(dialog);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -364,7 +496,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // config.xml, overlaid by config.json from a pushed theme (see Config and tools/theme.sh).
         Config cfg = Config.load(this);
         COLUMNS = cfg.columns;
-        reducedMotion = cfg.reducedMotion;
+        boolean lowSpec = DevicePerformance.isLowSpec(this);
+        reducedMotion = getSharedPreferences("theme_prefs", MODE_PRIVATE)
+                .getBoolean("reduced_motion", cfg.reducedMotion || lowSpec);
         liveTvPkg = cfg.liveTvPackage;
         liveTvAction = cfg.liveTvAction;
         inputAction = cfg.inputAction;
@@ -471,6 +605,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                     return true;
                 }
                 if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                    View warningContent = findViewById(R.id.weatherWarningContent);
+                    if (weatherWarningPill != null && weatherWarningPill.getVisibility() == View.VISIBLE) {
+                        if (warningContent != null) warningContent.requestFocus();
+                        else weatherWarningPill.requestFocus();
+                        return true;
+                    }
                     View target = (btnInputs != null && btnInputs.getVisibility() == View.VISIBLE) ? btnInputs
                             : (btnWifi != null && btnWifi.getVisibility() == View.VISIBLE) ? btnWifi
                             : findViewById(R.id.btnSettings);
@@ -486,6 +626,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 v.animate().scaleX(scale).scaleY(scale).setDuration(150).start();
             });
         }
+        setupWeatherWarningPill();
         updateWeatherAqi();
         WeatherAirQuality.syncIfDue(this, this::updateWeatherAqi);
 
@@ -580,6 +721,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 ayahBlock.setOnClickListener(v -> {
                     SoundEffects.playSelect();
                     showIslamicDetailDialog();
+                });
+                ayahBlock.setOnLongClickListener(v -> {
+                    SoundEffects.playSelect();
+                    showDisplayModeChoiceDialog();
+                    return true;
                 });
                 ayahBlock.setOnFocusChangeListener((v, hasFocus) -> {
                     if (hasFocus) SoundEffects.playNav();
@@ -693,6 +839,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         });
         grid.setHasFixedSize(true);
         grid.setItemAnimator(null);
+        grid.setItemViewCacheSize(12);
         tray = new DockDecoration(COLUMNS, density);
         grid.addItemDecoration(tray);
         // The top-right buttons line up with the dock, which is only known once the tiles are laid out.
@@ -717,7 +864,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             glider.addCompanion(pill);
             Backdrop.watch(pill);
             pill.setOnFocusChangeListener((v, has) -> {
-                if (has) moveTopHighlight(v);
+                if (has) {
+                    moveTopHighlight(v);
+                    if (v.getId() == R.id.btnCandyBox) {
+                        v.animate().scaleX(1.08f).scaleY(1.08f).setDuration(150).start();
+                    }
+                } else {
+                    if (v.getId() == R.id.btnCandyBox) {
+                        v.animate().scaleX(1.0f).scaleY(1.0f).setDuration(150).start();
+                    }
+                }
             });
         }
         if (prayerTimesView != null) {
@@ -1255,6 +1411,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             showIslamicDetailDialog();
             return;
         }
+        if (intent != null && intent.getBooleanExtra("open_display_mode_choice", false)) {
+            if (screensaverActive) dismissScreensaver();
+            showDisplayModeChoiceDialog();
+            return;
+        }
         if (intent != null && intent.getBooleanExtra("open_clean_cache", false)) {
             if (screensaverActive) dismissScreensaver();
             showCleanTvCacheDialog();
@@ -1477,6 +1638,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        stopWarningAnimation();
         if (sInstance != null && sInstance.get() == this) {
             sInstance = null;
         }
@@ -2001,6 +2163,13 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** Runs the glass through the same colour blend as the room's TransitionDrawable. */
     private void blendGlassGlow(int from, long ms) {
         if (glowBlend != null) glowBlend.cancel();
+        if (reducedMotion || DevicePerformance.isLowSpec(this)) {
+            // Immediate glow switch on low-spec hardware avoids heavy 60fps glass invalidation loop
+            glowFrom = from;
+            glowMix = 1f;
+            syncGlassGlow();
+            return;
+        }
         glowFrom = from;
         glowMix = 0f;
         glowBlend = android.animation.ValueAnimator.ofFloat(0f, 1f);
@@ -2424,6 +2593,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         } else if (weatherAirQualityView != null) {
             weatherAirQualityView.setText(WeatherAirQuality.getFormatted(this));
         }
+        updateWeatherWarning();
         updateHomeWeather();
     }
 
@@ -2466,6 +2636,305 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             weatherAirQualityView.setCompoundDrawables(null, null, null, null);
         }
         updateWeatherOverlay(line);
+        updateWeatherWarning();
+    }
+
+    private void setupWeatherWarningPill() {
+        weatherWarningPill = findViewById(R.id.weatherWarningPill);
+        weatherWarningIcon = findViewById(R.id.weatherWarningIcon);
+        weatherWarningText = findViewById(R.id.weatherWarningText);
+        View weatherWarningContent = findViewById(R.id.weatherWarningContent);
+        View btnWarningDismiss = findViewById(R.id.btnWarningDismiss);
+
+        if (weatherWarningContent != null) {
+            weatherWarningContent.setOnClickListener(v -> {
+                SoundEffects.playSelect();
+                showWeatherWarningDialog();
+            });
+            weatherWarningContent.setOnFocusChangeListener((v, hasFocus) -> {
+                float scale = hasFocus ? 1.03f : 1.0f;
+                v.animate().scaleX(scale).scaleY(scale).setDuration(140).start();
+                if (weatherWarningText != null) {
+                    weatherWarningText.setSelected(hasFocus);
+                }
+            });
+            weatherWarningContent.setOnKeyListener((v, keyCode, event) -> {
+                if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
+                if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
+                    if (weatherAirQualityView != null && weatherAirQualityView.getVisibility() == View.VISIBLE) {
+                        weatherAirQualityView.requestFocus();
+                        return true;
+                    }
+                }
+                if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                    if (btnWarningDismiss != null && btnWarningDismiss.getVisibility() == View.VISIBLE) {
+                        btnWarningDismiss.requestFocus();
+                        return true;
+                    }
+                    View target = (btnInputs != null && btnInputs.getVisibility() == View.VISIBLE) ? btnInputs
+                            : (btnWifi != null && btnWifi.getVisibility() == View.VISIBLE) ? btnWifi
+                            : findViewById(R.id.btnSettings);
+                    if (target != null) {
+                        target.requestFocus();
+                        return true;
+                    }
+                }
+                if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                    if (nowPlayingCard != null && nowPlayingCard.getVisibility() == View.VISIBLE) {
+                        if (cardTrackInfo != null) cardTrackInfo.requestFocus();
+                        else nowPlayingCard.requestFocus();
+                        return true;
+                    }
+                    focusTile(0);
+                    return true;
+                }
+                if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+                    View target = (btnInputs != null && btnInputs.getVisibility() == View.VISIBLE) ? btnInputs
+                            : (btnWifi != null && btnWifi.getVisibility() == View.VISIBLE) ? btnWifi
+                            : findViewById(R.id.btnSettings);
+                    if (target != null) {
+                        target.requestFocus();
+                        return true;
+                    }
+                }
+                return false;
+            });
+        }
+
+        if (btnWarningDismiss != null) {
+            btnWarningDismiss.setOnClickListener(v -> {
+                SoundEffects.playSelect();
+                dismissWeatherWarning();
+            });
+            btnWarningDismiss.setOnFocusChangeListener((v, hasFocus) -> {
+                float scale = hasFocus ? 1.15f : 1.0f;
+                v.animate().scaleX(scale).scaleY(scale).setDuration(120).start();
+            });
+            btnWarningDismiss.setOnKeyListener((v, keyCode, event) -> {
+                if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
+                if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
+                    if (weatherWarningContent != null) {
+                        weatherWarningContent.requestFocus();
+                        return true;
+                    }
+                }
+                if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                    View target = (btnInputs != null && btnInputs.getVisibility() == View.VISIBLE) ? btnInputs
+                            : (btnWifi != null && btnWifi.getVisibility() == View.VISIBLE) ? btnWifi
+                            : findViewById(R.id.btnSettings);
+                    if (target != null) {
+                        target.requestFocus();
+                        return true;
+                    }
+                }
+                if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                    if (nowPlayingCard != null && nowPlayingCard.getVisibility() == View.VISIBLE) {
+                        if (cardTrackInfo != null) cardTrackInfo.requestFocus();
+                        else nowPlayingCard.requestFocus();
+                        return true;
+                    }
+                    focusTile(0);
+                    return true;
+                }
+                if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+                    View target = (btnInputs != null && btnInputs.getVisibility() == View.VISIBLE) ? btnInputs
+                            : (btnWifi != null && btnWifi.getVisibility() == View.VISIBLE) ? btnWifi
+                            : findViewById(R.id.btnSettings);
+                    if (target != null) {
+                        target.requestFocus();
+                        return true;
+                    }
+                }
+                return false;
+            });
+        }
+    }
+
+    public void dismissWeatherWarning() {
+        WeatherAirQuality.WeatherAlert alert = WeatherAirQuality.getLastAlert(this);
+        long ts = (alert != null && alert.timestamp > 0) ? alert.timestamp : System.currentTimeMillis();
+        getSharedPreferences("theme_prefs", MODE_PRIVATE).edit()
+                .putLong("weather_warning_dismissed_ts", ts)
+                .putBoolean("weather_warning_test_mode", false)
+                .apply();
+        if (weatherWarningPill != null) {
+            weatherWarningPill.setVisibility(View.GONE);
+        }
+        stopWarningAnimation();
+        Toast.makeText(this, "Amaran cuaca ditutup", Toast.LENGTH_SHORT).show();
+    }
+
+    void updateWeatherWarning() {
+        if (weatherWarningPill == null || weatherWarningText == null) return;
+        boolean enabled = isWeatherWarningEnabled();
+        boolean testMode = isWeatherWarningTestMode();
+        WeatherAirQuality.WeatherAlert alert = WeatherAirQuality.getLastAlert(this);
+
+        if (!enabled) {
+            weatherWarningPill.setVisibility(View.GONE);
+            stopWarningAnimation();
+            return;
+        }
+
+        if (testMode && alert == null) {
+            alert = WeatherAirQuality.getTestAlert(this);
+        }
+
+        long dismissedTs = getSharedPreferences("theme_prefs", MODE_PRIVATE).getLong("weather_warning_dismissed_ts", 0);
+        if (alert != null && alert.timestamp > 0 && alert.timestamp <= dismissedTs && !testMode) {
+            weatherWarningPill.setVisibility(View.GONE);
+            stopWarningAnimation();
+            return;
+        }
+
+        if (alert != null && alert.active && !alert.title.isEmpty()) {
+            weatherWarningText.setText(alert.title);
+            weatherWarningText.setSelected(true);
+            weatherWarningPill.setVisibility(View.VISIBLE);
+            if (isAnimationsEnabled()) {
+                startWarningAnimation();
+            } else {
+                stopWarningAnimation();
+            }
+        } else {
+            weatherWarningPill.setVisibility(View.GONE);
+            stopWarningAnimation();
+        }
+    }
+
+    private void startWarningAnimation() {
+        if (weatherWarningIcon == null) return;
+        stopWarningAnimation();
+        if (!isAnimationsEnabled()) {
+            weatherWarningIcon.setScaleX(1.0f);
+            weatherWarningIcon.setScaleY(1.0f);
+            weatherWarningIcon.setAlpha(1.0f);
+            return;
+        }
+        PropertyValuesHolder pvhX = PropertyValuesHolder.ofFloat(View.SCALE_X, 1.0f, 1.25f);
+        PropertyValuesHolder pvhY = PropertyValuesHolder.ofFloat(View.SCALE_Y, 1.0f, 1.25f);
+        PropertyValuesHolder pvhAlpha = PropertyValuesHolder.ofFloat(View.ALPHA, 1.0f, 0.65f);
+
+        warningIconAnimator = ObjectAnimator.ofPropertyValuesHolder(weatherWarningIcon, pvhX, pvhY, pvhAlpha);
+        warningIconAnimator.setDuration(850);
+        warningIconAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        warningIconAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        warningIconAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+        warningIconAnimator.start();
+    }
+
+    private void stopWarningAnimation() {
+        if (warningIconAnimator != null) {
+            warningIconAnimator.cancel();
+            warningIconAnimator = null;
+        }
+        if (weatherWarningIcon != null) {
+            weatherWarningIcon.setScaleX(1.0f);
+            weatherWarningIcon.setScaleY(1.0f);
+            weatherWarningIcon.setAlpha(1.0f);
+        }
+    }
+
+    void showWeatherWarningDialog() {
+        WeatherAirQuality.WeatherAlert alert = WeatherAirQuality.getLastAlert(this);
+        if (alert == null && isWeatherWarningTestMode()) {
+            alert = WeatherAirQuality.getTestAlert(this);
+        }
+        if (alert == null) {
+            Toast.makeText(this, "Tiada amaran cuaca aktif pada masa ini.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final Dialog dialog = new Dialog(this, R.style.Theme_TvHome_GlassDialog);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_weather_warning_16_9);
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            android.view.WindowManager.LayoutParams lp = new android.view.WindowManager.LayoutParams();
+            lp.copyFrom(window.getAttributes());
+            lp.width = Math.round(580 * density);
+            lp.height = Math.round(326 * density);
+            lp.gravity = Gravity.CENTER;
+            window.setAttributes(lp);
+        }
+
+        TextView titleView = dialog.findViewById(R.id.dlgWarningTitle);
+        TextView timeView = dialog.findViewById(R.id.dlgWarningTime);
+        TextView sourceView = dialog.findViewById(R.id.dlgWarningSource);
+        TextView detailsView = dialog.findViewById(R.id.dlgWarningDetails);
+        TextView instructionView = dialog.findViewById(R.id.dlgWarningInstruction);
+        TextView btnOpenWeather = dialog.findViewById(R.id.btnDlgOpenWeather);
+        TextView btnClose = dialog.findViewById(R.id.btnDlgClose);
+        View btnDismissX = dialog.findViewById(R.id.btnDlgDismissX);
+
+        if (titleView != null) {
+            titleView.setText(!alert.fullTitle.isEmpty() ? alert.fullTitle : alert.title);
+        }
+        if (timeView != null) {
+            if (!alert.timeSpan.isEmpty()) {
+                timeView.setText("⏳ " + alert.timeSpan);
+                timeView.setVisibility(View.VISIBLE);
+            } else {
+                timeView.setVisibility(View.GONE);
+            }
+        }
+        if (sourceView != null) {
+            sourceView.setText("📡 Sumber: " + alert.source);
+        }
+        if (detailsView != null) {
+            detailsView.setText(!alert.details.isEmpty() ? alert.details : "Tiada butiran lanjut dicatatkan.");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                detailsView.setJustificationMode(Layout.JUSTIFICATION_MODE_INTER_WORD);
+            }
+        }
+        if (instructionView != null) {
+            instructionView.setText(!alert.instruction.isEmpty() ? alert.instruction : "Sila ambil langkah berjaga-jaga.");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                instructionView.setJustificationMode(Layout.JUSTIFICATION_MODE_INTER_WORD);
+            }
+        }
+
+        if (btnDismissX != null) {
+            btnDismissX.setOnClickListener(v -> {
+                SoundEffects.playSelect();
+                dialog.dismiss();
+                dismissWeatherWarning();
+            });
+            btnDismissX.setOnFocusChangeListener((v, hasFocus) -> {
+                float scale = hasFocus ? 1.15f : 1.0f;
+                v.animate().scaleX(scale).scaleY(scale).setDuration(120).start();
+            });
+        }
+
+        if (btnOpenWeather != null) {
+            btnOpenWeather.setOnClickListener(v -> {
+                SoundEffects.playSelect();
+                dialog.dismiss();
+                startActivity(new Intent(MainActivity.this, WeatherActivity.class));
+            });
+            btnOpenWeather.setOnFocusChangeListener((v, hasFocus) -> {
+                float scale = hasFocus ? 1.03f : 1.0f;
+                v.animate().scaleX(scale).scaleY(scale).setDuration(120).start();
+            });
+        }
+
+        if (btnClose != null) {
+            btnClose.setOnClickListener(v -> {
+                SoundEffects.playSelect();
+                dialog.dismiss();
+            });
+            btnClose.setOnFocusChangeListener((v, hasFocus) -> {
+                float scale = hasFocus ? 1.03f : 1.0f;
+                v.animate().scaleX(scale).scaleY(scale).setDuration(120).start();
+            });
+        }
+
+        dialog.show();
+        if (btnOpenWeather != null) {
+            btnOpenWeather.requestFocus();
+        }
     }
 
     public void ensureWeatherOverlayView() {
@@ -2473,12 +2942,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             weatherOverlayView = new WeatherBackgroundView(this);
             weatherOverlayView.setOverlayMode(true);
             try {
-                android.app.ActivityManager am = (android.app.ActivityManager) getSystemService(ACTIVITY_SERVICE);
-                android.app.ActivityManager.MemoryInfo mi = new android.app.ActivityManager.MemoryInfo();
-                if (am != null) {
-                    am.getMemoryInfo(mi);
-                    if (mi.totalMem <= 1610612736L) {
-                        weatherOverlayView.setLowSpecMode(true);
+                if (DevicePerformance.isLowSpec(this)) {
+                    weatherOverlayView.setLowSpecMode(true);
+                } else {
+                    android.app.ActivityManager am = (android.app.ActivityManager) getSystemService(ACTIVITY_SERVICE);
+                    android.app.ActivityManager.MemoryInfo mi = new android.app.ActivityManager.MemoryInfo();
+                    if (am != null) {
+                        am.getMemoryInfo(mi);
+                        if (mi.totalMem <= 2362232012L) {
+                            weatherOverlayView.setLowSpecMode(true);
+                        }
                     }
                 }
             } catch (Exception ignored) {}
@@ -2493,8 +2966,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         ensureWeatherOverlayView();
         if (weatherOverlayView == null) return;
 
+        boolean animEnabled = isAnimationsEnabled();
         boolean enabled = getSharedPreferences("wallpaper_prefs", MODE_PRIVATE).getBoolean("dynamic_weather_overlay", true);
-        if (!enabled) {
+        if (!enabled || !animEnabled) {
             weatherOverlayView.setCondition(WeatherBackgroundView.ConditionType.NONE);
             weatherOverlayView.stopAnimation();
             weatherOverlayView.setVisibility(View.GONE);
@@ -2743,38 +3217,156 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     }
 
     void showIslamicDetailDialog() {
+        if (isFinishing() || isDestroyed()) return;
+        final Dialog dialog = new Dialog(this, R.style.Theme_TvHome_GlassDialog);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_islamic_detail_16_9);
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+            lp.copyFrom(window.getAttributes());
+            lp.width = Math.round(640 * density);
+            lp.height = Math.round(360 * density);
+            lp.gravity = Gravity.CENTER;
+            window.setAttributes(lp);
+        }
+
+        ImageView iconView = dialog.findViewById(R.id.dlgDetailIcon);
+        TextView badgeView = dialog.findViewById(R.id.dlgDetailBadge);
+        TextView titleView = dialog.findViewById(R.id.dlgDetailTitle);
+        TextView metaView = dialog.findViewById(R.id.dlgDetailMeta);
+        TextView sourceView = dialog.findViewById(R.id.dlgDetailSource);
+        TextView btnSwitch = dialog.findViewById(R.id.btnDlgDetailSwitch);
+        TextView btnChoices = dialog.findViewById(R.id.btnDlgDetailChoices);
+        TextView btnClose = dialog.findViewById(R.id.btnDlgDetailClose);
+        View btnDismissX = dialog.findViewById(R.id.btnDlgDetailDismissX);
+
+        TextView arabicView = dialog.findViewById(R.id.dlgDetailArabic);
+        TextView subtitleView = dialog.findViewById(R.id.dlgDetailSubtitle);
+        TextView bodyView = dialog.findViewById(R.id.dlgDetailBody);
+
+        if (bodyView != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            bodyView.setJustificationMode(Layout.JUSTIFICATION_MODE_INTER_WORD);
+        }
+
         int mode = MinbarManager.getDisplayMode(this);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_TvHome_GlassDialog);
+
         if (mode == MinbarManager.MODE_MINBAR) {
             MinbarManager.KhutbahItem k = MinbarManager.getKhutbah(this);
-            builder.setTitle("🕌 " + k.title);
-            String message = "📍 Sumber: " + k.authority + (k.date != null && !k.date.isEmpty() ? "  •  " + k.date : "") + "\n\n"
-                    + (k.subtitle != null && !k.subtitle.isEmpty() ? "📌 " + k.subtitle + "\n\n" : "")
-                    + k.excerpt;
-            builder.setMessage(message);
-            builder.setPositiveButton("Tukar ke Doa Harian", (d, w) -> {
-                MinbarManager.setDisplayMode(MainActivity.this, MinbarManager.MODE_DOA);
-                SoundEffects.playSelect();
-                updateIslamicShelf();
-                Toast.makeText(MainActivity.this, "Paparan Ditukar ke Doa Harian", Toast.LENGTH_SHORT).show();
-            });
+            if (iconView != null) iconView.setImageResource(R.drawable.ic_mosque);
+            if (badgeView != null) {
+                badgeView.setText("KHUTBAH MINBAR");
+                badgeView.setTextColor(0xFF67E8F9);
+            }
+            if (titleView != null) titleView.setText(k != null && k.title != null ? k.title : "Khutbah Jumaat");
+            if (metaView != null) {
+                String dateStr = (k != null && k.date != null && !k.date.isEmpty()) ? k.date : "Mingguan";
+                metaView.setText("📅 " + dateStr);
+                metaView.setVisibility(View.VISIBLE);
+            }
+            if (sourceView != null) {
+                sourceView.setText("📍 Sumber: " + (k != null && k.authority != null ? k.authority : "Jabatan Agama Islam"));
+            }
+            if (btnSwitch != null) {
+                btnSwitch.setText("📖 Tukar ke Doa Harian");
+            }
+            if (arabicView != null) arabicView.setVisibility(View.GONE);
+            if (subtitleView != null) {
+                if (k != null && k.subtitle != null && !k.subtitle.trim().isEmpty()) {
+                    subtitleView.setText("📌 " + k.subtitle);
+                    subtitleView.setVisibility(View.VISIBLE);
+                } else {
+                    subtitleView.setVisibility(View.GONE);
+                }
+            }
+            if (bodyView != null) {
+                bodyView.setText(k != null && k.excerpt != null ? k.excerpt : "");
+            }
         } else {
             WeeklyAyah.Ayah a = WeeklyAyah.stored(this);
             if (a == null) a = WeeklyAyah.last(this);
-            builder.setTitle("📖 " + a.reference);
-            String message = a.arabic + "\n\n" + a.translation(AppLanguage.getLanguage(this));
-            builder.setMessage(message);
-            builder.setPositiveButton("Tukar ke Teks Minbar", (d, w) -> {
-                MinbarManager.setDisplayMode(MainActivity.this, MinbarManager.MODE_MINBAR);
+            if (iconView != null) iconView.setImageResource(R.drawable.ic_rehal);
+            if (badgeView != null) {
+                badgeView.setText("DOA HARIAN");
+                badgeView.setTextColor(0xFFFFD54F);
+            }
+            if (titleView != null) titleView.setText(a != null ? a.reference : "Ayat Al-Quran");
+            if (metaView != null) {
+                metaView.setText("📖 Ayat Pilihan Hari Ini");
+                metaView.setVisibility(View.VISIBLE);
+            }
+            if (sourceView != null) {
+                sourceView.setText("📍 Sumber: Quran.com • Basmeih");
+            }
+            if (btnSwitch != null) {
+                btnSwitch.setText("🕌 Tukar ke Teks Minbar");
+            }
+            if (arabicView != null) {
+                if (a != null && a.arabic != null && !a.arabic.isEmpty()) {
+                    arabicView.setText(a.arabic);
+                    arabicView.setVisibility(View.VISIBLE);
+                } else {
+                    arabicView.setVisibility(View.GONE);
+                }
+            }
+            if (subtitleView != null) subtitleView.setVisibility(View.GONE);
+            if (bodyView != null) {
+                String tr = (a != null) ? a.translation(AppLanguage.getLanguage(this)) : "";
+                bodyView.setText(tr);
+            }
+        }
+
+        if (btnSwitch != null) {
+            btnSwitch.setOnClickListener(v -> {
                 SoundEffects.playSelect();
+                int nextMode = (mode == MinbarManager.MODE_MINBAR) ? MinbarManager.MODE_DOA : MinbarManager.MODE_MINBAR;
+                MinbarManager.setDisplayMode(MainActivity.this, nextMode);
                 updateIslamicShelf();
-                Toast.makeText(MainActivity.this, "Paparan Ditukar ke Teks Minbar", Toast.LENGTH_SHORT).show();
+                String chosen = (nextMode == MinbarManager.MODE_MINBAR) ? "Teks Minbar (Khutbah)" : "Doa Harian";
+                Toast.makeText(MainActivity.this, "Paparan Ditukar: " + chosen, Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
             });
         }
-        builder.setNegativeButton("Tutup", (d, w) -> d.dismiss());
-        AlertDialog dialog = builder.create();
+
+        if (btnChoices != null) {
+            btnChoices.setOnClickListener(v -> {
+                SoundEffects.playSelect();
+                dialog.dismiss();
+                showDisplayModeChoiceDialog();
+            });
+        }
+
+        if (btnClose != null) {
+            btnClose.setOnClickListener(v -> {
+                SoundEffects.playSelect();
+                dialog.dismiss();
+            });
+        }
+
+        if (btnDismissX != null) {
+            btnDismissX.setOnClickListener(v -> {
+                SoundEffects.playSelect();
+                dialog.dismiss();
+            });
+        }
+
+        View.OnFocusChangeListener focusListener = (v, hasFocus) -> {
+            if (hasFocus) SoundEffects.playNav();
+            if (isAnimationsEnabled()) {
+                float scale = hasFocus ? 1.03f : 1.0f;
+                v.animate().scaleX(scale).scaleY(scale).setDuration(120).start();
+            }
+        };
+
+        if (btnSwitch != null) btnSwitch.setOnFocusChangeListener(focusListener);
+        if (btnChoices != null) btnChoices.setOnFocusChangeListener(focusListener);
+        if (btnClose != null) btnClose.setOnFocusChangeListener(focusListener);
+        if (btnDismissX != null) btnDismissX.setOnFocusChangeListener(focusListener);
+
         dialog.show();
-        styleGlassDialog(dialog);
+        if (btnSwitch != null) btnSwitch.requestFocus();
     }
 
     void showDisplayModeChoiceDialog() {
@@ -2782,30 +3374,173 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     }
 
     void showDisplayModeChoiceDialog(Runnable onModeChanged) {
-        int currentMode = MinbarManager.getDisplayMode(this);
-        String[] options = new String[]{
-                "📖 Doa Harian (Ayat Al-Quran & Terjemahan)",
-                "🕌 Teks Minbar (Khutbah Jumaat Mengikut Lokasi)"
+        if (isFinishing() || isDestroyed()) return;
+        final Dialog dialog = new Dialog(this, R.style.Theme_TvHome_GlassDialog);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_islamic_choice_16_9);
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+            lp.copyFrom(window.getAttributes());
+            lp.width = Math.round(640 * density);
+            lp.height = Math.round(360 * density);
+            lp.gravity = Gravity.CENTER;
+            window.setAttributes(lp);
+        }
+
+        View btnDismissX = dialog.findViewById(R.id.btnDlgChoiceDismissX);
+        View cardDoa = dialog.findViewById(R.id.cardChoiceDoa);
+        View cardMinbar = dialog.findViewById(R.id.cardChoiceMinbar);
+        TextView indicatorDoa = dialog.findViewById(R.id.indicatorChoiceDoa);
+        TextView indicatorMinbar = dialog.findViewById(R.id.indicatorChoiceMinbar);
+        TextView btnDoaSelect = dialog.findViewById(R.id.btnChoiceDoaSelect);
+        TextView btnMinbarSelect = dialog.findViewById(R.id.btnChoiceMinbarSelect);
+
+        TextView previewDoaArabic = dialog.findViewById(R.id.previewDoaArabic);
+        TextView previewDoaMalay = dialog.findViewById(R.id.previewDoaMalay);
+        TextView previewMinbarAuthority = dialog.findViewById(R.id.previewMinbarAuthority);
+        TextView previewMinbarTitle = dialog.findViewById(R.id.previewMinbarTitle);
+        TextView previewMinbarExcerpt = dialog.findViewById(R.id.previewMinbarExcerpt);
+
+        WeeklyAyah.Ayah a = WeeklyAyah.stored(this);
+        if (a == null) a = WeeklyAyah.last(this);
+        if (a != null) {
+            if (previewDoaArabic != null) previewDoaArabic.setText(a.arabic);
+            if (previewDoaMalay != null) {
+                String tr = a.translation(AppLanguage.getLanguage(this));
+                previewDoaMalay.setText(a.reference + " • " + (tr != null ? tr : ""));
+            }
+        }
+
+        MinbarManager.KhutbahItem k = MinbarManager.getKhutbah(this);
+        if (k != null) {
+            if (previewMinbarAuthority != null) {
+                String datePart = (k.date != null && !k.date.isEmpty()) ? " • " + k.date : "";
+                previewMinbarAuthority.setText(k.authority.toUpperCase(Locale.ROOT) + datePart);
+            }
+            if (previewMinbarTitle != null) previewMinbarTitle.setText(k.title);
+            if (previewMinbarExcerpt != null) {
+                String desc = (k.subtitle != null && !k.subtitle.isEmpty()) ? k.subtitle + " — " + k.excerpt : k.excerpt;
+                previewMinbarExcerpt.setText(desc);
+            }
+        }
+
+        final int[] currentMode = {MinbarManager.getDisplayMode(this)};
+
+        Runnable refreshIndicators = () -> {
+            boolean isDoa = (currentMode[0] == MinbarManager.MODE_DOA);
+            if (indicatorDoa != null) {
+                indicatorDoa.setBackgroundResource(isDoa ? R.drawable.bg_choice_active_badge : R.drawable.bg_choice_inactive_badge);
+                indicatorDoa.setText(isDoa ? "● AKTIF" : "○ PILIH");
+                indicatorDoa.setTextColor(isDoa ? 0xFF4ADE80 : 0x80FFFFFF);
+            }
+            if (btnDoaSelect != null) {
+                btnDoaSelect.setText(isDoa ? "✓ Sedang Dipaparkan" : "Tekan OK untuk Pilih");
+                btnDoaSelect.setTextColor(isDoa ? 0xFF4ADE80 : 0xFF94A3B8);
+            }
+
+            if (indicatorMinbar != null) {
+                indicatorMinbar.setBackgroundResource(!isDoa ? R.drawable.bg_choice_active_badge : R.drawable.bg_choice_inactive_badge);
+                indicatorMinbar.setText(!isDoa ? "● AKTIF" : "○ PILIH");
+                indicatorMinbar.setTextColor(!isDoa ? 0xFF4ADE80 : 0x80FFFFFF);
+            }
+            if (btnMinbarSelect != null) {
+                btnMinbarSelect.setText(!isDoa ? "✓ Sedang Dipaparkan" : "Tekan OK untuk Pilih");
+                btnMinbarSelect.setTextColor(!isDoa ? 0xFF4ADE80 : 0xFF94A3B8);
+            }
         };
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_TvHome_GlassDialog);
-        builder.setTitle("Pilihan Kandungan Paparan");
-        builder.setSingleChoiceItems(options, currentMode, (dialog, which) -> {
-            dialog.dismiss();
-            MinbarManager.setDisplayMode(MainActivity.this, which);
-            SoundEffects.playSelect();
-            updateIslamicShelf();
-            if (onModeChanged != null) onModeChanged.run();
-            String chosen = which == MinbarManager.MODE_MINBAR ? "Teks Minbar (Khutbah)" : "Doa Harian";
-            Toast.makeText(MainActivity.this, "Paparan Ditukar: " + chosen, Toast.LENGTH_SHORT).show();
-        });
-        builder.setNegativeButton("Batal", (dialog, which) -> dialog.dismiss());
-        AlertDialog dialog = builder.create();
+        refreshIndicators.run();
+
+        View.OnFocusChangeListener focusListener = (v, hasFocus) -> {
+            if (hasFocus) SoundEffects.playNav();
+            if (isAnimationsEnabled()) {
+                float scale = hasFocus ? 1.025f : 1.0f;
+                v.animate().scaleX(scale).scaleY(scale).setDuration(120).start();
+            }
+        };
+
+        if (cardDoa != null) cardDoa.setOnFocusChangeListener(focusListener);
+        if (cardMinbar != null) cardMinbar.setOnFocusChangeListener(focusListener);
+        if (btnDismissX != null) btnDismissX.setOnFocusChangeListener(focusListener);
+
+        if (cardDoa != null) {
+            cardDoa.setOnClickListener(v -> {
+                SoundEffects.playSelect();
+                currentMode[0] = MinbarManager.MODE_DOA;
+                MinbarManager.setDisplayMode(MainActivity.this, MinbarManager.MODE_DOA);
+                updateIslamicShelf();
+                if (onModeChanged != null) onModeChanged.run();
+                refreshIndicators.run();
+                Toast.makeText(MainActivity.this, "Paparan Ditukar: Doa Harian", Toast.LENGTH_SHORT).show();
+                cardDoa.postDelayed(dialog::dismiss, 220);
+            });
+            cardDoa.setOnKeyListener((v, keyCode, event) -> {
+                if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
+                if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && cardMinbar != null) {
+                    cardMinbar.requestFocus();
+                    return true;
+                }
+                if (keyCode == KeyEvent.KEYCODE_DPAD_UP && btnDismissX != null) {
+                    btnDismissX.requestFocus();
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        if (cardMinbar != null) {
+            cardMinbar.setOnClickListener(v -> {
+                SoundEffects.playSelect();
+                currentMode[0] = MinbarManager.MODE_MINBAR;
+                MinbarManager.setDisplayMode(MainActivity.this, MinbarManager.MODE_MINBAR);
+                updateIslamicShelf();
+                if (onModeChanged != null) onModeChanged.run();
+                refreshIndicators.run();
+                Toast.makeText(MainActivity.this, "Paparan Ditukar: Teks Minbar", Toast.LENGTH_SHORT).show();
+                cardMinbar.postDelayed(dialog::dismiss, 220);
+            });
+            cardMinbar.setOnKeyListener((v, keyCode, event) -> {
+                if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
+                if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT && cardDoa != null) {
+                    cardDoa.requestFocus();
+                    return true;
+                }
+                if (keyCode == KeyEvent.KEYCODE_DPAD_UP && btnDismissX != null) {
+                    btnDismissX.requestFocus();
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        if (btnDismissX != null) {
+            btnDismissX.setOnClickListener(v -> {
+                SoundEffects.playSelect();
+                dialog.dismiss();
+            });
+            btnDismissX.setOnKeyListener((v, keyCode, event) -> {
+                if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
+                if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                    if (currentMode[0] == MinbarManager.MODE_DOA && cardDoa != null) {
+                        cardDoa.requestFocus();
+                    } else if (cardMinbar != null) {
+                        cardMinbar.requestFocus();
+                    }
+                    return true;
+                }
+                return false;
+            });
+        }
+
         dialog.show();
-        styleGlassDialog(dialog);
-        if (dialog.getListView() != null) {
-            dialog.getListView().requestFocus();
-            dialog.getListView().setSelection(currentMode);
+
+        if (currentMode[0] == MinbarManager.MODE_DOA) {
+            if (cardDoa != null) cardDoa.requestFocus();
+        } else {
+            if (cardMinbar != null) cardMinbar.requestFocus();
         }
     }
 
@@ -5781,6 +6516,20 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (wallpaperFullscreen) {
             setWallpaperFullscreen(false);
         }
+        ModernSettingsDialog.dismissCurrent();
+        if (cardPrompt != null) {
+            try { cardPrompt.dismiss(); } catch (Exception ignored) {}
+            cardPrompt = null;
+        }
+        if (openPopup != null) {
+            try { openPopup.dismiss(); } catch (Exception ignored) {}
+            openPopup = null;
+        }
+        if (qrUploadDialog != null) {
+            try { qrUploadDialog.dismiss(); } catch (Exception ignored) {}
+            qrUploadDialog = null;
+        }
+        closeMenu(false);
         screensaverActive = true;
         if (screensaverView == null) {
             screensaverView = getLayoutInflater().inflate(R.layout.view_nightstand, root, false);
@@ -5822,6 +6571,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         TextView ampm = screensaverView.findViewById(R.id.nightstandAmPm);
         TextView date = screensaverView.findViewById(R.id.nightstandDate);
         TextView hint = screensaverView.findViewById(R.id.nightstandHint);
+        if (hint != null) hint.setText(AppLanguage.strScreensaverHint(this));
 
         if (isNightMode) {
             int red = 0xFFFF453A;

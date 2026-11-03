@@ -147,11 +147,22 @@ public class RtlWeatherIconView extends View {
         }
     }
 
+    private boolean isAnimationsEnabled() {
+        try {
+            return !getContext().getSharedPreferences("theme_prefs", Context.MODE_PRIVATE)
+                    .getBoolean("reduced_motion", false);
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        isAnimating = true;
-        postInvalidateOnAnimation();
+        isAnimating = isAnimationsEnabled();
+        if (isAnimating) {
+            postInvalidateOnAnimation();
+        }
     }
 
     @Override
@@ -167,12 +178,13 @@ public class RtlWeatherIconView extends View {
         int h = getHeight();
         if (w <= 0 || h <= 0) return;
 
-        long elapsed = SystemClock.uptimeMillis() - startTime;
+        boolean anim = isAnimationsEnabled();
+        long elapsed = anim ? (SystemClock.uptimeMillis() - startTime) : 0;
         float timeSec = elapsed / 1000f;
 
         // Smooth animations
-        float sunPulse = (float) Math.sin(timeSec * 2.2f); // Gentle breathing scale
-        float cloudBob = (float) Math.sin(timeSec * 1.8f) * (6f * density); // Gentle vertical float
+        float sunPulse = anim ? (float) Math.sin(timeSec * 2.2f) : 0f; // Gentle breathing scale
+        float cloudBob = anim ? ((float) Math.sin(timeSec * 1.8f) * (6f * density)) : 0f; // Gentle vertical float
 
         switch (type) {
             case SUNNY:
@@ -197,7 +209,7 @@ public class RtlWeatherIconView extends View {
                 break;
         }
 
-        if (isAnimating && getVisibility() == VISIBLE) {
+        if (isAnimating && getVisibility() == VISIBLE && anim) {
             postInvalidateOnAnimation();
         }
     }

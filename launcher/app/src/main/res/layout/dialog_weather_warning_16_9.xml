@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="580dp"
+    android:layout_height="326dp"
+    android:orientation="horizontal"
+    android:background="@drawable/bg_weather_warning_dialog_16_9"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="22dp"
+    android:paddingBottom="18dp"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:baselineAligned="false">
+
+    <!-- Left Column: Hero Info (width: 195dp) -->
+    <LinearLayout
+        android:layout_width="195dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Top row: Warning Icon Badge + Category Label -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/dlgWarningIcon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_weather_warning"
+                android:background="@drawable/bg_warning_badge"
+                android:padding="5dp"
+                android:contentDescription="Warning Icon" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:fontFamily="@font/inter"
+                android:fontVariationSettings="'wght' 700"
+                android:letterSpacing="0.1"
+                android:text="MET MALAYSIA"
+                android:textAllCaps="true"
+                android:textColor="#FFFF8A80"
+                android:textSize="10.5sp" />
+        </LinearLayout>
+
+        <!-- Main Alert Title -->
+        <TextView
+            android:id="@+id/dlgWarningTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:fontFamily="@font/inter"
+            android:fontVariationSettings="'wght' 700"
+            android:lineSpacingExtra="2dp"
+            android:maxLines="3"
+            android:ellipsize="end"
+            android:textColor="#FFFFFFFF"
+            android:textSize="16sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- Validity Badge -->
+        <TextView
+            android:id="@+id/dlgWarningTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_warning_time_pill"
+            android:fontFamily="@font/inter"
+            android:fontVariationSettings="'wght' 500"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp"
+            android:textColor="#E6FFFFFF"
+            android:textSize="11.5sp" />
+
+        <!-- Source -->
+        <TextView
+            android:id="@+id/dlgWarningSource"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:fontFamily="@font/inter"
+            android:fontVariationSettings="'wght' 400"
+            android:textColor="#80FFFFFF"
+            android:textSize="10.5sp" />
+    </LinearLayout>
+
+    <!-- Vertical Divider Line -->
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="18dp"
+        android:layout_marginEnd="18dp"
+        android:background="#26FFFFFF" />
+
+    <!-- Right Column: Details & Action Buttons -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- Top Header: Butiran Amaran Category + Dismiss "X" Button -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="4dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/inter"
+                android:fontVariationSettings="'wght' 600"
+                android:letterSpacing="0.08"
+                android:text="BUTIRAN AMARAN"
+                android:textColor="#80FFFFFF"
+                android:textSize="10sp" />
+
+            <ImageView
+                android:id="@+id/btnDlgDismissX"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/selector_btn_circle_subtle"
+                android:padding="5dp"
+                android:src="@drawable/ic_close"
+                android:focusable="true"
+                android:clickable="true"
+                android:contentDescription="Tutup dan Padam Amaran" />
+        </LinearLayout>
+
+        <!-- Scrollable Details Section (clips text strictly within its bounds) -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginBottom="6dp"
+            android:clipChildren="true"
+            android:clipToPadding="true"
+            android:fadeScrollbars="false"
+            android:scrollbars="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/dlgWarningDetails"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:fontFamily="@font/inter"
+                    android:fontVariationSettings="'wght' 400"
+                    android:justificationMode="inter_word"
+                    android:lineSpacingMultiplier="1.25"
+                    android:textColor="#E6FFFFFF"
+                    android:textSize="11.5sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="@font/inter"
+                    android:fontVariationSettings="'wght' 600"
+                    android:letterSpacing="0.08"
+                    android:text="NASIHAT KESELAMATAN"
+                    android:textColor="#80FFFFFF"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/dlgWarningInstruction"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:fontFamily="@font/inter"
+                    android:fontVariationSettings="'wght' 400"
+                    android:justificationMode="inter_word"
+                    android:lineSpacingMultiplier="1.25"
+                    android:textColor="#E6FFFFFF"
+                    android:textSize="11.5sp" />
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Action Buttons Bar with dedicated padding so focus scale never touches boundaries -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:gravity="end|center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/btnDlgOpenWeather"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:gravity="center"
+                android:background="@drawable/selector_dlg_btn_primary"
+                android:fontFamily="@font/inter"
+                android:fontVariationSettings="'wght' 600"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="Buka Cuaca Penuh"
+                android:textAllCaps="false"
+                android:textColor="@color/selector_dlg_btn_primary_text"
+                android:textSize="12sp"
+                android:includeFontPadding="false"
+                android:focusable="true"
+                android:clickable="true"
+                android:nextFocusRight="@+id/btnDlgClose" />
+
+            <TextView
+                android:id="@+id/btnDlgClose"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginStart="10dp"
+                android:gravity="center"
+                android:background="@drawable/selector_dlg_btn_secondary"
+                android:fontFamily="@font/inter"
+                android:fontVariationSettings="'wght' 500"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="Tutup"
+                android:textAllCaps="false"
+                android:textColor="#E6FFFFFF"
+                android:textSize="12sp"
+                android:includeFontPadding="false"
+                android:focusable="true"
+                android:clickable="true"
+                android:nextFocusLeft="@+id/btnDlgOpenWeather" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

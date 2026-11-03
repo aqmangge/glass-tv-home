@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="640dp"
+    android:layout_height="360dp"
+    android:orientation="vertical"
+    android:background="@drawable/bg_islamic_dialog_16_9"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="18dp"
+    android:paddingBottom="18dp"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:baselineAligned="false">
+
+    <!-- Top Header: Title, Description & Close "✕" Button -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:background="@drawable/bg_islamic_header_badge"
+            android:src="@drawable/ic_moon"
+            android:padding="6dp"
+            android:contentDescription="Islamic Moon Icon" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/inter"
+                android:fontVariationSettings="'wght' 700"
+                android:letterSpacing="0.06"
+                android:text="PILIHAN KANDUNGAN PAPARAN"
+                android:textAllCaps="true"
+                android:textColor="#FFFFFFFF"
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:fontFamily="@font/inter"
+                android:fontVariationSettings="'wght' 400"
+                android:text="Pilih jenis maklumat rohani yang dipaparkan di atas jadual waktu solat"
+                android:textColor="#99A1AF"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- Close "✕" Button for TV Remote -->
+        <TextView
+            android:id="@+id/btnDlgChoiceDismissX"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/selector_btn_circle_subtle"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="✕"
+            android:textColor="#CCFFFFFF"
+            android:textSize="13sp"
+            android:fontFamily="@font/inter"
+            android:fontVariationSettings="'wght' 700"
+            android:contentDescription="Tutup" />
+    </LinearLayout>
+
+    <!-- Cards Row: Doa Harian (Left) & Teks Minbar (Right) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="14dp"
+        android:orientation="horizontal"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:baselineAligned="false">
+
+        <!-- Card 1: Doa Harian -->
+        <LinearLayout
+            android:id="@+id/cardChoiceDoa"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:background="@drawable/selector_islamic_choice_card"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:focusable="true"
+            android:clickable="true">
+
+            <!-- Card Header Tag & Active Status Pill -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_rehal"
+                    android:contentDescription="Rehal Al-Quran Icon" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:fontFamily="@font/inter"
+                    android:fontVariationSettings="'wght' 700"
+                    android:letterSpacing="0.05"
+                    android:text="AYAT AL-QURAN"
+                    android:textAllCaps="true"
+                    android:textColor="#FFD54F"
+                    android:textSize="9.5sp" />
+
+                <TextView
+                    android:id="@+id/indicatorChoiceDoa"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_choice_active_badge"
+                    android:paddingStart="10dp"
+                    android:paddingTop="3dp"
+                    android:paddingEnd="10dp"
+                    android:paddingBottom="3dp"
+                    android:fontFamily="@font/inter"
+                    android:fontVariationSettings="'wght' 700"
+                    android:text="● AKTIF"
+                    android:textColor="#4ADE80"
+                    android:textSize="9.5sp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:fontFamily="@font/inter"
+                android:fontVariationSettings="'wght' 700"
+                android:text="Doa Harian"
+                android:textColor="#FFFFFFFF"
+                android:textSize="16.5sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:fontFamily="@font/inter"
+                android:fontVariationSettings="'wght' 400"
+                android:text="Ayat pilihan berganti setiap hari &amp; terjemahan Bahasa Melayu"
+                android:textColor="#94A3B8"
+                android:textSize="10.5sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <!-- Live Verse Preview Box -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_choice_preview_box"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/previewDoaArabic"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/amiri_quran"
+                    android:gravity="end"
+                    android:textDirection="rtl"
+                    android:lineSpacingExtra="2dp"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:textColor="#FFE082"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/previewDoaMalay"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/inter"
+                    android:fontVariationSettings="'wght' 400"
+                    android:lineSpacingExtra="1dp"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:textColor="#CBD5E1"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+            <!-- Bottom Action Footer -->
+            <TextView
+                android:id="@+id/btnChoiceDoaSelect"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:fontFamily="@font/inter"
+                android:fontVariationSettings="'wght' 600"
+                android:text="✓ Sedang Dipaparkan"
+                android:textColor="#4ADE80"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- Card 2: Teks Minbar -->
+        <LinearLayout
+            android:id="@+id/cardChoiceMinbar"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="14dp"
+            android:orientation="vertical"
+            android:background="@drawable/selector_islamic_choice_card"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:focusable="true"
+            android:clickable="true">
+
+            <!-- Card Header Tag & Active Status Pill -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_mosque"
+                    android:contentDescription="Mosque Icon" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:fontFamily="@font/inter"
+                    android:fontVariationSettings="'wght' 700"
+                    android:letterSpacing="0.05"
+                    android:text="KHUTBAH JUMAAT"
+                    android:textAllCaps="true"
+                    android:textColor="#67E8F9"
+                    android:textSize="9.5sp" />
+
+                <TextView
+                    android:id="@+id/indicatorChoiceMinbar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_choice_inactive_badge"
+                    android:paddingStart="10dp"
+                    android:paddingTop="3dp"
+                    android:paddingEnd="10dp"
+                    android:paddingBottom="3dp"
+                    android:fontFamily="@font/inter"
+                    android:fontVariationSettings="'wght' 700"
+                    android:text="○ PILIH"
+                    android:textColor="#80FFFFFF"
+                    android:textSize="9.5sp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:fontFamily="@font/inter"
+                android:fontVariationSettings="'wght' 700"
+                android:text="Teks Minbar"
+                android:textColor="#FFFFFFFF"
+                android:textSize="16.5sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:fontFamily="@font/inter"
+                android:fontVariationSettings="'wght' 400"
+                android:text="Intipati khutbah Jumaat mengikut zon lokasi anda"
+                android:textColor="#94A3B8"
+                android:textSize="10.5sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <!-- Live Sermon Preview Box -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_choice_preview_box"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/previewMinbarAuthority"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/inter"
+                    android:fontVariationSettings="'wght' 700"
+                    android:letterSpacing="0.05"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textColor="#67E8F9"
+                    android:textSize="9sp" />
+
+                <TextView
+                    android:id="@+id/previewMinbarTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:fontFamily="@font/inter"
+                    android:fontVariationSettings="'wght' 700"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/previewMinbarExcerpt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:fontFamily="@font/inter"
+                    android:fontVariationSettings="'wght' 400"
+                    android:lineSpacingExtra="1dp"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:textColor="#CBD5E1"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+            <!-- Bottom Action Footer -->
+            <TextView
+                android:id="@+id/btnChoiceMinbarSelect"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:fontFamily="@font/inter"
+                android:fontVariationSettings="'wght' 600"
+                android:text="Tekan OK untuk Pilih"
+                android:textColor="#94A3B8"
+                android:textSize="11sp" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -155,6 +155,18 @@ final class Config {
             liveTvRow = bool(json, "show_live_tv", liveTvRow);
             background = color(json, "background_color", background);
         }
+
+        // User settings override from SharedPreferences (theme_prefs)
+        try {
+            android.content.SharedPreferences themePrefs = ctx.getSharedPreferences("theme_prefs", Context.MODE_PRIVATE);
+            if (themePrefs.contains("dock_columns")) {
+                columns = themePrefs.getInt("dock_columns", columns);
+            }
+            if (themePrefs.contains("reduced_motion")) {
+                reducedMotion = themePrefs.getBoolean("reduced_motion", reducedMotion);
+            }
+        } catch (Exception ignored) {}
+
         File wallpaper = dir != null ? new File(dir, WALLPAPER_NAME) : null;
         if (wallpaper != null && !(wallpaper.isFile() && wallpaper.length() > 0)) wallpaper = null;
         // A theme can also switch the wallpaper off while the file is still there.

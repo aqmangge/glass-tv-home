@@ -41,10 +41,10 @@ public final class WhoIsWatchingDialog {
                 ViewGroup.LayoutParams.MATCH_PARENT
         ));
 
-        // Dark cinematic glass vignette background - opaque deep dark teal to pitch black
+        // Translucent liquid glass vignette background - lets homescreen wallpaper peek through softly
         GradientDrawable bg = new GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[]{0xFF09201C, 0xFF051210, 0xFF020706}
+                new int[]{0xCC0E1826, 0xE608101C, 0xF5040810}
         );
         rootFrame.setBackground(bg);
 
@@ -66,7 +66,7 @@ public final class WhoIsWatchingDialog {
 
         // Main Title
         TextView tvTitle = new TextView(activity);
-        tvTitle.setText("Who's watching?");
+        tvTitle.setText(AppLanguage.strWhosWatchingTitle(activity));
         tvTitle.setTextSize(38);
         tvTitle.setTextColor(0xFFFFFFFF);
         tvTitle.setTypeface(activity.getResources().getFont(R.font.inter), android.graphics.Typeface.BOLD);
@@ -76,7 +76,7 @@ public final class WhoIsWatchingDialog {
 
         // Subtitle
         TextView tvSub = new TextView(activity);
-        tvSub.setText("Select a profile to continue");
+        tvSub.setText(AppLanguage.strWhosWatchingSub(activity));
         tvSub.setTextSize(15.5f);
         tvSub.setTextColor(0xFF94A3B8);
         tvSub.setGravity(Gravity.CENTER);
@@ -114,7 +114,7 @@ public final class WhoIsWatchingDialog {
 
         // Bottom Hint
         TextView tvHint = new TextView(activity);
-        tvHint.setText("Hold to manage profile • Tekan lama untuk urus profil");
+        tvHint.setText(AppLanguage.strWhosWatchingHint(activity));
         tvHint.setTextSize(13);
         tvHint.setTextColor(0xFF64748B);
         tvHint.setGravity(Gravity.CENTER);
@@ -136,7 +136,9 @@ public final class WhoIsWatchingDialog {
 
         Window w = dialog.getWindow();
         if (w != null) {
-            w.setBackgroundDrawable(new ColorDrawable(0xFF020706));
+            w.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            w.addFlags(android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            w.setDimAmount(0.65f);
             w.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         }
 
@@ -208,7 +210,7 @@ public final class WhoIsWatchingDialog {
             GradientDrawable ringGd = new GradientDrawable();
             ringGd.setShape(GradientDrawable.OVAL);
             ringGd.setColor(Color.TRANSPARENT);
-            ringGd.setStroke(Math.round(2f * density), 0x26FFFFFF); // subtle translucent rim
+            ringGd.setStroke(Math.round(2f * density), 0x4D67E8F9); // Soap bubble thin-film rim
             ringFrame.setBackground(ringGd);
 
             // Inner Circular Avatar
@@ -284,11 +286,11 @@ public final class WhoIsWatchingDialog {
             tvRole.setTypeface(activity.getResources().getFont(R.font.inter), android.graphics.Typeface.BOLD);
 
             if (prof.isPrimary) {
-                tvRole.setText("PRIMARY");
+                tvRole.setText(AppLanguage.strProfileRolePrimary(activity));
                 tvRole.setTextColor(0xFFF59E0B); // Amber gold
                 tvRole.setVisibility(View.VISIBLE);
             } else if (prof.isChild) {
-                tvRole.setText("KANAK-KANAK");
+                tvRole.setText(AppLanguage.strProfileRoleChild(activity));
                 tvRole.setTextColor(0xFF38BDF8); // Sky blue
                 tvRole.setVisibility(View.VISIBLE);
             } else {
@@ -300,12 +302,12 @@ public final class WhoIsWatchingDialog {
             // Focus & Scale Animation - only scale ringFrame so text labels stay strictly aligned!
             card.setOnFocusChangeListener((v, hasFocus) -> {
                 if (hasFocus) {
-                    ringGd.setStroke(Math.round(3.5f * density), 0xFFFFFFFF); // Crisp glowing white rim
-                    ringGd.setColor(0x18FFFFFF);
+                    ringGd.setStroke(Math.round(3.5f * density), 0xFF67E8F9); // Glowing soap bubble rim
+                    ringGd.setColor(0x2867E8F9);
                     ringFrame.animate().scaleX(1.10f).scaleY(1.10f).setDuration(160).start();
                     tvName.setTextColor(0xFFFFFFFF);
                 } else {
-                    ringGd.setStroke(Math.round(2f * density), 0x26FFFFFF);
+                    ringGd.setStroke(Math.round(2f * density), 0x4D67E8F9);
                     ringGd.setColor(Color.TRANSPARENT);
                     ringFrame.animate().scaleX(1.0f).scaleY(1.0f).setDuration(160).start();
                     tvName.setTextColor(0xFF94A3B8);
@@ -356,7 +358,7 @@ public final class WhoIsWatchingDialog {
         GradientDrawable plusGd = new GradientDrawable();
         plusGd.setShape(GradientDrawable.OVAL);
         plusGd.setColor(0x14FFFFFF); // Translucent frosted glass circle
-        plusGd.setStroke(Math.round(2f * density), 0x26FFFFFF);
+        plusGd.setStroke(Math.round(2f * density), 0x4D67E8F9);
         plusRing.setBackground(plusGd);
 
         TextView tvPlus = new TextView(activity);
@@ -379,7 +381,7 @@ public final class WhoIsWatchingDialog {
         );
         addLabelLp.topMargin = Math.round(14 * density);
         tvAddLabel.setLayoutParams(addLabelLp);
-        tvAddLabel.setText("Add Profile");
+        tvAddLabel.setText(AppLanguage.strAddProfile(activity));
         tvAddLabel.setTextSize(17);
         tvAddLabel.setTextColor(0xFF94A3B8);
         tvAddLabel.setTypeface(activity.getResources().getFont(R.font.inter), android.graphics.Typeface.BOLD);
@@ -402,13 +404,13 @@ public final class WhoIsWatchingDialog {
 
         addCard.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
-                plusGd.setStroke(Math.round(3.5f * density), 0xFFFFFFFF);
-                plusGd.setColor(0x28FFFFFF);
+                plusGd.setStroke(Math.round(3.5f * density), 0xFF67E8F9);
+                plusGd.setColor(0x2867E8F9);
                 tvPlus.setTextColor(0xFFFFFFFF);
                 tvAddLabel.setTextColor(0xFFFFFFFF);
                 plusRing.animate().scaleX(1.10f).scaleY(1.10f).setDuration(160).start();
             } else {
-                plusGd.setStroke(Math.round(2f * density), 0x26FFFFFF);
+                plusGd.setStroke(Math.round(2f * density), 0x4D67E8F9);
                 plusGd.setColor(0x14FFFFFF);
                 tvPlus.setTextColor(0xFF94A3B8);
                 tvAddLabel.setTextColor(0xFF94A3B8);

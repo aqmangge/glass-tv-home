@@ -848,4 +848,144 @@ final class AppLanguage {
             case LANG_MS: default: return "Memuat turun audio " + soundLabel + "...";
         }
     }
+
+    // --- Screensaver Hint ---
+    public static String strScreensaverHint(Context ctx) {
+        switch (getLanguage(ctx)) {
+            case LANG_EN: return "Press any button to return";
+            case LANG_ID: return "Tekan tombol apa saja untuk kembali";
+            case LANG_MS: default: return "Tekan mana-mana butang untuk kembali";
+        }
+    }
+
+    // --- Who's Watching Profile Selection Screen ---
+    public static String strWhosWatchingTitle(Context ctx) {
+        switch (getLanguage(ctx)) {
+            case LANG_EN: return "Who's watching?";
+            case LANG_ID: return "Siapa yang menonton?";
+            case LANG_MS: default: return "Siapa yang menonton?";
+        }
+    }
+
+    public static String strWhosWatchingSub(Context ctx) {
+        switch (getLanguage(ctx)) {
+            case LANG_EN: return "Select a profile to continue";
+            case LANG_ID: return "Pilih profil untuk melanjutkan";
+            case LANG_MS: default: return "Pilih profil untuk teruskan";
+        }
+    }
+
+    public static String strProfileRolePrimary(Context ctx) {
+        switch (getLanguage(ctx)) {
+            case LANG_EN: return "PRIMARY";
+            case LANG_ID: return "UTAMA";
+            case LANG_MS: default: return "UTAMA";
+        }
+    }
+
+    public static String strProfileRoleChild(Context ctx) {
+        switch (getLanguage(ctx)) {
+            case LANG_EN: return "KIDS";
+            case LANG_ID: return "ANAK-ANAK";
+            case LANG_MS: default: return "KANAK-KANAK";
+        }
+    }
+
+    public static String strAddProfile(Context ctx) {
+        switch (getLanguage(ctx)) {
+            case LANG_EN: return "Add Profile";
+            case LANG_ID: return "Tambah Profil";
+            case LANG_MS: default: return "Tambah Profil";
+        }
+    }
+
+    public static String strWhosWatchingHint(Context ctx) {
+        switch (getLanguage(ctx)) {
+            case LANG_EN: return "Press & hold to manage profile";
+            case LANG_ID: return "Tekan & tahan untuk kelola profil";
+            case LANG_MS: default: return "Tekan & tahan untuk urus profil";
+        }
+    }
+
+    // --- Profile Settings & Management Tab ---
+    public static String strActiveProfileAvatarHeader(Context ctx, String name) {
+        String n = (name != null) ? name.toUpperCase(Locale.ROOT) : "";
+        switch (getLanguage(ctx)) {
+            case LANG_EN: return "CURRENT PROFILE AVATAR (" + n + ")";
+            case LANG_ID: return "AVATAR PROFIL SAAT INI (" + n + ")";
+            case LANG_MS: default: return "AVATAR PROFIL SEMASA (" + n + ")";
+        }
+    }
+
+    public static String strAvatarCustomizeTitle(Context ctx) {
+        switch (getLanguage(ctx)) {
+            case LANG_EN: return "🎨 Avatar Customization (3 Options)";
+            case LANG_ID: return "🎨 Kustomisasi Avatar (3 Pilihan)";
+            case LANG_MS: default: return "🎨 Kustomisasi Avatar (3 Pilihan)";
+        }
+    }
+
+    public static String strAvatarCustomizeSub(Context ctx) {
+        switch (getLanguage(ctx)) {
+            case LANG_EN: return "Choose Single Character, Search GIF (Giphy), or Upload from Phone";
+            case LANG_ID: return "Pilih Karakter Tunggal, Cari GIF (Giphy), atau Unggah dari Ponsel";
+            case LANG_MS: default: return "Pilih Watak Tunggal, Cari GIF (Giphy), atau Muat Naik dari Telefon";
+        }
+    }
+
+    public static String strUserListHeader(Context ctx, int count) {
+        switch (getLanguage(ctx)) {
+            case LANG_EN: return "USER LIST (" + count + ")";
+            case LANG_ID: return "DAFTAR PENGGUNA (" + count + ")";
+            case LANG_MS: default: return "SENARAI PENGGUNA (" + count + ")";
+        }
+    }
+
+    public static String strActiveStatus(Context ctx) {
+        switch (getLanguage(ctx)) {
+            case LANG_EN: return "Active ✓";
+            case LANG_ID: return "Aktif ✓";
+            case LANG_MS: default: return "Aktif ✓";
+        }
+    }
+
+    public static String strDeleteUser(Context ctx) {
+        switch (getLanguage(ctx)) {
+            case LANG_EN: return "🗑️ Delete";
+            case LANG_ID: return "🗑️ Hapus";
+            case LANG_MS: default: return "🗑️ Padam";
+        }
+    }
+
+    public static String strAddNewUser(Context ctx) {
+        switch (getLanguage(ctx)) {
+            case LANG_EN: return "➕ Add New User";
+            case LANG_ID: return "➕ Tambah Pengguna Baru";
+            case LANG_MS: default: return "➕ Tambah Pengguna Baharu";
+        }
+    }
+
+    public static String strAddNewUserDesc(Context ctx) {
+        switch (getLanguage(ctx)) {
+            case LANG_EN: return "Create a new profile for family members or kids";
+            case LANG_ID: return "Buat profil baru untuk anggota keluarga atau anak";
+            case LANG_MS: default: return "Cipta profil baharu untuk ahli keluarga atau anak";
+        }
+    }
+
+    public static String strManagePhotosTitle(Context ctx) {
+        switch (getLanguage(ctx)) {
+            case LANG_EN: return "📸 Manage Photos & Phone Upload (QR)";
+            case LANG_ID: return "📸 Kelola Foto & Unggah Ponsel (QR)";
+            case LANG_MS: default: return "📸 Urus Gambar & Muat Naik Telefon (QR)";
+        }
+    }
+
+    public static String strManagePhotosSub(Context ctx) {
+        switch (getLanguage(ctx)) {
+            case LANG_EN: return "Scan QR code to send photos directly from phone to TV";
+            case LANG_ID: return "Pindai kode QR untuk kirim foto dari ponsel langsung ke TV";
+            case LANG_MS: default: return "Imbas kod QR untuk hantar gambar dari telefon terus ke TV";
+        }
+    }
 }

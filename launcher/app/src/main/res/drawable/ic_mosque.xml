@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Flaticon Mosque Dome 2800479 vector icon -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="22dp"
-    android:height="22dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M12,2C11.5,3.5 10,4.8 8.5,5.2V7h7V5.2C14,4.8 12.5,3.5 12,2zM5,10v11h14V10L12,5 5,10zM12,19c-1.66,0 -3,-1.34 -3,-3v-3h6v3c0,1.66 -1.34,3 -3,3z" />
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="5120"
+    android:viewportHeight="5120">
+    <group
+        android:scaleY="-1"
+        android:translateY="5120">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M2411 4915 c-283 -105 -457 -418 -397 -715 45 -222 184 -388 396 -473 l65 -26 3 -76 c3 -85 0 -93 -71 -177 -94 -112 -248 -223 -607 -438 -417 -251 -535 -334 -679 -482 -100 -103 -154 -178 -210 -293 -85 -172 -118 -342 -108 -550 14 -259 85 -516 190 -683 l27 -42 1540 0 1540 0 21 33 c73 118 146 316 173 477 71 409 -12 745 -249 1010 -145 162 -294 273 -655 488 -459 273 -604 379 -705 514 -43 57 -45 63 -45 128 l0 67 61 7 c251 29 458 193 540 429 30 86 28 108 -9 137 -35 28 -54 25 -130 -20 -37 -23 -89 -47 -116 -55 -153 -46 -326 15 -428 150 -47 62 -68 120 -75 210 -7 88 11 155 67 247 47 78 49 96 15 132 -30 33 -68 33 -154 1z" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M950 779 c-55 -25 -95 -62 -123 -114 -20 -36 -22 -58 -25 -234 -4 -211 2 -242 46 -260 19 -8 510 -11 1730 -9 l1704 3 19 24 c17 21 19 41 19 220 0 176 -3 201 -21 241 -27 60 -64 98 -124 126 l-50 24 -1565 0 c-1553 0 -1565 -1 -1610 -21z" />
+    </group>
 </vector>

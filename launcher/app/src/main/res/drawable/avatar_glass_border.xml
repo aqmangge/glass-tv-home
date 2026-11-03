@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Frosted liquid glass border overlay for circular profile avatars (ReactDrops Soap Bubble style) -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true">
+        <shape android:shape="oval">
+            <solid android:color="#2667E8F9" />
+            <stroke android:width="2.5dp" android:color="#FF67E8F9" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#00000000" />
+            <stroke android:width="1.5dp" android:color="#6667E8F9" />
+        </shape>
+    </item>
+</selector>

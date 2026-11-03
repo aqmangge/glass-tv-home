@@ -47,6 +47,39 @@ final class WeatherAirQuality {
     private static final String KEY_LAST_UPDATE = "last_update";
     private static final long REFRESH_INTERVAL_MS = 30L * 60 * 1000; // 30 minutes
 
+    // Severe weather warning alert keys
+    private static final String KEY_ALERT_ACTIVE = "alert_active";
+    private static final String KEY_ALERT_TITLE = "alert_title";
+    private static final String KEY_ALERT_FULL_TITLE = "alert_full_title";
+    private static final String KEY_ALERT_TIME_SPAN = "alert_time_span";
+    private static final String KEY_ALERT_DETAILS = "alert_details";
+    private static final String KEY_ALERT_INSTRUCTION = "alert_instruction";
+    private static final String KEY_ALERT_SOURCE = "alert_source";
+    private static final String KEY_ALERT_TIMESTAMP = "alert_timestamp";
+
+    static class WeatherAlert {
+        final boolean active;
+        final String title;
+        final String fullTitle;
+        final String timeSpan;
+        final String details;
+        final String instruction;
+        final String source;
+        final long timestamp;
+
+        WeatherAlert(boolean active, String title, String fullTitle, String timeSpan,
+                     String details, String instruction, String source, long timestamp) {
+            this.active = active;
+            this.title = title != null ? title : "";
+            this.fullTitle = fullTitle != null ? fullTitle : this.title;
+            this.timeSpan = timeSpan != null ? timeSpan : "";
+            this.details = details != null ? details : "";
+            this.instruction = instruction != null ? instruction : "";
+            this.source = source != null ? source : "MET Malaysia";
+            this.timestamp = timestamp;
+        }
+    }
+
     static class HourlyItem {
         final String time;
         final String icon;
@@ -158,7 +191,8 @@ final class WeatherAirQuality {
 
     /** Fetches weather and air quality in background if due (30-min cache). */
     static void syncIfDue(Context context, Runnable onUpdated) {
-        syncInternal(context, onUpdated, false);
+        boolean force = (context != null && !context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).contains(KEY_ALERT_TIMESTAMP));
+        syncInternal(context, onUpdated, force);
     }
 
     private static void syncInternal(Context context, Runnable onUpdated, boolean force) {
@@ -247,6 +281,161 @@ final class WeatherAirQuality {
                     }
                 }
 
+                // 3. Fetch Official Weather Warnings from MET Malaysia (api.data.gov.my)
+                boolean alertActive = false;
+                String alertTitle = "";
+                String alertFullTitle = "";
+                String alertTimeSpan = "";
+                String alertDetails = "";
+                String alertInstruction = "";
+                String alertSource = "MET Malaysia";
+
+                String warnUrl = "https://api.data.gov.my/weather/warning/";
+                String warnText = fetchJsonText(warnUrl);
+                if (warnText != null && warnText.trim().startsWith("[")) {
+                    try {
+                        JSONArray warnArr = new JSONArray(warnText);
+                        for (int i = 0; i < warnArr.length(); i++) {
+                            JSONObject wItem = warnArr.getJSONObject(i);
+                            JSONObject wIssue = wItem.optJSONObject("warning_issue");
+                            String titleBm = wIssue != null ? wIssue.optString("title_bm", "") : "";
+                            String titleEn = wIssue != null ? wIssue.optString("title_en", "") : "";
+
+                            if (titleBm.equalsIgnoreCase("Tiada Nasihat") || titleBm.equalsIgnoreCase("Tiada Amaran")
+                                    || titleBm.toLowerCase(Locale.ROOT).contains("tiada")) {
+                                continue;
+                            }
+
+                            String validTo = wItem.optString("valid_to", "");
+                            if (!validTo.isEmpty() && !validTo.equals("null")) {
+                                try {
+                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT);
+                                    Date exp = sdf.parse(validTo);
+                                    if (exp != null && exp.getTime() < System.currentTimeMillis()) {
+                                        continue; // Expired
+                                    }
+                                } catch (Exception ignored) {}
+                            }
+
+                            String textBm = wItem.optString("text_bm", "");
+                            String headingBm = wItem.optString("heading_bm", titleBm);
+                            String instBm = wItem.optString("instruction_bm", "");
+
+                            boolean hasThunderstormInText = textBm.toUpperCase(Locale.ROOT).contains("AMARAN RIBUT PETIR")
+                                    || textBm.toUpperCase(Locale.ROOT).contains("RIBUT PETIR");
+
+                            String chosenTitle = isMalay ? (titleBm.isEmpty() ? headingBm : titleBm)
+                                    : (titleEn.isEmpty() ? wItem.optString("heading_en", titleBm) : titleEn);
+
+                            if (hasThunderstormInText && !chosenTitle.toLowerCase(Locale.ROOT).contains("ribut petir")) {
+                                alertTitle = (isMalay ? "Amaran Ribut Petir · " : "Thunderstorm Warning · ") + chosenTitle;
+                            } else {
+                                alertTitle = chosenTitle;
+                            }
+
+                            alertFullTitle = chosenTitle;
+                            alertDetails = isMalay ? textBm : wItem.optString("text_en", textBm);
+                            alertInstruction = isMalay ? instBm : wItem.optString("instruction_en", instBm);
+
+                            if (!validTo.isEmpty() && !validTo.equals("null")) {
+                                try {
+                                    SimpleDateFormat sdfIn = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT);
+                                    SimpleDateFormat sdfOut = new SimpleDateFormat("h:mm a, d MMM", Locale.US);
+                                    Date exp = sdfIn.parse(validTo);
+                                    if (exp != null) {
+                                        String formatted = sdfOut.format(exp);
+                                        if (isMalay) {
+                                            formatted = formatted.replace("AM", "PG").replace("PM", "PTG");
+                                        }
+                                        alertTimeSpan = (isMalay ? "Sah sehingga: " : "Valid until: ") + formatted;
+                                    }
+                                } catch (Exception ignored) {}
+                            }
+
+                            alertActive = true;
+                            alertSource = "MET Malaysia";
+                            break;
+                        }
+                    } catch (Exception e) {
+                        Log.w(TAG, "Failed parsing MET warnings: " + e.getMessage());
+                    }
+                }
+
+                // 4. Fallback / Prediction: Check Open-Meteo hourly for incoming heavy rain / thunderstorm ("before heavy raining")
+                if (!alertActive && wJson != null && wJson.has("hourly")) {
+                    try {
+                        JSONObject hourly = wJson.getJSONObject("hourly");
+                        JSONArray hCodes = hourly.optJSONArray("weather_code");
+                        JSONArray hRains = hourly.optJSONArray("precipitation_probability");
+
+                        Calendar cal = Calendar.getInstance();
+                        int curHour = cal.get(Calendar.HOUR_OF_DAY);
+
+                        for (int offset = 1; offset <= 4; offset++) {
+                            int checkHour = (curHour + offset) % 24;
+                            int codeAtHour = hCodes != null ? hCodes.optInt(checkHour, -1) : -1;
+                            int rainProbAtHour = hRains != null ? hRains.optInt(checkHour, 0) : 0;
+
+                            boolean isThunderstorm = (codeAtHour >= 95 && codeAtHour <= 99);
+                            boolean isHeavyRain = (codeAtHour >= 65 && codeAtHour <= 67) || codeAtHour == 82;
+                            boolean isImminentRain = rainProbAtHour >= 75 && (codeAtHour >= 51 || codeAtHour >= 61);
+
+                            if (isThunderstorm || isHeavyRain || isImminentRain) {
+                                String timeStr = formatHourDisplay(checkHour, isMalay);
+                                if (isThunderstorm) {
+                                    alertTitle = isMalay ? ("Amaran Ribut Petir Dijangka (" + timeStr + ")")
+                                            : ("Thunderstorm Warning Expected (" + timeStr + ")");
+                                    alertDetails = isMalay ? ("Ramalan menjangkakan ribut petir berserta hujan lebat sekitar jam " + timeStr + ".")
+                                            : ("Forecast expects thunderstorms with heavy rainfall around " + timeStr + ".");
+                                    alertInstruction = isMalay ? "Waspada kilat petir dan angin kencang di luar premis."
+                                            : "Be cautious of lightning strikes and strong winds outdoors.";
+                                } else if (isHeavyRain) {
+                                    alertTitle = isMalay ? ("Amaran Hujan Lebat Dijangka (" + timeStr + ")")
+                                            : ("Heavy Rain Warning Expected (" + timeStr + ")");
+                                    alertDetails = isMalay ? ("Ramalan cuaca menjangkakan hujan lebat sekitar jam " + timeStr + " (kebarangkalian " + rainProbAtHour + "%).")
+                                            : ("Weather forecast predicts heavy rain around " + timeStr + " (" + rainProbAtHour + "% probability).");
+                                    alertInstruction = isMalay ? "Sedia payung dan berhati-hati jalan raya licin."
+                                            : "Prepare umbrellas and drive carefully on wet roads.";
+                                } else {
+                                    alertTitle = isMalay ? ("Kebarangkalian Hujan Tinggi (" + rainProbAtHour + "% pada " + timeStr + ")")
+                                            : ("High Rain Chance (" + rainProbAtHour + "% at " + timeStr + ")");
+                                    alertDetails = isMalay ? ("Kebarangkalian hujan meningkat sehingga " + rainProbAtHour + "% pada jam " + timeStr + ".")
+                                            : ("Precipitation probability increases to " + rainProbAtHour + "% at " + timeStr + ".");
+                                    alertInstruction = isMalay ? "Bawa payung jika keluar." : "Take an umbrella when going out.";
+                                }
+                                alertFullTitle = alertTitle;
+                                alertTimeSpan = isMalay ? ("Jangkaan: Jam " + timeStr) : ("Expected: " + timeStr);
+                                alertSource = "Open-Meteo";
+                                alertActive = true;
+                                break;
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.w(TAG, "Failed checking hourly heavy rain: " + e.getMessage());
+                    }
+                }
+
+                // 5. Check if current weather code is thunderstorm / heavy rain
+                if (!alertActive) {
+                    if (code >= 95) {
+                        alertTitle = isMalay ? "Amaran Ribut Petir Semasa" : "Current Thunderstorm Warning";
+                        alertFullTitle = alertTitle;
+                        alertDetails = isMalay ? "Ribut petir dan hujan lebat sedang dikesan di kawasan anda."
+                                : "Thunderstorm and heavy rain currently detected in your area.";
+                        alertInstruction = isMalay ? "Kekal di dalam bangunan dan elakkan aktiviti luar."
+                                : "Stay indoors and avoid open outdoor areas.";
+                        alertSource = "Open-Meteo";
+                        alertActive = true;
+                    } else if (code >= 65) {
+                        alertTitle = isMalay ? "Amaran Hujan Lebat Semasa" : "Current Heavy Rain Warning";
+                        alertFullTitle = alertTitle;
+                        alertDetails = isMalay ? "Hujan lebat sedang turun di kawasan anda." : "Heavy rain currently falling in your area.";
+                        alertInstruction = isMalay ? "Pandu berhati-hati jika berada di jalan raya." : "Drive safely on wet roads.";
+                        alertSource = "Open-Meteo";
+                        alertActive = true;
+                    }
+                }
+
                 SharedPreferences.Editor edit = prefs.edit();
                 if (wJson != null) edit.putString(KEY_WEATHER_JSON, wJson.toString());
                 if (fallbackAqiJson != null) edit.putString(KEY_AQI_JSON, fallbackAqiJson.toString());
@@ -258,6 +447,14 @@ final class WeatherAirQuality {
                     .putString(KEY_AQI_STATION_PLACE, aqiPlace)
                     .putString(KEY_AQI_DATETIME, aqiDateTime)
                     .putBoolean(KEY_AQI_IS_JAS, isJas)
+                    .putBoolean(KEY_ALERT_ACTIVE, alertActive)
+                    .putString(KEY_ALERT_TITLE, alertTitle)
+                    .putString(KEY_ALERT_FULL_TITLE, alertFullTitle)
+                    .putString(KEY_ALERT_TIME_SPAN, alertTimeSpan)
+                    .putString(KEY_ALERT_DETAILS, alertDetails)
+                    .putString(KEY_ALERT_INSTRUCTION, alertInstruction)
+                    .putString(KEY_ALERT_SOURCE, alertSource)
+                    .putLong(KEY_ALERT_TIMESTAMP, now)
                     .putLong(KEY_LAST_UPDATE, now)
                     .apply();
 
@@ -663,7 +860,61 @@ final class WeatherAirQuality {
         return 0xFF991B1B;                 // Maroon (Berbahaya)
     }
 
-    private static JSONObject fetchJson(String urlStr) {
+    static WeatherAlert getLastAlert(Context context) {
+        if (context == null) return null;
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        boolean active = prefs.getBoolean(KEY_ALERT_ACTIVE, false);
+        String title = prefs.getString(KEY_ALERT_TITLE, "");
+        if (!active || title.isEmpty()) {
+            return null;
+        }
+        String fullTitle = prefs.getString(KEY_ALERT_FULL_TITLE, title);
+        String timeSpan = prefs.getString(KEY_ALERT_TIME_SPAN, "");
+        String details = prefs.getString(KEY_ALERT_DETAILS, "");
+        String instruction = prefs.getString(KEY_ALERT_INSTRUCTION, "");
+        String source = prefs.getString(KEY_ALERT_SOURCE, "MET Malaysia");
+        long timestamp = prefs.getLong(KEY_ALERT_TIMESTAMP, 0);
+        return new WeatherAlert(active, title, fullTitle, timeSpan, details, instruction, source, timestamp);
+    }
+
+    static WeatherAlert getTestAlert(Context context) {
+        boolean isMalay = context == null || AppLanguage.LANG_MS.equals(AppLanguage.getLanguage(context))
+                || AppLanguage.LANG_ID.equals(AppLanguage.getLanguage(context))
+                || Locale.getDefault().getLanguage().startsWith("ms")
+                || Locale.getDefault().getLanguage().startsWith("in")
+                || Locale.getDefault().getLanguage().startsWith("id");
+        return new WeatherAlert(
+                true,
+                isMalay ? "Amaran Ribut Petir · Amaran Angin Kencang dan Laut Bergelora"
+                        : "Thunderstorm Warning · Strong Winds & Rough Seas Warning",
+                isMalay ? "Amaran Ribut Petir & Angin Kencang" : "Thunderstorm & Strong Winds Warning",
+                isMalay ? "Sah sehingga: 2:00 PTG (3 Nov 2026)" : "Valid until: 2:00 PM (3 Nov 2026)",
+                isMalay ? "Ribut petir, hujan lebat dan angin kencang dijangka berlaku di beberapa kawasan perairan dan daratan."
+                        : "Thunderstorms, heavy rain and strong winds are expected over land and coastal waters.",
+                isMalay ? "Keadaan angin kencang dan laut bergelora ini adalah berbahaya kepada bot-bot kecil. Sila ambil langkah berjaga-jaga."
+                        : "Conditions of strong winds and rough seas are dangerous to small vessels. Please take necessary precautions.",
+                "MET Malaysia",
+                System.currentTimeMillis()
+        );
+    }
+
+    private static String formatHourDisplay(int hour24, boolean isMalay) {
+        int h12 = hour24 % 12;
+        if (h12 == 0) h12 = 12;
+        String period;
+        if (hour24 < 12) {
+            period = isMalay ? "PG" : "AM";
+        } else if (hour24 < 14) {
+            period = isMalay ? "TGH" : "PM";
+        } else if (hour24 < 19) {
+            period = isMalay ? "PTG" : "PM";
+        } else {
+            period = isMalay ? "MLM" : "PM";
+        }
+        return h12 + ":00 " + period;
+    }
+
+    static String fetchJsonText(String urlStr) {
         HttpURLConnection conn = null;
         try {
             URL url = new URL(urlStr);
@@ -679,12 +930,24 @@ final class WeatherAirQuality {
                 String line;
                 while ((line = reader.readLine()) != null) sb.append(line);
                 reader.close();
-                return new JSONObject(sb.toString());
+                return sb.toString();
             }
         } catch (Exception e) {
-            Log.w(TAG, "fetchJson failed for " + urlStr + ": " + e.getMessage());
+            Log.w(TAG, "fetchJsonText failed for " + urlStr + ": " + e.getMessage());
         } finally {
             if (conn != null) conn.disconnect();
+        }
+        return null;
+    }
+
+    private static JSONObject fetchJson(String urlStr) {
+        String text = fetchJsonText(urlStr);
+        if (text != null && !text.isEmpty()) {
+            try {
+                return new JSONObject(text);
+            } catch (Exception e) {
+                Log.w(TAG, "fetchJson parse error for " + urlStr + ": " + e.getMessage());
+            }
         }
         return null;
     }

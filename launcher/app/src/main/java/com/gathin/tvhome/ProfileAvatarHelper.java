@@ -3,10 +3,12 @@ package com.gathin.tvhome;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.ImageDecoder;
 import android.graphics.Outline;
 import android.graphics.drawable.AnimatedImageDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -47,6 +49,9 @@ public final class ProfileAvatarHelper {
         });
         container.setClipToOutline(true);
 
+        boolean animEnabled = !context.getSharedPreferences("theme_prefs", Context.MODE_PRIVATE)
+                .getBoolean("reduced_motion", false);
+
         if (profile == null || ProfileManager.AVATAR_TYPE_LOTTIE.equals(profile.avatarType)) {
             // 1. Watak Tunggal (Lottie Animation)
             LottieAnimationView lottie = new LottieAnimationView(context);
@@ -63,6 +68,9 @@ public final class ProfileAvatarHelper {
             int face = (profile != null) ? profile.lottieFaceIndex : AvatarThemeManager.DEFAULT_FACE_INDEX;
 
             AvatarThemeManager.applyAvatar(lottie, bg, chr, face, context);
+            if (!animEnabled || DevicePerformance.isLowSpec(context)) {
+                lottie.pauseAnimation();
+            }
 
         } else {
             // 2 & 3. Animated GIF or Custom Image
@@ -78,6 +86,19 @@ public final class ProfileAvatarHelper {
 
             loadGifOrImage(iv, profile.avatarPath, context);
         }
+
+        // Circular frosted liquid glass border overlay (ReactDrops Soap Bubble style)
+        float density = context.getResources().getDisplayMetrics().density;
+        View glassRim = new View(context);
+        GradientDrawable rimGd = new GradientDrawable();
+        rimGd.setShape(GradientDrawable.OVAL);
+        rimGd.setColor(Color.TRANSPARENT);
+        rimGd.setStroke(Math.max(1, Math.round(1.5f * density)), 0x5967E8F9); // Translucent Soap Bubble iridescent glass rim
+        glassRim.setBackground(rimGd);
+        container.addView(glassRim, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        ));
     }
 
     public static void loadGifOrImage(ImageView iv, String path, Context context) {
@@ -135,8 +156,21 @@ public final class ProfileAvatarHelper {
                 Drawable d = ImageDecoder.decodeDrawable(src);
                 iv.setImageDrawable(d);
                 if (d instanceof AnimatedImageDrawable) {
-                    ((AnimatedImageDrawable) d).setRepeatCount(AnimatedImageDrawable.REPEAT_INFINITE);
-                    ((AnimatedImageDrawable) d).start();
+                    AnimatedImageDrawable aid = (AnimatedImageDrawable) d;
+                    boolean animEnabled = !DevicePerformance.isLowSpec(iv.getContext());
+                    try {
+                        if (animEnabled) {
+                            animEnabled = !iv.getContext().getSharedPreferences("theme_prefs", Context.MODE_PRIVATE)
+                                    .getBoolean("reduced_motion", false);
+                        }
+                    } catch (Exception ignored) {}
+
+                    if (animEnabled) {
+                        aid.setRepeatCount(AnimatedImageDrawable.REPEAT_INFINITE);
+                        aid.start();
+                    } else {
+                        aid.stop();
+                    }
                 }
                 return;
             } catch (Exception ignored) {}

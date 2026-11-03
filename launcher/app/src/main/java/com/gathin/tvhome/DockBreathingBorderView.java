@@ -15,9 +15,11 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import androidx.annotation.Nullable;
 
 /**
- * Organic Breathing Glow & Glass Rim Focus Effect for TV Dock Cards.
- * Gently and elegantly pulses border illumination, specular reflection,
- * and outer atmospheric bloom in a calm rhythmic breathing cycle.
+ * High-performance Breathing Glow & Glass Rim Focus Effect for TV Dock Cards.
+ * Optimized for low-spec Android TV boxes:
+ * - Caches shaders & gradient objects to eliminate all frame-by-frame GC allocations.
+ * - On low-spec devices or reduced motion, renders a crisp static focus rim with 0% CPU/GPU overhead.
+ * - On capable hardware, provides smooth 60fps organic breathing without dropped frames.
  */
 public class DockBreathingBorderView extends View {
 
@@ -32,8 +34,12 @@ public class DockBreathingBorderView extends View {
     private float density = 1f;
     private float cornerRadius = 16f;
 
-    private float breathProgress = 0f;
+    private float breathProgress = 0.85f;
     private ValueAnimator breathAnimator;
+
+    // Cached shaders to prevent object allocations inside onDraw()
+    private LinearGradient cachedRimShader;
+    private LinearGradient cachedSheenShader;
 
     public DockBreathingBorderView(Context context) {
         super(context);
@@ -95,9 +101,52 @@ public class DockBreathingBorderView extends View {
 
         sheenBounds.set(bounds.left + 2 * density, bounds.top + density,
                 bounds.right - 2 * density, bounds.top + 16 * density);
+
+        // Pre-allocate and cache shaders once per size change
+        cachedRimShader = new LinearGradient(
+                0, bounds.top, 0, bounds.bottom,
+                new int[]{0xFFFFFFFF, 0xFF38BDF8},
+                new float[]{0.0f, 1.0f},
+                Shader.TileMode.CLAMP
+        );
+        rimPaint.setShader(cachedRimShader);
+
+        cachedSheenShader = new LinearGradient(
+                sheenBounds.left, sheenBounds.top, sheenBounds.right, sheenBounds.top,
+                new int[]{0x00FFFFFF, 0xFFFFFFFF, 0x00FFFFFF},
+                new float[]{0f, 0.5f, 1f},
+                Shader.TileMode.CLAMP
+        );
+        topSheenPaint.setShader(cachedSheenShader);
+    }
+
+    private boolean isAnimationsEnabled() {
+        try {
+            if (DevicePerformance.isLowSpec(getContext())) {
+                return false; // Low-spec TV devices stay buttery smooth with static focus rim
+            }
+            return !getContext().getSharedPreferences("theme_prefs", Context.MODE_PRIVATE)
+                    .getBoolean("reduced_motion", false);
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
+    public void setReducedMotion(boolean reduced) {
+        if (reduced) {
+            stopAnimation();
+            breathProgress = 0.85f;
+            invalidate();
+        }
     }
 
     public void startAnimation() {
+        if (!isAnimationsEnabled()) {
+            stopAnimation();
+            breathProgress = 0.85f;
+            invalidate();
+            return;
+        }
         if (breathAnimator != null && breathAnimator.isRunning()) return;
 
         // Smooth 1600ms inhale-exhale cycle
@@ -118,15 +167,21 @@ public class DockBreathingBorderView extends View {
             breathAnimator.cancel();
             breathAnimator = null;
         }
-        breathProgress = 0f;
-        invalidate();
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         if (getVisibility() == VISIBLE) {
-            startAnimation();
+            if (isAnimationsEnabled()) {
+                startAnimation();
+            } else {
+                stopAnimation();
+                breathProgress = 0.85f;
+                invalidate();
+            }
+        } else {
+            stopAnimation();
         }
     }
 
@@ -140,7 +195,13 @@ public class DockBreathingBorderView extends View {
     public void setVisibility(int visibility) {
         super.setVisibility(visibility);
         if (visibility == VISIBLE) {
-            startAnimation();
+            if (isAnimationsEnabled()) {
+                startAnimation();
+            } else {
+                stopAnimation();
+                breathProgress = 0.85f;
+                invalidate();
+            }
         } else {
             stopAnimation();
         }
@@ -152,10 +213,13 @@ public class DockBreathingBorderView extends View {
 
         if (getWidth() <= 0 || getHeight() <= 0) return;
 
-        // Calculate smooth breathing factors
-        // min alpha: 0.35, max alpha: 1.0
+        // Ensure shaders are ready
+        if (cachedRimShader == null) {
+            updateBounds();
+        }
+
+        // Calculate smooth breathing factors without object allocations
         float alphaFactor = 0.35f + (0.65f * breathProgress);
-        // stroke width breaths between 1.6dp and 2.6dp
         float strokeW = (1.6f + (1.0f * breathProgress)) * density;
         rimPaint.setStrokeWidth(strokeW);
 
@@ -166,31 +230,14 @@ public class DockBreathingBorderView extends View {
         canvas.drawRoundRect(glowBounds, cornerRadius + (2f * density), cornerRadius + (2f * density), glowPaint);
 
         // 2. Main Glass Rim Border with Vertical Specular Gradient
-        // Top: pure white highlight -> Bottom: electric cyan
-        int topAlpha = (int) (245 * alphaFactor);
-        int bottomAlpha = (int) (180 * alphaFactor);
-        int topColor = Color.argb(topAlpha, 255, 255, 255);
-        int bottomColor = Color.argb(bottomAlpha, 56, 189, 248);
-
-        LinearGradient rimShader = new LinearGradient(
-                0, bounds.top, 0, bounds.bottom,
-                new int[]{topColor, bottomColor},
-                new float[]{0.0f, 1.0f},
-                Shader.TileMode.CLAMP
-        );
-        rimPaint.setShader(rimShader);
+        int rimAlpha = (int) (225 * alphaFactor);
+        rimPaint.setAlpha(rimAlpha);
         canvas.drawRoundRect(bounds, cornerRadius, cornerRadius, rimPaint);
 
         // 3. Delicate Soap-Bubble Top Edge Specular Glint
         int sheenAlpha = (int) (190 * (0.4f + (0.6f * breathProgress)));
         topSheenPaint.setStrokeWidth(1.2f * density);
-        LinearGradient sheenShader = new LinearGradient(
-                sheenBounds.left, sheenBounds.top, sheenBounds.right, sheenBounds.top,
-                new int[]{0x00FFFFFF, Color.argb(sheenAlpha, 255, 255, 255), 0x00FFFFFF},
-                new float[]{0f, 0.5f, 1f},
-                Shader.TileMode.CLAMP
-        );
-        topSheenPaint.setShader(sheenShader);
+        topSheenPaint.setAlpha(sheenAlpha);
         canvas.drawLine(bounds.left + cornerRadius, bounds.top + (0.5f * density),
                 bounds.right - cornerRadius, bounds.top + (0.5f * density), topSheenPaint);
     }

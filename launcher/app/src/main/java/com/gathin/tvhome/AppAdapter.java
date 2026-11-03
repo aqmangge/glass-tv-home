@@ -118,14 +118,14 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
 
     private final Context ctx;
     private final TileListener listener;
-    private final int dockSize;
+    private int dockSize;
     /** Dock order (config.xml dock_apps, or a theme's config.json). */
     private final List<String> favourites;
     /** Never shown as tiles (res/values/config.xml, hidden_apps). */
     private final Set<String> hidden;
     private final boolean showHomeSettings;
     /** Calmer motion for weak GPUs (config.xml, reduced_motion): no overshoot, shorter fades. */
-    private final boolean reducedMotion;
+    private boolean reducedMotion;
     private final List<Entry> items = new ArrayList<>();
     /** The order someone arranged the tiles in, by key (see {@link #keyAt}); empty until they do. */
     private final List<String> arranged = new ArrayList<>();
@@ -146,6 +146,15 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         setHasStableIds(true);
         String saved = ctx.getSharedPreferences(ORDER_PREFS, Context.MODE_PRIVATE).getString(ORDER_KEY, "");
         if (!saved.isEmpty()) arranged.addAll(Arrays.asList(saved.split("\n")));
+    }
+
+    public void setDockSize(int dockSize) {
+        this.dockSize = dockSize;
+    }
+
+    public void setReducedMotion(boolean reducedMotion) {
+        this.reducedMotion = reducedMotion;
+        notifyDataSetChanged();
     }
 
     /**
@@ -309,10 +318,21 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
 
     @Override
     public void onBindViewHolder(@NonNull Holder h, int position) {
+        h.reducedMotion = this.reducedMotion;
         Entry e = items.get(position);
         h.name.setText(e.name);
         h.name.setVisibility(position < dockSize ? View.INVISIBLE : View.VISIBLE);   // the dock has no labels
         boolean focused = h.card.isFocused();   // a rebind after reload() can hit the focused tile
+        if (h.breathingBorder != null) {
+            h.breathingBorder.setReducedMotion(this.reducedMotion);
+            if (focused && !this.reducedMotion) {
+                float r = cornerRadius(h.card.getWidth(), h.card.getResources().getDisplayMetrics().density);
+                h.breathingBorder.setCornerRadiusDp(r / h.card.getResources().getDisplayMetrics().density);
+                h.breathingBorder.setVisibility(View.VISIBLE);
+            } else {
+                h.breathingBorder.setVisibility(View.GONE);
+            }
+        }
         h.name.setAlpha(focused ? 1f : 0f);
         h.card.setScaleX(focused ? FOCUS_SCALE : 1f);
         h.card.setScaleY(focused ? FOCUS_SCALE : 1f);
@@ -518,7 +538,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         final TextView label;
         final TextView name;
         final DockBreathingBorderView breathingBorder;
-        final boolean reducedMotion;
+        boolean reducedMotion;
 
         Holder(View v, TileListener listener, boolean reducedMotion) {
             super(v);
@@ -550,7 +570,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
 
             card.setOnFocusChangeListener((view, focused) -> {
                 if (breathingBorder != null) {
-                    if (focused) {
+                    if (focused && !this.reducedMotion) {
                         float r = cornerRadius(view.getWidth(), density);
                         breathingBorder.setCornerRadiusDp(r / density);
                         breathingBorder.setVisibility(View.VISIBLE);
@@ -568,7 +588,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
                             .setInterpolator(ZOOM_REDUCED)
                             .withLayer()
                             .start();
-                    name.animate().alpha(focused ? 1f : 0f).setDuration(100).start();
+                    name.animate().alpha(focused ? 1f : 0f).setDuration(100).withLayer().start();
                 } else {
                     view.animate().scaleX(s).scaleY(s)
                             .setDuration(focused ? 260 : 180)
@@ -577,7 +597,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
                             .start();
                     name.animate().alpha(focused ? 1f : 0f)
                             .translationY(focused ? density * 4f : -density * 6f)
-                            .setDuration(220).start();
+                            .setDuration(220).withLayer().start();
                 }
                 int pos = getBindingAdapterPosition();
                 if (focused && listener != null && pos != RecyclerView.NO_POSITION) {

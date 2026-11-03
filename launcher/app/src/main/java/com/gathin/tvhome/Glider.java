@@ -86,7 +86,7 @@ final class Glider extends View {
     private final RectF drawn = new RectF(), dirty = new RectF(), area = new RectF();
     private final int[] gliderAt = new int[2], companionAt = new int[2];
     private final float[] target = new float[5];
-    private final boolean reducedMotion;
+    private boolean reducedMotion;
     /** How far a scrolling list has carried the shape since its target was set. */
     private float yShift;
     private float opacity;
@@ -120,6 +120,21 @@ final class Glider extends View {
             springs[i].addEndListener((anim, canceled, value, velocity) -> {
                 if (!canceled) arriveIfResting();
             });
+        }
+    }
+
+    void setReducedMotion(boolean reduced) {
+        this.reducedMotion = reduced;
+        for (int i = 0; i < springs.length; i++) {
+            if (springs[i] != null) {
+                if (reduced) {
+                    springs[i].setSpring(new SpringForce().setStiffness(1400f).setDampingRatio(0.95f));
+                    springs[i].setMinimumVisibleChange(1.5f);
+                } else {
+                    springs[i].setSpring(new SpringForce().setStiffness(900f).setDampingRatio(1.0f));
+                    springs[i].setMinimumVisibleChange(1.0f);
+                }
+            }
         }
     }
 

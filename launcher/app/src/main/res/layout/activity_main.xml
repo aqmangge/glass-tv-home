@@ -409,7 +409,9 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false">
 
             <!-- Top Row: Clock & Date on Left, Menu Buttons on Right (SEBARIS DENGAN MASA) -->
             <LinearLayout
@@ -502,32 +504,118 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Bawah Jam: Weather plus Haze API (clickable & focusable pill to open WeatherActivity) -->
-            <TextView
-                android:id="@+id/weatherAirQuality"
+            <!-- Bawah Jam: Row Cuaca & Amaran Cuaca Buruk (Sebelah Weather) -->
+            <LinearLayout
+                android:id="@+id/weatherRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/leftBlock"
                 android:layout_alignParentStart="true"
-                android:layout_marginTop="8dp"
-                android:focusable="true"
-                android:clickable="true"
-                android:background="@drawable/weather_pill_bg"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:paddingTop="6dp"
-                android:paddingBottom="5dp"
-                android:gravity="center_vertical"
-                android:includeFontPadding="false"
-                android:textColor="#FFFFFFFF"
-                android:textSize="14sp"
-                android:fontFamily="@font/inter"
-                android:fontVariationSettings="'wght' 500"
-                android:shadowColor="#99000000"
-                android:shadowDx="0"
-                android:shadowDy="1"
-                android:shadowRadius="3"
-                android:singleLine="true" />
+                android:layout_marginTop="6dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/weatherAirQuality"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:background="@drawable/weather_pill_bg"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="5dp"
+                    android:gravity="center_vertical"
+                    android:includeFontPadding="false"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="14sp"
+                    android:fontFamily="@font/inter"
+                    android:fontVariationSettings="'wght' 500"
+                    android:shadowColor="#99000000"
+                    android:shadowDx="0"
+                    android:shadowDy="1"
+                    android:shadowRadius="3"
+                    android:singleLine="true" />
+
+                <!-- Amaran Cuaca Buruk / Ribut Petir (Sebelah Weather) -->
+                <LinearLayout
+                    android:id="@+id/weatherWarningPill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/weather_warning_pill_bg"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="6dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    android:visibility="gone">
+
+                    <!-- Inner clickable area for opening warning details dialog -->
+                    <LinearLayout
+                        android:id="@+id/weatherWarningContent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingEnd="6dp"
+                        android:paddingTop="2dp"
+                        android:paddingBottom="2dp"
+                        android:focusable="true"
+                        android:clickable="true">
+
+                        <ImageView
+                            android:id="@+id/weatherWarningIcon"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_weather_warning"
+                            android:contentDescription="Amaran Cuaca" />
+
+                        <TextView
+                            android:id="@+id/weatherWarningText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:maxWidth="400dp"
+                            android:singleLine="true"
+                            android:ellipsize="marquee"
+                            android:marqueeRepeatLimit="marquee_forever"
+                            android:fadingEdge="horizontal"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="14dp"
+                            android:textColor="#FFFF8A80"
+                            android:textSize="13.5sp"
+                            android:fontFamily="@font/inter"
+                            android:fontVariationSettings="'wght' 500"
+                            android:includeFontPadding="false"
+                            android:shadowColor="#99000000"
+                            android:shadowDx="0"
+                            android:shadowDy="1"
+                            android:shadowRadius="3" />
+                    </LinearLayout>
+
+                    <!-- Dedicated Close "X" Button to dismiss/hide warning -->
+                    <ImageView
+                        android:id="@+id/btnWarningDismiss"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_marginStart="2dp"
+                        android:background="@drawable/selector_btn_circle_subtle"
+                        android:padding="4.5dp"
+                        android:src="@drawable/ic_close"
+                        android:focusable="true"
+                        android:clickable="true"
+                        android:contentDescription="Tutup Amaran" />
+                </LinearLayout>
+            </LinearLayout>
 
             <!-- Now Playing Widget Card: Matching bravia-glass-tv design -->
             <LinearLayout
@@ -535,7 +623,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:minHeight="64dp"
-                android:layout_below="@id/weatherAirQuality"
+                android:layout_below="@id/weatherRow"
                 android:layout_alignParentStart="true"
                 android:layout_marginTop="12dp"
                 android:focusable="false"
@@ -717,6 +805,7 @@
                     android:layout_marginStart="10dp"
                     android:focusable="true"
                     android:clickable="true"
+                    android:foreground="@drawable/avatar_glass_border"
                     android:contentDescription="Select User &amp; Child Mode"
                     android:clipChildren="false"
                     android:clipToPadding="false">
@@ -764,7 +853,7 @@
                 android:id="@+id/prayerTimes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/weatherAirQuality"
+                android:layout_below="@id/weatherRow"
                 android:layout_alignParentStart="true"
                 android:visibility="gone" />
         </RelativeLayout>
