@@ -15,11 +15,12 @@ final class Voice implements TextToSpeech.OnInitListener {
     private static final Locale MALAY = Locale.forLanguageTag("ms-MY");
     /** Indonesian is spelt and said almost like Malay, and far more phones have a voice for it. */
     private static final Locale INDONESIAN = Locale.forLanguageTag("id-ID");
+    private static final Locale CHINESE = Locale.SIMPLIFIED_CHINESE;
 
     private final TextToSpeech tts;
     private boolean ready, arabic;
     private Locale malay;
-    private boolean muted;
+    private boolean muted, chinese;
     private int id;
 
     Voice(Context c) {
@@ -33,6 +34,7 @@ final class Voice implements TextToSpeech.OnInitListener {
         arabic = tts.isLanguageAvailable(ARABIC) >= TextToSpeech.LANG_AVAILABLE;
         if (tts.isLanguageAvailable(MALAY) >= TextToSpeech.LANG_AVAILABLE) malay = MALAY;
         else if (tts.isLanguageAvailable(INDONESIAN) >= TextToSpeech.LANG_AVAILABLE) malay = INDONESIAN;
+        chinese = tts.isLanguageAvailable(CHINESE) >= TextToSpeech.LANG_AVAILABLE;
         tts.setSpeechRate(0.85f);
         tts.setPitch(1.1f);
     }
@@ -75,6 +77,19 @@ final class Voice implements TextToSpeech.OnInitListener {
     void setMuted(boolean m) {
         muted = m;
         if (m) stop();
+    }
+
+    /**
+     * Reads Mandarin with the phone's Chinese voice, slower for learners. Returns false when the phone has none
+     * (the screen then says how to add one).
+     */
+    boolean sayChinese(String text, boolean slow) {
+        if (!ready) return true;
+        if (!chinese) return false;
+        tts.setSpeechRate(slow ? 0.6f : 0.85f);
+        speak(text, CHINESE, true);
+        tts.setSpeechRate(0.85f);
+        return true;
     }
 
     boolean hasMalay() {

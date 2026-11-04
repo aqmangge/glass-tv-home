@@ -51,6 +51,13 @@ shot 15-arabic-draw "4,1"
 shot 16-123-learn "1,0"
 shot 17-islamic-drag "3,2"
 
+# Cakap Mandarin: the path of four levels, a word, a sentence, a conversation, a speech on stage.
+shot 60-zh-levels "zh"
+shot 61-zh-words "zh,0"
+shot 62-zh-sentences "zh,1"
+shot 63-zh-chat "zh,2,3"
+shot 64-zh-stage "zh,3,0"
+
 # The music corner: each instrument.
 shot 50-music-piano "music,0"
 shot 51-music-drums "music,1"

@@ -26,6 +26,15 @@ Five subjects, each with four ways to play:
 | 🧩 **Drag** | Drag each tile into the slot of its picture: 🍎 takes A, three ducklings take 3, the shadow of ب takes ب. |
 | 🔗 **Match** | Draw a line from each picture to its word (or tap one, then the other). |
 
+**华语 Cakap Mandarin** (a card on the home screen) teaches Mandarin for speaking in front of people, in four steps:
+24 words (greetings, name, age, family, school, likes, thanks), 16 short sentences, 4 role-play conversations with a
+panda (meeting someone, at school, family, being asked to introduce yourself at an event: pick the right reply, then
+say it), and 4 short speeches given on a stage with curtains, a spotlight and an audience (a teleprompter lights up as
+the model reads each line, then the child says it; the audience stands and claps at the end). Simplified characters
+with Hanyu Pinyin, meanings in Malay and English, read by the phone's Chinese voice. The microphone uses the phone's
+own speech recogniser to give up to three stars; without one it records the child and plays it back. Nothing heard
+is kept or sent.
+
 **🎵 Muzik** (top left of the home screen) is a break from learning: a piano (C4–C6, chords and slides), a drum kit
 (kick, snare, hi-hats, three toms, crash), a guitar (six strings in standard tuning, chord buttons C G D Am Em F, tap a
 string or swipe to strum) and a rainbow xylophone (C5–C7, slide for a glissando), with ♪ ♫ floating up from each note.
@@ -92,6 +101,7 @@ drags tiles, draws match lines, traces Alif), records a video and checks each ga
 | File | What it does |
 |---|---|
 | `Content.java` | All the letters, numbers and words |
+| `Chinese`, `ChineseScreen`, `PhraseScreen`, `ChatScreen`, `StageScreen`, `ZhPickScreen`, `ZhKit`, `Speech` | Cakap Mandarin: the course, its four levels, and listening to the child |
 | `SoundBank`, `Synth`, `MusicScreen` + `PianoView`, `DrumView`, `GuitarView`, `XyloView` | The music corner: synthesis, the low-latency mixer, and the instruments |
 | `Exam.java`, `ExamScreen.java` | The Year 1 test: question banks, and the test with its marks |
 | `BabyArt`, `BabyView`, `BabyLayer` | The Kawan Comel babies: sprites, mascots, and their games |

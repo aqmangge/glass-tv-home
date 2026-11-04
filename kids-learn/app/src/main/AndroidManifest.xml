@@ -6,9 +6,16 @@
         <intent>
             <action android:name="android.intent.action.TTS_SERVICE" />
         </intent>
+        <!-- the phone's speech recogniser, for "now you say it" in Cakap Mandarin -->
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
     </queries>
 
-    <!-- No INTERNET permission: no ads, no tracking, works offline. -->
+    <!-- Only to hear the child speak Mandarin: asked for the first time they press the microphone. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- No INTERNET permission: no ads, no tracking, works offline. Nothing the microphone hears is kept or sent. -->
     <application
         android:allowBackup="true"
         android:hardwareAccelerated="true"

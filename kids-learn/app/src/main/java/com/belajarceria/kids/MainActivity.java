@@ -80,6 +80,25 @@ public final class MainActivity extends Activity {
      */
     private void open(String path) {
         try {
+            if (path.startsWith("zh")) {
+                // "zh" opens Cakap Mandarin; "zh,3" goes straight to level 4 (public speaking)
+                String[] p = path.split(",");
+                lastNav = 0;
+                ChineseScreen zh = new ChineseScreen(this);
+                push(zh);
+                if (p.length > 1) {
+                    int level = Integer.parseInt(p[1].trim());
+                    lastNav = 0;
+                    push(zh.level(level));
+                    // a third number opens one conversation (level 3) or speech (level 4) directly
+                    if (p.length > 2 && level >= 2) {
+                        int item = Integer.parseInt(p[2].trim());
+                        lastNav = 0;
+                        push(level == 2 ? new ChatScreen(this, item) : new StageScreen(this, item));
+                    }
+                }
+                return;
+            }
             if (path.startsWith("music")) {
                 // "music,2" opens the music corner on the guitar
                 String[] p = path.split(",");
@@ -215,6 +234,28 @@ public final class MainActivity extends Activity {
             }).to(0f);
             Spring.scale(badge, 0.8f, 300f, 1f);
         }, 1700);
+    }
+
+    private Runnable micGranted;
+
+    /** Runs the action once the microphone may be used, asking the parent the first time. */
+    void withMic(Runnable action) {
+        if (checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            action.run();
+            return;
+        }
+        micGranted = action;
+        requestPermissions(new String[]{android.Manifest.permission.RECORD_AUDIO}, 7);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int code, String[] permissions, int[] results) {
+        super.onRequestPermissionsResult(code, permissions, results);
+        if (code == 7 && results.length > 0 && results[0] == android.content.pm.PackageManager.PERMISSION_GRANTED
+                && micGranted != null) {
+            micGranted.run();
+        }
+        micGranted = null;
     }
 
     /** For automated tests: once the screen settles, log where each labelled piece is on screen. */

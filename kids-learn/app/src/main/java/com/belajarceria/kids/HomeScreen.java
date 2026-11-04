@@ -25,7 +25,7 @@ final class HomeScreen extends Screen {
         int cardH = (int) Math.min(Math.max(Ui.shortSide(a) * 0.5f, Ui.dp(170)), Ui.dp(300));
         // All five cards fit across the screen when it is wide enough, so nothing hides off the edge.
         int screenW = getResources().getDisplayMetrics().widthPixels;
-        int fitW = (screenW - Ui.dp(48)) / (Content.SUBJECTS.length + 1) - Ui.dp(20);
+        int fitW = (screenW - Ui.dp(48)) / (Content.SUBJECTS.length + 2) - Ui.dp(20);
         int cardW = (int) Math.max(Ui.dp(120), Math.min(cardH * 0.8f, fitW));
         cardH = (int) Math.min(cardH, cardW * 1.3f);
 
@@ -65,6 +65,14 @@ final class HomeScreen extends Screen {
             row.addView(c, lp);
             cards.add(c);
         }
+        View zh = card(new Content.Subject("华语", "Cakap Mandarin", "中文", ZhKit.RED_GOLD, Content.Kind.WORDS,
+                new Content.Item[0]), cardW, cardH);
+        zh.setContentDescription("Mandarin");
+        Ui.press(zh, () -> act.push(new ChineseScreen(act)));
+        LinearLayout.LayoutParams zp = new LinearLayout.LayoutParams(cardW, cardH);
+        zp.leftMargin = zp.rightMargin = Ui.dp(10);
+        row.addView(zh, zp);
+        cards.add(zh);
         View exam = examCard(cardW, cardH);
         LinearLayout.LayoutParams ep = new LinearLayout.LayoutParams(cardW, cardH);
         ep.leftMargin = ep.rightMargin = Ui.dp(10);

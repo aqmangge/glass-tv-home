@@ -348,6 +348,50 @@ def play_music():
     back()
 
 
+def play_mandarin():
+    print("Cakap Mandarin: word cards and the microphone, a conversation, a speech with applause")
+    sh(f"pm grant {PKG} android.permission.RECORD_AUDIO")
+    before = len(events())
+    tap("Mandarin", 3)
+    tap("zh level 0", 3)
+    tap("next", 1.5)
+    tap("next", 1.5)
+    tap("mic", 1)
+    # the emulator has no recogniser, so the app records instead; it stops on its own after five seconds
+    time.sleep(7)
+    shot("p18-zh-words")
+    back()
+    back()
+    sh(f"am start -S -W -n {PKG}/.MainActivity --es open zh,2,0")
+    time.sleep(6)
+    for k in range(4):
+        tap("reply:wrong", 1.2)
+        tap("reply:right", 2.5)
+        if k == 1:
+            shot("p19-zh-chat")
+        tap("skip", 3.5)
+    time.sleep(1)
+    shot("p20-zh-chat-done")
+    sh(f"am start -S -W -n {PKG}/.MainActivity --es open zh,3,0")
+    time.sleep(6)
+    shot("p21-zh-stage")
+    for _ in range(7):
+        tap("next", 1.2)
+    time.sleep(1.5)
+    shot("p22-zh-applause")
+    ev = events()[before:]
+    phrases = [e for e in ev if e.startswith("zh phrase")]
+    check("Mandarin: word cards go forward", len(phrases) >= 3, f"{len(phrases)} cards")
+    check("Mandarin: the microphone listens and scores", any(e.startswith("zh mic stars") for e in ev),
+          next((e for e in ev if e.startswith("zh mic")), "no mic"))
+    check("Mandarin: a wrong reply is refused, a right one goes on", sum(e.startswith("zh chat wrong") for e in ev) == 4
+          and sum(e.startswith("zh chat right") for e in ev) == 4, f"{[e for e in ev if e.startswith('zh chat')]}")
+    check("Mandarin: the conversation is finished", any(e.startswith("zh chat done") for e in ev))
+    check("Mandarin: the speech ends with applause", any(e.startswith("zh stage applause") for e in ev))
+    sh(f"am start -S -W -n {PKG}/.MainActivity")
+    time.sleep(3)
+
+
 def record(name):
     """Starts a screen recording (Android stops each one after 3 minutes)."""
     return subprocess.Popen(["adb", "shell", "screenrecord", "--time-limit", "180", "--bit-rate", "6000000",
@@ -392,6 +436,10 @@ def main():
     back()
 
     stop(rec, "playtest")
+
+    rec = record("mandarin")
+    play_mandarin()
+    stop(rec, "mandarin")
 
     rec = record("music")
     play_music()
