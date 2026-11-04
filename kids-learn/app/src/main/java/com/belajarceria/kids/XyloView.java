@@ -107,6 +107,7 @@ final class XyloView extends InstrumentView {
             paint.setColor(0x33000000);
             c.drawRoundRect(r.left + Ui.dp(2), r.top + Ui.dp(5), r.right + Ui.dp(2), r.bottom + Ui.dp(5), Ui.dp(10), Ui.dp(10), paint);
             int light = Content.mix(col, 0xFFFFFFFF, 0.25f + 0.4f * k), dark = Content.mix(col, 0xFF000000, 0.12f);
+            paint.setColor(0xFFFFFFFF); // a shader is still scaled by the paint's alpha
             paint.setShader(new LinearGradient(r.left, 0, r.right, 0, light, dark, Shader.TileMode.CLAMP));
             c.drawRoundRect(r, Ui.dp(10), Ui.dp(10), paint);
             paint.setShader(null);

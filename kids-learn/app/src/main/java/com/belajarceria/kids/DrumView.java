@@ -98,6 +98,7 @@ final class DrumView extends InstrumentView {
                 c.save();
                 c.rotate(tilt, cx, cy);
                 r.set(cx - rad * 1.25f, cy - rad * 0.42f * squash, cx + rad * 1.25f, cy + rad * 0.42f * squash);
+                paint.setColor(0xFFFFFFFF); // a shader is still scaled by the paint's alpha
                 paint.setShader(new RadialGradient(cx - rad * 0.3f, cy - rad * 0.2f, rad * 1.4f,
                         new int[]{0xFFFFF3B0, 0xFFFFC300, 0xFFC98A00}, null, Shader.TileMode.CLAMP));
                 c.drawOval(r, paint);
@@ -122,6 +123,7 @@ final class DrumView extends InstrumentView {
                 c.drawCircle(cx, cy, rad, paint);
                 paint.setColor(0xFFE0E0E8);
                 c.drawCircle(cx, cy, rad * 0.86f * squash, paint);
+                paint.setColor(0xFFFFFFFF); // a shader is still scaled by the paint's alpha
                 paint.setShader(new RadialGradient(cx - rad * 0.25f, cy - rad * 0.3f, rad,
                         new int[]{0xFFFFFFFF, k > 0 ? Content.mix(0xFFF6F3EA, col, 0.4f * k) : 0xFFF6F3EA}, null,
                         Shader.TileMode.CLAMP));

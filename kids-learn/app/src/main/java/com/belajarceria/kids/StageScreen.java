@@ -226,9 +226,11 @@ final class StageScreen extends Screen {
             float clap = Math.max(0f, 1f - (now - applauseAt) / 4500f);
             float nod = Math.max(0f, 1f - (now - nodAt) / 900f);
             // back wall and stage floor
+            paint.setColor(0xFFFFFFFF); // a shader is still scaled by the paint's alpha
             paint.setShader(new LinearGradient(0, 0, 0, h, 0xFF3A1F2B, 0xFF1A1016, Shader.TileMode.CLAMP));
             c.drawRect(0, 0, w, h, paint);
             float floor = h * 0.66f;
+            paint.setColor(0xFFFFFFFF); // a shader is still scaled by the paint's alpha
             paint.setShader(new LinearGradient(0, floor, 0, h, 0xFFB5793F, 0xFF6E4423, Shader.TileMode.CLAMP));
             c.drawRect(0, floor, w, h, paint);
             paint.setShader(null);
@@ -236,6 +238,7 @@ final class StageScreen extends Screen {
             for (float x = 0; x < w; x += Ui.dp(46)) c.drawLine(x, floor, x, h, paint);
             // spotlight on the podium, gently breathing
             float sx = w * 0.42f, sr = h * (0.55f + 0.02f * (float) Math.sin(t * 2));
+            paint.setColor(0xFFFFFFFF); // a shader is still scaled by the paint's alpha
             paint.setShader(new RadialGradient(sx, floor, sr, new int[]{0x66FFF3C4, 0x22FFF3C4, 0x00FFF3C4}, null,
                     Shader.TileMode.CLAMP));
             c.drawCircle(sx, floor, sr, paint);
@@ -295,6 +298,7 @@ final class StageScreen extends Screen {
             float fold = (x1 - x0) / 3f;
             for (int i = 0; i < 3; i++) {
                 float a = x0 + i * fold;
+                paint.setColor(0xFFFFFFFF); // a shader is still scaled by the paint's alpha
                 paint.setShader(new LinearGradient(a, 0, a + fold, 0, new int[]{0xFF6D0F1E, 0xFFB71C2E, 0xFF6D0F1E}, null,
                         Shader.TileMode.CLAMP));
                 c.drawRect(a, 0, a + fold, h, paint);

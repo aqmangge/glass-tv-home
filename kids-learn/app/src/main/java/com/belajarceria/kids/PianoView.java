@@ -136,6 +136,7 @@ final class PianoView extends InstrumentView {
             paint.setShader(null);
             paint.setColor(0x33000000);
             c.drawRoundRect(r.left, r.top + Ui.dp(4), r.right, r.bottom + Ui.dp(4) - sink, rad, rad, paint);
+            paint.setColor(0xFFFFFFFF); // a shader is still scaled by the paint's alpha
             paint.setShader(new LinearGradient(0, r.top, 0, r.bottom,
                     down[m] ? Content.mix(0xFFFFFFFF, color, 0.35f) : 0xFFFFFFFF,
                     down[m] ? Content.mix(0xFFFFFFFF, color, 0.6f) : 0xFFF1F1F6, Shader.TileMode.CLAMP));
@@ -159,6 +160,7 @@ final class PianoView extends InstrumentView {
             paint.setColor(0x44000000);
             c.drawRoundRect(r.left + Ui.dp(2), r.top + Ui.dp(4), r.right + Ui.dp(2), r.bottom + Ui.dp(4), rad * 0.6f, rad * 0.6f, paint);
             int top = down[b] ? Content.mix(0xFF2B2D42, RAINBOW[noteColorIndex(b)], 0.45f) : 0xFF2B2D42;
+            paint.setColor(0xFFFFFFFF); // a shader is still scaled by the paint's alpha
             paint.setShader(new LinearGradient(0, r.top, 0, r.bottom, top, 0xFF0E0F18, Shader.TileMode.CLAMP));
             c.drawRoundRect(r, rad * 0.6f, rad * 0.6f, paint);
             paint.setShader(null);

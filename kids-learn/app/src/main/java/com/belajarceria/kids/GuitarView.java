@@ -114,6 +114,7 @@ final class GuitarView extends InstrumentView {
         float w = getWidth(), h = getHeight(), pw = panelW();
         // the wooden body, with a sound hole and rosette
         r.set(pw + Ui.dp(12), 0, w, h);
+        paint.setColor(0xFFFFFFFF); // a shader is still scaled by the paint's alpha
         paint.setShader(new LinearGradient(0, 0, 0, h, 0xFFE8A55A, 0xFFB8692E, Shader.TileMode.CLAMP));
         c.drawRoundRect(r, Ui.dp(28), Ui.dp(28), paint);
         paint.setShader(null);
@@ -125,6 +126,7 @@ final class GuitarView extends InstrumentView {
             paint.setColor(rosette[k]);
             c.drawCircle(hx, hy, hr * (1.14f - k * 0.03f), paint);
         }
+        paint.setColor(0xFFFFFFFF); // a shader is still scaled by the paint's alpha
         paint.setShader(new RadialGradient(hx, hy, hr, 0xFF2A160A, 0xFF3D2412, Shader.TileMode.CLAMP));
         c.drawCircle(hx, hy, hr, paint);
         paint.setShader(null);
