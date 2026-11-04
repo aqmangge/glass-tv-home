@@ -78,12 +78,21 @@ abstract class InstrumentView extends View {
                 break;
             }
             case MotionEvent.ACTION_MOVE:
-                for (int i = 0; i < e.getPointerCount(); i++) move(e.getPointerId(i), e.getX(i), e.getY(i));
+                // A fast finger arrives as several positions in one event: play every one, or a quick strum or
+                // glissando would skip strings and bars.
+                for (int i = 0; i < e.getPointerCount(); i++) {
+                    int id = e.getPointerId(i);
+                    for (int h = 0; h < e.getHistorySize(); h++) move(id, e.getHistoricalX(i, h), e.getHistoricalY(i, h));
+                    move(id, e.getX(i), e.getY(i));
+                }
                 break;
             case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_POINTER_UP:
-                up(e.getPointerId(e.getActionIndex()));
+            case MotionEvent.ACTION_POINTER_UP: {
+                int i = e.getActionIndex();
+                move(e.getPointerId(i), e.getX(i), e.getY(i)); // the last stretch before the finger lifted
+                up(e.getPointerId(i));
                 break;
+            }
             case MotionEvent.ACTION_CANCEL:
                 for (int i = 0; i < e.getPointerCount(); i++) up(e.getPointerId(i));
                 break;

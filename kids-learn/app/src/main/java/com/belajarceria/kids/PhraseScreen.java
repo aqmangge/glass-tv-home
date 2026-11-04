@@ -57,11 +57,16 @@ final class PhraseScreen extends Screen {
         int nb = Ui.dp(52);
         FrameLayout.LayoutParams pl = new FrameLayout.LayoutParams(nb, nb, Gravity.CENTER_VERTICAL | Gravity.START);
         pl.leftMargin = Ui.dp(10);
-        cardBox.addView(Ui.chevronButton(a, true, ZhKit.RED, () -> go(-1)), pl);
+        // the arrows sit on the card, so they must be lifted above it: the card's own shadow is higher than a
+        // button's, and the higher view is the one drawn on top and the one a finger touches
+        View prev = Ui.chevronButton(a, true, ZhKit.RED, () -> go(-1));
+        prev.setTranslationZ(Ui.dp(10));
+        cardBox.addView(prev, pl);
         FrameLayout.LayoutParams nl = new FrameLayout.LayoutParams(nb, nb, Gravity.CENTER_VERTICAL | Gravity.END);
         nl.rightMargin = Ui.dp(10);
         View next = Ui.chevronButton(a, false, ZhKit.RED, () -> go(1));
         next.setContentDescription("next");
+        next.setTranslationZ(Ui.dp(10));
         cardBox.addView(next, nl);
         body.addView(cardBox, new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1f));
 

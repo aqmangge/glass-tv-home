@@ -76,7 +76,7 @@ jobs:
           name: belajar-ceria-screenshots
           path: shots/
       - name: Publish the screenshots and the APK on the kids-learn-screenshots branch
-        if: always() && github.event_name == 'push'
+        if: always()
         continue-on-error: true # a nice-to-have: never fails the build
         run: |
           cd shots
