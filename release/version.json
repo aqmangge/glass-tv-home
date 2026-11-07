@@ -1,7 +1,7 @@
 {
-  "versionCode": 45,
-  "versionName": "4.1.0",
+  "versionCode": 46,
+  "versionName": "4.1.1",
   "apkUrl": "https://github.com/aqmangge/glass-tv-home/raw/main/release/glass-tv-home.apk",
-  "changelog": "✨ Glass TV v4.1.0 (Khutbah Minbar Tempatan, Pemilih Mod Paparan & Navigasi DPAD):\n• Khutbah Minbar Mingguan: Penyelarasan automatik teks khutbah Jumaat mengikut zon & negeri (JAWI Putrajaya/KL, JAIS Selangor, JAINJ Johor, MUIS Singapura, Kemenag RI Indonesia, dll.) melalui minbar.gosolat.com dan islam.nu.or.id berserta pangkalan data luar talian (offline fallback).\n• Pilihan Paparan Skrin Utama: Pilihan pantas di Tetapan Moden untuk beralih antara 'Doa Harian (Ayat Al-Quran & Terjemahan)' dan 'Teks Minbar (Khutbah Jumaat)'.\n• Dialog Perincian Kaca (Frosted Glass Detail Modal): Memaparkan teks penuh khutbah, tema, sumber rasmi dan butang tukar mod pantas bila ditekan OK pada remote TV.\n• Navigasi DPAD Remote Sempurna: Aliran navigasi berarah dua hala antara Dock aplikasi bawah <-> Rak Ayah/Minbar (dengan bingkai cahaya cyan bercahaya) <-> Bar Kawalan Atas (Tetapan).\n• Profil Pengguna & Avatar Animasi: Sistem penyesuaian profil pelbagai pengguna, avatar animasi Lottie, carian GIF Tenor, dan pelayan muat naik gambar telefon pintar tempatan (LAN HTTP Server).",
-  "releaseDate": "2026-11-02"
+  "changelog": "✨ Glass TV v4.1.1 (Pembetulan Pepijat & Peningkatan):\n• Baiki Isu Kemas Kini OTA: Membuang sekatan kebenaran pemasangan awal yang menghalang muat turun kemas kini pada Xiaomi Mi TV / Android 11 (#9).\n• Baiki Jubin Aplikasi Pendua (Duplicate App Tiles): Menyah-pendua (de-duplicate) aplikasi yang mendaftarkan lebih daripada satu aktiviti LEANBACK_LAUNCHER (seperti Sooka com.astro.sott) mengikut aktiviti pelancar rasmi sistem Android TV (#10).\n• Baiki Fungsi Sembunyikan Aplikasi (Hide Apps): Memastikan aplikasi yang dipilih dalam 'Sembunyikan Aplikasi' disembunyikan serta-merta dari skrin utama tanpa bergantung kepada status PIN (#10).",
+  "releaseDate": "2026-11-07"
 }

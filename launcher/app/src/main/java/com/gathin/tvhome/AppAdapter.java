@@ -198,6 +198,45 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
                 listed.add(pkg);
             }
         }
+        // De-duplicate launcher activities by package name (e.g. Sooka com.astro.sott declares multiple LEANBACK_LAUNCHER activities)
+        Map<String, List<ResolveInfo>> byPkg = new java.util.LinkedHashMap<>();
+        for (ResolveInfo ri : found) {
+            if (ri.activityInfo == null) continue;
+            String pkg = ri.activityInfo.packageName;
+            if (!byPkg.containsKey(pkg)) {
+                byPkg.put(pkg, new ArrayList<>());
+            }
+            byPkg.get(pkg).add(ri);
+        }
+
+        List<ResolveInfo> deduplicated = new ArrayList<>();
+        for (Map.Entry<String, List<ResolveInfo>> entry : byPkg.entrySet()) {
+            String pkg = entry.getKey();
+            List<ResolveInfo> list = entry.getValue();
+            if (list.size() == 1) {
+                deduplicated.add(list.get(0));
+            } else {
+                ResolveInfo chosen = null;
+                try {
+                    Intent leanbackIntent = pm.getLeanbackLaunchIntentForPackage(pkg);
+                    if (leanbackIntent != null && leanbackIntent.getComponent() != null) {
+                        String targetCls = leanbackIntent.getComponent().getClassName();
+                        for (ResolveInfo ri : list) {
+                            if (ri.activityInfo.name.equals(targetCls)) {
+                                chosen = ri;
+                                break;
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {}
+                if (chosen == null) {
+                    chosen = list.get(0);
+                }
+                deduplicated.add(chosen);
+            }
+        }
+        found = deduplicated;
+
         // The install path moves when an app is updated, so it stands in for the version: an update
         // that brought a new banner still gets a rebuild.
         List<String> parts = new ArrayList<>();
@@ -209,6 +248,9 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         for (Cards.Card c : cards) {
             parts.add('#' + c.pkg + '/' + c.component.flattenToShortString() + '|' + c.label + '|'
                     + c.caption + '|' + c.accent);
+        }
+        for (String h : ChildModeManager.getHiddenApps(ctx)) {
+            parts.add("!hidden:" + h);
         }
         Collections.sort(parts);
         String signature = android.text.TextUtils.join(";", parts);

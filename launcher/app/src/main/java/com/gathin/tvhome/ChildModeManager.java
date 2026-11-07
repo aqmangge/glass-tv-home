@@ -95,7 +95,6 @@ public final class ChildModeManager {
 
     public static boolean isAppHidden(Context ctx, String pkg) {
         if (ctx == null || pkg == null) return false;
-        if (!isChildModeEnabled(ctx)) return false;
         Set<String> set = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 .getStringSet(KEY_HIDDEN_APPS, null);
         return set != null && set.contains(pkg);

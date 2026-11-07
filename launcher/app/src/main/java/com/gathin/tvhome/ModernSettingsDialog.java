@@ -34,6 +34,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -1441,11 +1442,14 @@ public final class ModernSettingsDialog {
             }
         }
 
+        Set<String> seenPkgs = new HashSet<>();
         List<AppEntry> entryList = new ArrayList<>();
         if (apps != null) {
             for (ResolveInfo ri : apps) {
+                if (ri.activityInfo == null) continue;
                 String p = ri.activityInfo.packageName;
-                if (p.equals(selfPkg)) continue;
+                if (p.equals(selfPkg) || seenPkgs.contains(p)) continue;
+                seenPkgs.add(p);
                 String lbl = ri.loadLabel(pm).toString();
                 entryList.add(new AppEntry(p, lbl, ri.loadIcon(pm)));
             }

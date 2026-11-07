@@ -259,27 +259,6 @@ public final class AppUpdateManager {
 
     @SuppressWarnings("deprecation")
     private static void downloadAndInstallApk(Activity activity, String apkUrl, String versionName) {
-        // Check install permission on Android 8.0+ (Oreo, API 26+)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (!activity.getPackageManager().canRequestPackageInstalls()) {
-                AlertDialog.Builder permDialog = new AlertDialog.Builder(activity, R.style.Theme_TvHome_GlassDialog);
-                permDialog.setTitle("⚠️ Kebenaran Pemasangan Diperlukan");
-                permDialog.setMessage("Sila aktifkan 'Allow from this source' untuk membenarkan Glass TV Home memasang kemas kini automatik.");
-                permDialog.setPositiveButton("Buka Tetapan", (d, w) -> {
-                    try {
-                        Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                                Uri.parse("package:" + activity.getPackageName()));
-                        activity.startActivity(intent);
-                    } catch (Exception e) {
-                        Toast.makeText(activity, "Buka Tetapan > Keselamatan > Install Unknown Apps", Toast.LENGTH_LONG).show();
-                    }
-                });
-                permDialog.setNegativeButton("Batal", (d, w) -> d.dismiss());
-                permDialog.show();
-                return;
-            }
-        }
-
         ProgressDialog progressDialog = new ProgressDialog(activity, R.style.Theme_TvHome_GlassDialog);
         progressDialog.setTitle("📥 Memuat Turun Kemas Kini (v" + versionName + ")");
         progressDialog.setMessage("Sedang memuat turun fail pemasangan...");
@@ -384,7 +363,33 @@ public final class AppUpdateManager {
             activity.startActivity(intent);
         } catch (Exception e) {
             Log.e(TAG, "Install error: " + e.getMessage());
-            Toast.makeText(activity, "❌ Gagal memulakan pemasangan: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            showInstallPermissionOrErrorDialog(activity, apkFile, e.getMessage());
         }
+    }
+
+    private static void showInstallPermissionOrErrorDialog(Activity activity, File apkFile, String errorMsg) {
+        if (activity == null || activity.isFinishing()) return;
+        AlertDialog.Builder permDialog = new AlertDialog.Builder(activity, R.style.Theme_TvHome_GlassDialog);
+        permDialog.setTitle("⚠️ Kebenaran Pemasangan Diperlukan");
+        permDialog.setMessage("Sila pastikan kebenaran 'Install unknown apps' (Allow from this source) telah diaktifkan untuk Glass TV Home (tersenarai sebagai 'Home' di tetapan TV).\n\n(Info: " + (errorMsg != null ? errorMsg : "Kebenaran diperlukan") + ")");
+        permDialog.setPositiveButton("Buka Tetapan", (d, w) -> {
+            try {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                        Uri.parse("package:" + activity.getPackageName()));
+                activity.startActivity(intent);
+            } catch (Exception e) {
+                try {
+                    activity.startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES));
+                } catch (Exception ex) {
+                    Toast.makeText(activity, "Buka Tetapan > Keselamatan > Install Unknown Apps", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+        permDialog.setNeutralButton("⚡ Cuba Pasang Semula", (d, w) -> {
+            d.dismiss();
+            installApk(activity, apkFile);
+        });
+        permDialog.setNegativeButton("Batal", (d, w) -> d.dismiss());
+        permDialog.show();
     }
 }
