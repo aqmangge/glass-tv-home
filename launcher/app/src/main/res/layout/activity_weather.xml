@@ -1,419 +1,257 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Designed for a 1920x1080 TV (≈ 960 x 540 dp) -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#111216"
-    android:clipChildren="false">
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:focusable="false"
+    android:clickable="false"
+    android:background="#0B1020">
 
-    <!-- Layer 0: Hardware-Accelerated Dynamic Atmospheric Weather Canvas (Subtle ambient) -->
-    <com.gathin.tvhome.WeatherBackgroundView
-        android:id="@+id/weatherBgView"
+    <!-- Animated background (replaces the .png) -->
+    <com.gathin.tvhome.WeatherSkyView
+        android:id="@+id/skyView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:alpha="0.25" />
+        android:layout_height="match_parent" />
 
-    <!-- Main Widescreen TV Content: Zero vertical scroll, fits 1080p/4K TV perfectly -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:orientation="vertical"
         android:paddingStart="56dp"
-        android:paddingTop="52dp"
         android:paddingEnd="56dp"
-        android:paddingBottom="38dp">
+        android:paddingTop="36dp"
+        android:paddingBottom="24dp">
 
-        <!-- Upper Section: Hero Location/Temp (Left) & RTL Weather Icon/Stats (Right) -->
+        <!-- ===== Top: current weather + stats ===== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:clipChildren="false"
+            android:clipToPadding="false">
 
-            <!-- Left Hero: Location + Massive Temp + Condition -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:id="@+id/headerBlock"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.1"
-                android:gravity="start|center_vertical"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:focusable="true"
+                android:clickable="true"
+                android:nextFocusDown="@+id/chipTemp">
 
-                <!-- Subtitle: Agora em / Sekarang di -->
                 <TextView
-                    android:id="@+id/weatherSubtitle"
+                    android:id="@+id/tvIcon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/inter"
-                    android:fontVariationSettings="'wght' 400"
-                    android:includeFontPadding="false"
-                    android:singleLine="true"
-                    android:text="Agora em"
-                    android:textColor="#9CA3AF"
-                    android:textSize="17sp" />
+                    android:text="⛈️"
+                    android:textSize="64sp"
+                    android:layout_marginEnd="24dp" />
 
-                <!-- City / Region Title -->
-                <TextView
-                    android:id="@+id/weatherLocation"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:fontFamily="@font/inter"
-                    android:fontVariationSettings="'wght' 700"
-                    android:includeFontPadding="false"
-                    android:singleLine="true"
-                    android:text="São Paulo"
-                    android:textColor="#FFFFFF"
-                    android:textSize="38sp" />
-
-                <!-- Giant Temperature Display -->
-                <TextView
-                    android:id="@+id/weatherMainTemp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:fontFamily="@font/inter"
-                    android:fontVariationSettings="'wght' 500"
-                    android:includeFontPadding="false"
-                    android:singleLine="true"
-                    android:text="28°C"
-                    android:textColor="#FF4545"
-                    android:textSize="72sp" />
-
-                <!-- Condition Phrase -->
-                <TextView
-                    android:id="@+id/weatherMainCondition"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:fontFamily="@font/inter"
-                    android:fontVariationSettings="'wght' 400"
-                    android:includeFontPadding="false"
-                    android:singleLine="true"
-                    android:text="Alguma nebulosidade"
-                    android:textColor="#E2E8F0"
-                    android:textSize="21sp" />
-
-                <!-- Secondary Sub (High / Low) -->
-                <TextView
-                    android:id="@+id/weatherMainSub"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:fontFamily="@font/inter"
-                    android:fontVariationSettings="'wght' 500"
-                    android:includeFontPadding="false"
-                    android:singleLine="true"
-                    android:text="Max: 30°C  ·  Min: 21°C"
-                    android:textColor="#94A3B8"
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-            <!-- Right Hero: RTL Animated Weather Illustration + 3 Core Metrics -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.2"
-                android:gravity="end"
-                android:orientation="vertical">
-
-                <!-- RTL Animated Weather Illustration (Lucas Carrascosa Style) -->
-                <com.gathin.tvhome.RtlWeatherIconView
-                    android:id="@+id/rtlWeatherIcon"
-                    android:layout_width="220dp"
-                    android:layout_height="125dp"
-                    android:layout_gravity="end"
-                    android:layout_marginEnd="12dp" />
-
-                <!-- 3 Core Metrics (SENSAÇÃO / UMIDADE / PRESSÃO) -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="vertical">
 
-                    <!-- Metric 1: Sensação / Feels Like -->
-                    <LinearLayout
+                    <TextView
+                        android:id="@+id/tvLocation"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="36dp"
-                        android:gravity="end"
-                        android:orientation="vertical">
+                        android:text="📍 Putrajaya"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp" />
 
-                        <TextView
-                            android:id="@+id/feelsLikeLabel"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/inter"
-                            android:fontVariationSettings="'wght' 700"
-                            android:includeFontPadding="false"
-                            android:letterSpacing="0.06"
-                            android:singleLine="true"
-                            android:text="SENSAÇÃO"
-                            android:textAllCaps="true"
-                            android:textColor="#FFFFFF"
-                            android:textSize="12sp" />
-
-                        <TextView
-                            android:id="@+id/feelsLikeVal"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:fontFamily="@font/inter"
-                            android:fontVariationSettings="'wght' 400"
-                            android:includeFontPadding="false"
-                            android:singleLine="true"
-                            android:text="29°C"
-                            android:textColor="#FF4545"
-                            android:textSize="28sp" />
-                    </LinearLayout>
-
-                    <!-- Metric 2: Umidade / Humidity -->
-                    <LinearLayout
+                    <TextView
+                        android:id="@+id/tvTemp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="36dp"
-                        android:gravity="end"
-                        android:orientation="vertical">
+                        android:text="26°C"
+                        android:textColor="#FFFFFF"
+                        android:textSize="76sp"
+                        android:fontFamily="sans-serif-light"
+                        android:includeFontPadding="false" />
 
-                        <TextView
-                            android:id="@+id/humidityLabel"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/inter"
-                            android:fontVariationSettings="'wght' 700"
-                            android:includeFontPadding="false"
-                            android:letterSpacing="0.06"
-                            android:singleLine="true"
-                            android:text="UMIDADE"
-                            android:textAllCaps="true"
-                            android:textColor="#FFFFFF"
-                            android:textSize="12sp" />
-
-                        <TextView
-                            android:id="@+id/humidityValText"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:fontFamily="@font/inter"
-                            android:fontVariationSettings="'wght' 400"
-                            android:includeFontPadding="false"
-                            android:singleLine="true"
-                            android:text="79%"
-                            android:textColor="#38BDF8"
-                            android:textSize="28sp" />
-                    </LinearLayout>
-
-                    <!-- Metric 3: Pressão / Air Quality -->
-                    <LinearLayout
+                    <TextView
+                        android:id="@+id/tvCondition"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="end"
-                        android:orientation="vertical">
+                        android:text="Thunderstorm"
+                        android:textColor="#FFFFFF"
+                        android:textSize="24sp" />
 
-                        <TextView
-                            android:id="@+id/aqiLabel"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/inter"
-                            android:fontVariationSettings="'wght' 700"
-                            android:includeFontPadding="false"
-                            android:letterSpacing="0.06"
-                            android:singleLine="true"
-                            android:text="PRESSÃO"
-                            android:textAllCaps="true"
-                            android:textColor="#FFFFFF"
-                            android:textSize="12sp" />
+                    <TextView
+                        android:id="@+id/tvMaxMin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Max: 30°C  ·  Min: 25°C"
+                        android:textColor="#B3FFFFFF"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/aqiValue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:fontFamily="@font/inter"
-                            android:fontVariationSettings="'wght' 400"
-                            android:includeFontPadding="false"
-                            android:singleLine="true"
-                            android:text="1017hPa"
-                            android:textColor="#FF4545"
-                            android:textSize="28sp" />
-                    </LinearLayout>
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:id="@+id/statsBlock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="40dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="🌡️" android:textSize="20sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Feels Like" android:textColor="#B3FFFFFF" android:textSize="13sp" />
+                    <TextView android:id="@+id/tvFeels" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="31°C" android:textColor="#FFFFFF" android:textSize="24sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="40dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="💧" android:textSize="20sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Rain Chance" android:textColor="#B3FFFFFF" android:textSize="13sp" />
+                    <TextView android:id="@+id/tvRain" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="95%" android:textColor="#FFFFFF" android:textSize="24sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="⏲️" android:textSize="20sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Pressure" android:textColor="#B3FFFFFF" android:textSize="13sp" />
+                    <TextView android:id="@+id/tvPressure" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="1006hPa" android:textColor="#FFFFFF" android:textSize="24sp" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Dynamic vertical spacer giving generous breathing room below hero -->
-        <Space
+        <!-- ===== Hourly forecast card ===== -->
+        <LinearLayout
+            android:id="@+id/hourlyCard"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.8" />
-
-        <!-- Google Weather Subtabs: Temperature | Precipitation | Wind -->
-        <LinearLayout
-            android:id="@+id/weatherSubTabs"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginStart="32dp"
-            android:layout_marginBottom="4dp"
-            android:gravity="center_vertical">
-
-            <!-- Tab 1: Temperature / Suhu (Active) -->
-            <LinearLayout
-                android:id="@+id/tabTemperature"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginEnd="28dp">
-
-                <TextView
-                    android:id="@+id/tabTempTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/inter"
-                    android:fontVariationSettings="'wght' 600"
-                    android:includeFontPadding="false"
-                    android:singleLine="true"
-                    android:text="Suhu"
-                    android:textColor="#FFFFFF"
-                    android:textSize="14.5sp" />
-
-                <!-- Google Weather yellow underline indicator -->
-                <View
-                    android:id="@+id/tabTempIndicator"
-                    android:layout_width="match_parent"
-                    android:layout_height="2.5dp"
-                    android:layout_marginTop="3dp"
-                    android:background="#FBBF24" />
-            </LinearLayout>
-
-            <!-- Tab 2: Precipitation / Kerpasan -->
-            <LinearLayout
-                android:id="@+id/tabPrecipitation"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginEnd="28dp">
-
-                <TextView
-                    android:id="@+id/tabPrecipTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/inter"
-                    android:fontVariationSettings="'wght' 400"
-                    android:includeFontPadding="false"
-                    android:singleLine="true"
-                    android:text="Kerpasan"
-                    android:textColor="#94A3B8"
-                    android:textSize="14.5sp" />
-            </LinearLayout>
-
-            <!-- Tab 3: Wind / Angin -->
-            <LinearLayout
-                android:id="@+id/tabWind"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/tabWindTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/inter"
-                    android:fontVariationSettings="'wght' 400"
-                    android:includeFontPadding="false"
-                    android:singleLine="true"
-                    android:text="Angin"
-                    android:textColor="#94A3B8"
-                    android:textSize="14.5sp" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Middle Section: Google Weather Style Smooth Hourly Temperature Curve -->
-        <com.gathin.tvhome.HourlyWeatherGraphView
-            android:id="@+id/hourlyGraphView"
-            android:layout_width="match_parent"
-            android:layout_height="82dp" />
-
-        <!-- Dynamic vertical spacer distributing space before bottom forecast cards -->
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1.0" />
-
-        <!-- Bottom Section: 5-Day Forecast Cards evenly spaced across widescreen TV -->
-        <LinearLayout
-            android:id="@+id/dailyContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="16dp"
+            android:orientation="vertical"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:orientation="horizontal"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp" />
-    </LinearLayout>
+            android:padding="18dp"
+            android:background="@drawable/glass_card">
 
-    <!-- Invisible Container preserving legacy references for full backwards compatibility -->
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp">
 
-        <View
-            android:id="@+id/btnChangeLocation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="📈  Hourly Forecast"
+                    android:textColor="#FFFFFF"
+                    android:textSize="17sp" />
+
+                <TextView
+                    android:id="@+id/chipTemp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:gravity="center"
+                    android:text="Temperature"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:includeFontPadding="false"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:nextFocusUp="@+id/headerBlock"
+                    android:nextFocusDown="@+id/dayRow"
+                    android:nextFocusRight="@+id/chipPrecip"
+                    android:background="@drawable/chip_selected" />
+
+                <TextView
+                    android:id="@+id/chipPrecip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:gravity="center"
+                    android:layout_marginStart="10dp"
+                    android:text="Precipitation"
+                    android:textColor="#B3FFFFFF"
+                    android:textSize="13sp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:includeFontPadding="false"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:nextFocusUp="@+id/headerBlock"
+                    android:nextFocusDown="@+id/dayRow"
+                    android:nextFocusLeft="@+id/chipTemp"
+                    android:nextFocusRight="@+id/chipWind"
+                    android:background="@drawable/chip" />
+
+                <TextView
+                    android:id="@+id/chipWind"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:gravity="center"
+                    android:layout_marginStart="10dp"
+                    android:text="Wind"
+                    android:textColor="#B3FFFFFF"
+                    android:textSize="13sp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:includeFontPadding="false"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:nextFocusUp="@+id/headerBlock"
+                    android:nextFocusDown="@+id/dayRow"
+                    android:nextFocusLeft="@+id/chipPrecip"
+                    android:background="@drawable/chip" />
+            </LinearLayout>
+
+            <com.gathin.tvhome.HourlyChartView
+                android:id="@+id/hourlyChart"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <!-- ===== 5-day cards (filled from MainActivity) ===== -->
         <LinearLayout
-            android:id="@+id/hourlyContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <com.gathin.tvhome.WindCompassView
-            android:id="@+id/windCompassView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <com.gathin.tvhome.MoonPhaseView
-            android:id="@+id/moonPhaseView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <com.gathin.tvhome.SunArcView
-            android:id="@+id/sunArcView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <com.gathin.tvhome.RadarMapView
-            android:id="@+id/radarMapView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <com.gathin.tvhome.PressureGaugeView
-            android:id="@+id/pressureGaugeView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:id="@+id/sunsetText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:id="@+id/uvValText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:id="@+id/uvDescText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:id="@+id/aqiStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <com.gathin.tvhome.AqiSpectrumBarView
-            android:id="@+id/aqiBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:id="@+id/aqiStation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:id="@+id/weatherFooter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:id="@+id/dayRow"
+            android:layout_width="match_parent"
+            android:layout_height="124dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:orientation="horizontal" />
     </LinearLayout>
 </FrameLayout>

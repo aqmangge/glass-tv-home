@@ -18,6 +18,7 @@ public class InputKeyService extends AccessibilityService {
 
     @Override
     protected boolean onKeyEvent(KeyEvent event) {
+        if (AppKeys.handle(this, event)) return true;
         if (event.getKeyCode() != KeyEvent.KEYCODE_TV) return false;
         if (event.getAction() == KeyEvent.ACTION_UP) {
             try {

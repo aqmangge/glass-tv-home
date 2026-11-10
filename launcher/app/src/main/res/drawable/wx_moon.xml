@@ -1,9 +1,29 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- A weather symbol drawn as vectors (cloud and sun after Material Icons, Apache 2.0). -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp" android:height="24dp"
-    android:viewportWidth="24" android:viewportHeight="24">
-    <group android:scaleX="0.9" android:scaleY="0.9" android:translateX="1.2" android:translateY="1.2">
-        <path android:fillColor="#FFFFE9A8" android:pathData="M12,3c-4.97,0 -9,4.03 -9,9s4.03,9 9,9 9,-4.03 9,-9c0,-0.46 -0.04,-0.92 -0.1,-1.36 -0.98,1.37 -2.58,2.26 -4.4,2.26 -2.98,0 -5.4,-2.42 -5.4,-5.4 0,-1.81 0.89,-3.42 2.26,-4.4C12.92,3.04 12.46,3 12,3z" />
-    </group>
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="128"
+    android:viewportHeight="128">
+    <path
+        android:strokeColor="#FF72B9D5"
+        android:strokeWidth="1"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M60.3 32.58C55.28 53.7 73.6 74.35 95.33 72.51 91.52 85.77 79.2 95.5 64.53 95.5c-17.7 0-32.03-14.16-32.03-31.6 0-16.03 12.1-29.27 27.8-31.32Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="64"
+                android:startY="32"
+                android:endX="64"
+                android:endY="96">
+                <item
+                    android:color="#FF86C3DB"
+                    android:offset="0"/>
+                <item
+                    android:color="#FF72B9D5"
+                    android:offset="1"/>
+            </gradient>
+        </aapt:attr>
+    </path>
 </vector>

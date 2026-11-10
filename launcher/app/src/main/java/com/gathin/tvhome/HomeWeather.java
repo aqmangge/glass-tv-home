@@ -185,7 +185,9 @@ final class HomeWeather {
         if (code == 45 || code == 48) return R.drawable.wx_fog;
         if (code >= 51 && code <= 57) return R.drawable.wx_drizzle;
         if (code >= 61 && code <= 67) return R.drawable.wx_rain;
+        if (code >= 71 && code <= 77) return R.drawable.wx_snow;
         if (code >= 80 && code <= 82) return R.drawable.wx_rain;
+        if (code >= 85 && code <= 86) return R.drawable.wx_snow;
         if (code >= 95) return R.drawable.wx_storm;
         return R.drawable.wx_cloud;
     }

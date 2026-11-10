@@ -63,9 +63,8 @@
     <!-- Grid rows left visible under the dock on the home screen. 0 = dock sits at the very bottom. -->
     <integer name="rows_below_dock">0</integer>
 
-    <!-- Tiles per row in the grid; the dock always has this many slots. Tiles are 180dp wide at 4 columns and
-         shrink to fit from 5 up (about 144dp at 5, 117dp at 6 on a 1080p TV). -->
-    <integer name="columns">5</integer>
+    <!-- Tiles per row in the grid; the dock always has this many slots. 6 columns matches the 6 dock applications. -->
+    <integer name="columns">6</integer>
 
     <!-- "Default home" tile that opens Android's home-screen picker, for TVs whose settings have one
          (most Android TVs don't; the tile only appears when the page exists). Off by default. -->

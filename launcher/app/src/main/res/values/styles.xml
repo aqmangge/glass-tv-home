@@ -87,14 +87,14 @@
     <!-- Frosted pill, tvOS style. -->
     <style name="TopButtonBase">
         <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">42dp</item>
+        <item name="android:layout_height">@dimen/home_top_button_height</item>
         <item name="android:layout_marginStart">10dp</item>
         <item name="android:paddingStart">13.5dp</item>
         <item name="android:paddingEnd">13.5dp</item>
         <item name="android:gravity">center</item>
         <item name="android:background">@drawable/pill_bg</item>
         <item name="android:textColor">@drawable/pill_text</item>
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">@dimen/home_top_button_text_size</item>
         <item name="android:fontFamily">@font/inter</item>
         <item name="android:letterSpacing">0.01</item>
         <item name="android:drawablePadding">7dp</item>

@@ -1,7 +1,51 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- A weather symbol drawn as vectors (cloud and sun after Material Icons, Apache 2.0). -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp" android:height="24dp"
-    android:viewportWidth="24" android:viewportHeight="24">
-    <path android:fillColor="#FFFFD60A" android:pathData="M6.76,4.84l-1.8,-1.79 -1.41,1.41 1.79,1.79 1.42,-1.41zM4,10.5L1,10.5v2h3v-2zM13,0.55h-2L11,3.5h2L13,0.55zM20.45,4.46l-1.41,-1.41 -1.79,1.79 1.41,1.41 1.79,-1.79zM17.24,18.16l1.79,1.8 1.41,-1.41 -1.8,-1.79 -1.4,1.4zM20,10.5v2h3v-2h-3zM12,5.5c-3.31,0 -6,2.69 -6,6s2.69,6 6,6 6,-2.69 6,-6 -2.69,-6 -6,-6zM11,22.45h2L13,19.5h-2v2.95zM3.55,18.54l1.41,1.41 1.79,-1.8 -1.41,-1.41 -1.79,1.8z" />
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="128"
+    android:viewportHeight="128">
+    <path
+        android:strokeColor="#FFF8AF18"
+        android:strokeWidth="1"
+        android:pathData="M64 44.5a19.5 19.5 0 1 0 0 39 19.5 19.5 0 1 0 0-39z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="64"
+                android:startY="44"
+                android:endX="64"
+                android:endY="84">
+                <item
+                    android:color="#FFFBBF24"
+                    android:offset="0"/>
+                <item
+                    android:color="#FFF8AF18"
+                    android:offset="1"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path
+        android:fillColor="#FFF8AF18"
+        android:pathData="M61 19c0-1.66 1.34-3 3-3s3 1.34 3 3v14c0 1.66-1.34 3-3 3s-3-1.34-3-3V19Z"/>
+    <path
+        android:fillColor="#FFF8AF18"
+        android:pathData="M93.7 30.06c1.17-1.17 3.07-1.17 4.24 0 1.17 1.17 1.17 3.07 0 4.24l-9.9 9.9c-1.17 1.17-3.07 1.17-4.24 0-1.17-1.17-1.17-3.07 0-4.24l9.9-9.9Z"/>
+    <path
+        android:fillColor="#FFF8AF18"
+        android:pathData="M109 61c1.66 0 3 1.34 3 3s-1.34 3-3 3H95c-1.66 0-3-1.34-3-3s1.34-3 3-3h14Z"/>
+    <path
+        android:fillColor="#FFF8AF18"
+        android:pathData="M97.94 93.7c1.17 1.17 1.17 3.07 0 4.24-1.17 1.17-3.07 1.17-4.24 0l-9.9-9.9c-1.17-1.17-1.17-3.07 0-4.24 1.17-1.17 3.07-1.17 4.24 0l9.9 9.9Z"/>
+    <path
+        android:fillColor="#FFF8AF18"
+        android:pathData="M61 95c0-1.66 1.34-3 3-3s3 1.34 3 3v14c0 1.66-1.34 3-3 3s-3-1.34-3-3V95Z"/>
+    <path
+        android:fillColor="#FFF8AF18"
+        android:pathData="M39.96 83.8c1.17-1.17 3.07-1.17 4.24 0 1.17 1.17 1.17 3.07 0 4.24l-9.9 9.9c-1.17 1.17-3.07 1.17-4.24 0-1.17-1.17-1.17-3.07 0-4.24l9.9-9.9Z"/>
+    <path
+        android:fillColor="#FFF8AF18"
+        android:pathData="M33 61c1.66 0 3 1.34 3 3s-1.34 3-3 3H19c-1.66 0-3-1.34-3-3s1.34-3 3-3h14Z"/>
+    <path
+        android:fillColor="#FFF8AF18"
+        android:pathData="M44.2 39.96c1.17 1.17 1.17 3.07 0 4.24-1.17 1.17-3.07 1.17-4.24 0l-9.9-9.9c-1.17-1.17-1.17-3.07 0-4.24 1.17-1.17 3.07-1.17 4.24 0l9.9 9.9Z"/>
 </vector>

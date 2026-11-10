@@ -62,6 +62,24 @@ public class LocationBroadcastReceiver extends BroadcastReceiver {
             matched = AppLocationManager.findStationByQuery(query);
         }
 
+        // A town from the Waktu Solat list (e.g. "Cyberjaya" or "Cyberjaya, Selangor") that has no air-quality
+        // station of its own: pick its JAKIM zone like the Location screen does, and the nearest station.
+        Location.Zone townZone = (matched == null && lat == 0.0 && lon == 0.0) ? Location.byTown(query) : null;
+        if (townZone != null) {
+            AppLocationManager.setStation(context, AppLocationManager.findNearestStation(townZone.lat, townZone.lon));
+            Location.choose(context, townZone);
+            Location.publish(context, townZone.code, townZone.town, townZone.state, townZone.lat, townZone.lon);
+            PrayerTimes.setZone(context, townZone.code, townZone.town, townZone.lat, townZone.lon);
+            HomeWeather.forget(context);
+            Azan.schedule(context, townZone.code);
+            final String name = townZone.town + " (" + townZone.code + ")";
+            new Handler(Looper.getMainLooper()).post(() ->
+                    Toast.makeText(context, "📍 Lokasi TV: " + name, Toast.LENGTH_LONG).show());
+            MainActivity main = MainActivity.getInstance();
+            if (main != null) main.runOnUiThread(main::refreshLocationDependentData);
+            return;
+        }
+
         if (matched == null && lat != 0.0 && lon != 0.0) {
             matched = AppLocationManager.findNearestStation(lat, lon);
         }

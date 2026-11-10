@@ -20,7 +20,7 @@
     <string name="vpn_off">VPN off</string>
     <string name="home_settings">Default home</string>
     <string name="home_settings_help">Choose a home screen in system settings, then press Home.</string>
-    <string name="input_key_service_description">Opens the input switcher when the remote\'s Input button is pressed.</string>
+    <string name="input_key_service_description">Opens the input switcher when the remote\'s Input button is pressed, and the Netflix, YouTube and Prime Video apps from their remote buttons.</string>
     <string name="home_key_name">Home button</string>
     <string name="home_key_description">Makes the remote\'s Home button open this launcher.</string>
     <string name="card_prompt_title">New card from %1$s</string>

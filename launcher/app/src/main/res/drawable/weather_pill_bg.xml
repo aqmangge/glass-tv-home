@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Frosted glass pill background matching modern glassmorphism aesthetic -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_focused="true">
         <shape android:shape="rectangle">
-            <solid android:color="#4DFFFFFF" />
+            <solid android:color="#B316243A" />
             <stroke
                 android:width="2dp"
-                android:color="#FFFFFFFF" />
-            <corners android:radius="14dp" />
+                android:color="#38BDF8" />
+            <corners android:radius="22dp" />
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#14FFFFFF" />
+            <solid android:color="#59101826" />
             <stroke
-                android:width="2dp"
-                android:color="#14FFFFFF" />
-            <corners android:radius="14dp" />
+                android:width="1.2dp"
+                android:color="#2E3D52" />
+            <corners android:radius="22dp" />
         </shape>
     </item>
 </selector>

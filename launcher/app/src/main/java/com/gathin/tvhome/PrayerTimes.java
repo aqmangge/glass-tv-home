@@ -498,7 +498,7 @@ final class PrayerTimes {
         if (loc.contains("kuala lumpur") || loc.contains("cheras") || loc.contains("batu muda")) return "WLY01";
         if (loc.contains("labuan")) return "WLY02";
         if (loc.contains("melaka") || loc.contains("alor gajah") || loc.contains("rambai")) return "MLK01";
-        if (loc.contains("petaling") || loc.contains("shah alam")) return "SGR01";
+        if (loc.contains("petaling") || loc.contains("shah alam") || loc.contains("cyberjaya") || loc.contains("sepang")) return "SGR01";
         if (loc.contains("klang") || loc.contains("banting")) return "SGR03";
         if (loc.contains("seremban") || loc.contains("nilai") || loc.contains("port dickson")) return "NGS02";
         if (loc.contains("johor") || loc.contains("larkin") || loc.contains("pasir gudang")) return "JHR02";
@@ -531,12 +531,14 @@ final class PrayerTimes {
         final String name;
         final String timeStr;
         final boolean isNext;
+        final boolean isCurrent;
         final boolean isPast;
 
-        PrayerItem(String name, String timeStr, boolean isNext, boolean isPast) {
+        PrayerItem(String name, String timeStr, boolean isNext, boolean isCurrent, boolean isPast) {
             this.name = name;
             this.timeStr = timeStr;
             this.isNext = isNext;
+            this.isCurrent = isCurrent;
             this.isPast = isPast;
         }
     }
@@ -560,6 +562,19 @@ final class PrayerTimes {
         }
         if (nextIdx == -1) nextIdx = 0;
 
+        // Determine current active prayer period
+        int currentIdx = 5;
+        if (nowMs < times[0]) {
+            currentIdx = 5; // Previous night's Isha until Fajr
+        } else {
+            for (int i = 5; i >= 0; i--) {
+                if (nowMs >= times[i]) {
+                    currentIdx = i;
+                    break;
+                }
+            }
+        }
+
         SimpleDateFormat timeFmt = new SimpleDateFormat("HH:mm", Locale.getDefault());
         String[] prayerNames = AppLanguage.getPrayerNames(context);
         PrayerItem[] items = new PrayerItem[6];
@@ -568,6 +583,7 @@ final class PrayerTimes {
                     prayerNames[i],
                     timeFmt.format(new Date(times[i])),
                     i == nextIdx,
+                    i == currentIdx,
                     times[i] < nowMs
             );
         }

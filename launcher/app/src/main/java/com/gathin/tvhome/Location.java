@@ -84,6 +84,7 @@ final class Location {
         {"SWK08", "Sarawak", "Kuching", "Kuching, Bau, Lundu, Sematan", "1.55", "110.3333"},
         {"SWK09", "Sarawak", "Kampung Patarikan", "Zon Khas (Kampung Patarikan)", "4.8604", "115.409"},
         {"SGR01", "Selangor", "Shah Alam", "Gombak, Petaling, Sepang, Hulu Langat, Hulu Selangor, Shah Alam", "3.0851", "101.5328"},
+        {"SGR01", "Selangor", "Cyberjaya", "Cyberjaya, Dengkil, Salak Tinggi, Sepang", "2.9213", "101.6559"},
         {"SGR02", "Selangor", "Kuala Selangor", "Kuala Selangor, Sabak Bernam", "3.35", "101.25"},
         {"SGR03", "Selangor", "Klang", "Klang, Kuala Langat", "3.0367", "101.4433"},
         {"TRG01", "Terengganu", "Kuala Terengganu", "Kuala Terengganu, Marang, Kuala Nerus", "5.3302", "103.1408"},
@@ -156,11 +157,34 @@ final class Location {
 
     /** The zone chosen on the TV, or null when none has been chosen there. */
     static Zone chosen(Context ctx) {
-        return byCode(prefs(ctx).getString("zone", null));
+        SharedPreferences p = prefs(ctx);
+        return byCodeAndTown(p.getString("zone", null), p.getString("zone_town", null));
     }
 
     static void choose(Context ctx, Zone z) {
-        prefs(ctx).edit().putString("zone", z.code).apply();
+        prefs(ctx).edit().putString("zone", z.code).putString("zone_town", z.town).apply();
+    }
+
+    /**
+     * Several towns can share one JAKIM zone (Shah Alam and Cyberjaya are both SGR01): the town picks the
+     * row for the weather and the name shown, the code still decides Waktu Solat. Unknown town → first row.
+     */
+    static Zone byCodeAndTown(String code, String town) {
+        if (code == null) return null;
+        if (town != null) {
+            for (Zone z : all()) if (z.code.equalsIgnoreCase(code) && z.town.equalsIgnoreCase(town)) return z;
+        }
+        return byCode(code);
+    }
+
+    /** A zone row whose town is {@code town} (case-insensitive), e.g. "Cyberjaya"; null when none. */
+    static Zone byTown(String town) {
+        if (town == null) return null;
+        String t = town.trim();
+        int comma = t.indexOf(',');
+        if (comma > 0) t = t.substring(0, comma).trim();   // "Cyberjaya, Selangor" -> "Cyberjaya"
+        for (Zone z : all()) if (z.town.equalsIgnoreCase(t)) return z;
+        return null;
     }
 
     /** Whether the Location screen has opened by itself once already (first start with no zone). */

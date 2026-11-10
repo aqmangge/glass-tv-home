@@ -225,6 +225,31 @@ final class CacheCleaner {
         }, "cache-clean").start();
     }
 
+    /**
+     * Restart ({@code reboot}) or standby of the box, asked for from the Settings menu. Uses the same
+     * debugging connection as the cleaning, with one of two fixed commands. Runs off the main thread;
+     * {@code onFail} runs on the main thread when the box could not be asked (debugging off, declined).
+     */
+    static void power(Context ctx, boolean reboot, Runnable onFail) {
+        final Context app = ctx.getApplicationContext();
+        final String cmd = reboot ? "shell:svc power reboot" : "shell:input keyevent KEYCODE_SLEEP";
+        final android.os.Handler main = new android.os.Handler(android.os.Looper.getMainLooper());
+        new Thread(() -> {
+            boolean ok = false;
+            try {
+                ok = shell(app, true, cmd) || shell(app, false, cmd);
+            } catch (IOException e) {
+                // A reboot drops the connection as it starts: that is success, not failure.
+                ok = reboot && e.getMessage() != null && !e.getMessage().contains("refused");
+                Log.i(TAG, "power " + (reboot ? "reboot" : "sleep") + ": " + e);
+            } catch (Exception e) {
+                Log.w(TAG, "power command failed: " + e);
+            }
+            Log.i(TAG, "power " + (reboot ? "reboot" : "sleep") + (ok ? " sent" : " not possible"));
+            if (!ok && onFail != null) main.post(onFail);
+        }, "tv-power").start();
+    }
+
     private static void clean(Context ctx, int before) {
         SharedPreferences p = prefs(ctx);
         try {

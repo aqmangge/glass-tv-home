@@ -21,12 +21,23 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Google Weather style smooth temperature curve graph for Android TV.
- * Connects 8 hourly intervals with natural cubic Bezier curves,
- * soft translucent gradient fills, temperature dots & labels, and time axis.
+ * Google Weather style smooth curve graph for Android TV.
+ * Connects hourly intervals with natural cubic Bezier curves,
+ * soft translucent gradient fills, highlight dots & labels, and time axis.
+ * Supports 3 interactive modes:
+ * - TEMPERATURE: Temperature curve in °C (warm amber/yellow)
+ * - PRECIPITATION: Rain probability in % (sky blue)
+ * - WIND: Wind speed in km/h (mint teal)
  */
 public class HourlyWeatherGraphView extends View {
 
+    public enum Mode {
+        TEMPERATURE,
+        PRECIPITATION,
+        WIND
+    }
+
+    private Mode mode = Mode.TEMPERATURE;
     private final List<WeatherAirQuality.HourlyItem> items = new ArrayList<>();
     private int accentColor = 0xFFFBBF24; // Amber Sun default
 
@@ -34,6 +45,7 @@ public class HourlyWeatherGraphView extends View {
     private final Paint fillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint pointPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint pointHaloPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint whiteCenterPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint tempTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint timeTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint baselinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -77,17 +89,18 @@ public class HourlyWeatherGraphView extends View {
         fillPaint.setStyle(Paint.Style.FILL);
 
         pointPaint.setStyle(Paint.Style.FILL);
-        pointHaloPaint.setStyle(Paint.Style.STROKE);
-        pointHaloPaint.setStrokeWidth(2.0f * density);
-        pointHaloPaint.setColor(0x40000000);
+        pointHaloPaint.setStyle(Paint.Style.FILL);
 
-        tempTextPaint.setColor(0xFFFFFFFF);
+        whiteCenterPaint.setStyle(Paint.Style.FILL);
+        whiteCenterPaint.setColor(0xFFFFFFFF);
+
+        tempTextPaint.setColor(0xFFF5F7FC);
         tempTextPaint.setTextSize(13.5f * density);
         tempTextPaint.setTextAlign(Paint.Align.CENTER);
         tempTextPaint.setTypeface(interTypeface != null ? Typeface.create(interTypeface, Typeface.BOLD) : Typeface.DEFAULT_BOLD);
         tempTextPaint.setShadowLayer(3.0f * density, 0, 1.0f * density, 0x80000000);
 
-        timeTextPaint.setColor(0xFF94A3B8); // Slate 400
+        timeTextPaint.setColor(0xFFA8B5CC); // Slate A8B5CC
         timeTextPaint.setTextSize(11.5f * density);
         timeTextPaint.setTextAlign(Paint.Align.CENTER);
         timeTextPaint.setTypeface(interTypeface != null ? interTypeface : Typeface.DEFAULT);
@@ -97,13 +110,27 @@ public class HourlyWeatherGraphView extends View {
         baselinePaint.setStyle(Paint.Style.STROKE);
     }
 
+    public void setMode(Mode newMode) {
+        if (this.mode != newMode) {
+            this.mode = newMode;
+            startRevealAnimation();
+        }
+    }
+
+    public Mode getMode() {
+        return mode;
+    }
+
     public void setData(List<WeatherAirQuality.HourlyItem> newItems, int color) {
         this.items.clear();
         if (newItems != null) {
             this.items.addAll(newItems);
         }
         this.accentColor = color;
+        startRevealAnimation();
+    }
 
+    private void startRevealAnimation() {
         if (animator != null && animator.isRunning()) {
             animator.cancel();
         }
@@ -117,6 +144,18 @@ public class HourlyWeatherGraphView extends View {
             invalidate();
         });
         animator.start();
+    }
+
+    private int getActiveColor() {
+        switch (mode) {
+            case PRECIPITATION:
+                return 0xFF38BDF8; // Electric Blue Accent
+            case WIND:
+                return 0xFF38BDF8; // Electric Blue Accent
+            case TEMPERATURE:
+            default:
+                return 0xFF38BDF8; // Electric Blue Accent (#38BDF8)
+        }
     }
 
     @Override
@@ -140,27 +179,52 @@ public class HourlyWeatherGraphView extends View {
 
         if (usableW <= 0 || usableH <= 0) return;
 
-        // Find min & max temperature
-        int minTemp = Integer.MAX_VALUE;
-        int maxTemp = Integer.MIN_VALUE;
-        for (WeatherAirQuality.HourlyItem item : items) {
-            if (item.temp < minTemp) minTemp = item.temp;
-            if (item.temp > maxTemp) maxTemp = item.temp;
+        float[] values = new float[n];
+        float minVal = Float.MAX_VALUE;
+        float maxVal = Float.MIN_VALUE;
+
+        for (int i = 0; i < n; i++) {
+            WeatherAirQuality.HourlyItem item = items.get(i);
+            float v;
+            if (mode == Mode.PRECIPITATION) {
+                v = item.rainChance;
+            } else if (mode == Mode.WIND) {
+                v = item.windSpeed;
+            } else {
+                v = item.temp;
+            }
+            values[i] = v;
+            if (v < minVal) minVal = v;
+            if (v > maxVal) maxVal = v;
         }
 
-        if (minTemp == maxTemp) {
-            minTemp -= 2;
-            maxTemp += 2;
+        float valBase;
+        float valRange;
+
+        if (mode == Mode.PRECIPITATION) {
+            // Precipitation is 0% to 100%
+            valBase = 0f;
+            valRange = Math.max(50.0f, maxVal > 80 ? 100.0f : Math.max(40.0f, maxVal + 10.0f));
+        } else if (mode == Mode.WIND) {
+            // Wind speed in km/h
+            valBase = Math.max(0f, minVal - 2f);
+            valRange = Math.max(12.0f, maxVal - valBase + 2.0f);
+        } else {
+            // Temperature in °C
+            if (minVal == maxVal) {
+                minVal -= 2;
+                maxVal += 2;
+            }
+            valRange = Math.max(4.0f, maxVal - minVal + 2.0f);
+            valBase = minVal - 1.0f;
         }
-        float tempRange = Math.max(4.0f, (float) (maxTemp - minTemp + 2));
-        float tempBase = (float) (minTemp - 1);
 
         float[] xs = new float[n];
         float[] ys = new float[n];
 
         for (int i = 0; i < n; i++) {
             xs[i] = paddingH + (i * (usableW / (float) (n - 1)));
-            float norm = (items.get(i).temp - tempBase) / tempRange;
+            float norm = Math.max(0f, Math.min(1f, (values[i] - valBase) / valRange));
             float targetY = baselineY - (norm * usableH);
             // Smooth reveal animation from baseline up to targetY
             ys[i] = baselineY - ((baselineY - targetY) * animProgress);
@@ -184,31 +248,42 @@ public class HourlyWeatherGraphView extends View {
         fillPath.lineTo(xs[0], baselineY);
         fillPath.close();
 
+        int activeColor = getActiveColor();
+
         // Shading: translucent top to transparent baseline
-        int topColor = Color.argb((int) (60 * animProgress), Color.red(accentColor), Color.green(accentColor), Color.blue(accentColor));
-        int bottomColor = Color.argb(0, Color.red(accentColor), Color.green(accentColor), Color.blue(accentColor));
+        int topColor = Color.argb((int) (60 * animProgress), Color.red(activeColor), Color.green(activeColor), Color.blue(activeColor));
+        int bottomColor = Color.argb(0, Color.red(activeColor), Color.green(activeColor), Color.blue(activeColor));
         fillPaint.setShader(new LinearGradient(0, paddingTop, 0, baselineY, topColor, bottomColor, Shader.TileMode.CLAMP));
         canvas.drawPath(fillPath, fillPaint);
 
-        // Draw Golden/Accent Curve Line
-        linePaint.setColor(accentColor);
+        // Draw Active Curve Line
+        linePaint.setColor(activeColor);
         linePaint.setAlpha((int) (255 * animProgress));
         canvas.drawPath(curvePath, linePaint);
 
         // Draw Points & Labels
-        pointPaint.setColor(accentColor);
+        pointPaint.setColor(activeColor);
         tempTextPaint.setAlpha((int) (255 * animProgress));
         timeTextPaint.setAlpha(220);
 
         for (int i = 0; i < n; i++) {
             WeatherAirQuality.HourlyItem item = items.get(i);
 
-            // Halo & Center Point Dot
-            canvas.drawCircle(xs[i], ys[i], 5.0f * density, pointHaloPaint);
-            canvas.drawCircle(xs[i], ys[i], 3.2f * density, pointPaint);
+            // Electric blue outer dot with crisp white center (matching minimal dashboard mockup)
+            pointHaloPaint.setColor(activeColor);
+            canvas.drawCircle(xs[i], ys[i], 4.2f * density, pointHaloPaint);
+            canvas.drawCircle(xs[i], ys[i], 2.2f * density, whiteCenterPaint);
 
-            // Temperature text above point (clean Google Weather styling)
-            canvas.drawText(String.valueOf(item.temp), xs[i], ys[i] - (8.0f * density), tempTextPaint);
+            // Value text above point according to mode
+            String valStr;
+            if (mode == Mode.PRECIPITATION) {
+                valStr = item.rainChance + "%";
+            } else if (mode == Mode.WIND) {
+                valStr = item.windSpeed + " km/h";
+            } else {
+                valStr = item.temp + "°";
+            }
+            canvas.drawText(valStr, xs[i], ys[i] - (8.0f * density), tempTextPaint);
 
             // Time label below baseline
             String label = item.time != null ? item.time.toLowerCase(Locale.ROOT) : "";

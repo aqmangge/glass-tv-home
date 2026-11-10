@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Profile B: Full HD (1920 × 1080) Default TV Profile -->
+<resources>
+    <dimen name="home_clock_text_size">58sp</dimen>
+    <dimen name="home_clock_ampm_size">13.5sp</dimen>
+    <dimen name="home_clock_date_size">13.5sp</dimen>
+    <dimen name="home_weather_text_size">14sp</dimen>
+    <dimen name="home_weather_warning_size">13.5sp</dimen>
+    <dimen name="home_top_button_height">42dp</dimen>
+    <dimen name="home_top_button_text_size">14.5sp</dimen>
+
+    <!-- Daily Prayer & Prayer Times Section (Full HD Profile: 576px panel) -->
+    <dimen name="islamic_panel_width">576px</dimen>
+    <dimen name="home_ayah_heading_size">14px</dimen>
+    <dimen name="home_ayah_arabic_size">26px</dimen>
+    <dimen name="home_ayah_text_size">14.5px</dimen>
+    <dimen name="home_daily_prayer_gap">14px</dimen>
+    <dimen name="home_prayer_header_size">13px</dimen>
+    <dimen name="home_prayer_header_gap">12px</dimen>
+    <dimen name="home_prayer_label_size">14px</dimen>
+    <dimen name="home_prayer_time_size">18px</dimen>
+    <dimen name="home_prayer_time_gap">6px</dimen>
+
+    <dimen name="home_dock_tray_radius">30dp</dimen>
+    <dimen name="home_screen_padding_horizontal">56dp</dimen>
+    <dimen name="home_screen_padding_top">26dp</dimen>
+</resources>

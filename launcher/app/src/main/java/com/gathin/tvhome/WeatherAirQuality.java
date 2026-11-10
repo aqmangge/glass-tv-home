@@ -85,12 +85,18 @@ final class WeatherAirQuality {
         final String icon;
         final int temp;
         final int rainChance;
+        final int windSpeed;
 
         HourlyItem(String time, String icon, int temp, int rainChance) {
+            this(time, icon, temp, rainChance, 8);
+        }
+
+        HourlyItem(String time, String icon, int temp, int rainChance, int windSpeed) {
             this.time = time;
             this.icon = icon;
             this.temp = temp;
             this.rainChance = rainChance;
+            this.windSpeed = windSpeed;
         }
     }
 
@@ -212,7 +218,7 @@ final class WeatherAirQuality {
 
                 // 1. Fetch Complete Weather Forecast (Open-Meteo)
                 String weatherUrl = String.format(Locale.ROOT,
-                        "https://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,weather_code,wind_speed_10m,surface_pressure&hourly=temperature_2m,precipitation_probability,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max&timezone=Asia%%2FKuala_Lumpur&forecast_days=7",
+                        "https://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,weather_code,wind_speed_10m,surface_pressure&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max&timezone=Asia%%2FKuala_Lumpur&forecast_days=7",
                         lat, lon);
                 JSONObject wJson = fetchJson(weatherUrl);
 
@@ -500,10 +506,10 @@ final class WeatherAirQuality {
         sb.setSpan(new ForegroundColorSpan(0xFFFFFFFF), startWeather, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         sb.setSpan(new StyleSpan(Typeface.BOLD), startWeather, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-        // Separator: "  •  "
+        // Separator: "   |   " matching minimalist glassmorphism dashboard
         int startDot = sb.length();
-        sb.append("  •  ");
-        sb.setSpan(new ForegroundColorSpan(0x80FFFFFF), startDot, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        sb.append("   |   ");
+        sb.setSpan(new ForegroundColorSpan(0x59FFFFFF), startDot, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         // Air Quality: "IPU 112 Tidak Sihat"
         int startAqi = sb.length();
@@ -565,6 +571,7 @@ final class WeatherAirQuality {
                 JSONArray hTemps = hJson != null ? hJson.optJSONArray("temperature_2m") : null;
                 JSONArray hRains = hJson != null ? hJson.optJSONArray("precipitation_probability") : null;
                 JSONArray hCodes = hJson != null ? hJson.optJSONArray("weather_code") : null;
+                JSONArray hWinds = hJson != null ? hJson.optJSONArray("wind_speed_10m") : null;
 
                 if (wJson.has("daily")) {
                     JSONObject d = wJson.getJSONObject("daily");
@@ -606,7 +613,8 @@ final class WeatherAirQuality {
                                         int t = (int) Math.round(hTemps.optDouble(hIdx, 28.0));
                                         int hc = hCodes != null ? hCodes.optInt(hIdx, c) : c;
                                         int hr = hRains != null ? hRains.optInt(hIdx, r) : r;
-                                        dayHourly.add(new HourlyItem(label, getWeatherIcon(hc), t, hr));
+                                        int hw = hWinds != null ? (int) Math.round(hWinds.optDouble(hIdx, windSpeed)) : windSpeed;
+                                        dayHourly.add(new HourlyItem(label, getWeatherIcon(hc), t, hr, hw));
                                     }
                                 }
                             }
@@ -614,7 +622,7 @@ final class WeatherAirQuality {
                                 int[] sampleHours = {0, 3, 6, 9, 12, 15, 18, 21};
                                 for (int hour : sampleHours) {
                                     int t = (hour >= 12 && hour <= 15) ? mx : (hour < 6 ? mn : (mx + mn) / 2);
-                                    dayHourly.add(new HourlyItem(formatHourLabel(hour), getWeatherIcon(c), t, r));
+                                    dayHourly.add(new HourlyItem(formatHourLabel(hour), getWeatherIcon(c), t, r, windSpeed));
                                 }
                             }
 
@@ -636,7 +644,8 @@ final class WeatherAirQuality {
                                 int t = (int) Math.round(hTemps.optDouble(i, 28.0));
                                 int c = hCodes != null ? hCodes.optInt(i, 2) : 2;
                                 int r = hRains != null ? hRains.optInt(i, 30) : 30;
-                                hourly.add(new HourlyItem(label, getWeatherIcon(c), t, r));
+                                int hw = hWinds != null ? (int) Math.round(hWinds.optDouble(i, windSpeed)) : windSpeed;
+                                hourly.add(new HourlyItem(label, getWeatherIcon(c), t, r, hw));
                                 count++;
                             }
                         }
@@ -842,6 +851,37 @@ final class WeatherAirQuality {
             default:
                 return "⛅";
         }
+    }
+
+    public static int getCurrentCode(Context context) {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getInt(KEY_CODE, 2);
+    }
+
+    public static int getCurrentAqi(Context context) {
+        if (context == null) return 59;
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getInt(KEY_AQI, 59);
+    }
+
+    public static String getAqiStatusName(int aqi, boolean isMalay) {
+        return getAqiStatus(aqi, isMalay);
+    }
+
+    public static int getAqiColorCode(int aqi) {
+        return getAqiColor(aqi);
+    }
+
+    public static int getIconRes(int code, boolean isDay) {
+        if (code == 0) return isDay ? R.drawable.wx_sun : R.drawable.wx_moon;
+        if (code == 1 || code == 2) return isDay ? R.drawable.wx_partly : R.drawable.wx_partly_night;
+        if (code == 3) return R.drawable.wx_cloud;
+        if (code == 45 || code == 48) return R.drawable.wx_fog;
+        if (code >= 51 && code <= 57) return R.drawable.wx_drizzle;
+        if (code >= 61 && code <= 67) return R.drawable.wx_rain;
+        if (code >= 71 && code <= 77) return R.drawable.wx_snow;
+        if (code >= 80 && code <= 82) return R.drawable.wx_rain;
+        if (code >= 85 && code <= 86) return R.drawable.wx_snow;
+        if (code >= 95) return R.drawable.wx_storm;
+        return isDay ? R.drawable.wx_partly : R.drawable.wx_partly_night;
     }
 
     private static String getAqiStatus(int aqi, boolean isMalay) {

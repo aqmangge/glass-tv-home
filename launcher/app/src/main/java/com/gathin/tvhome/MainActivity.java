@@ -453,6 +453,14 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         updateWeatherWarning();
     }
 
+    public boolean isNightstandRedModeEnabled() {
+        return getSharedPreferences("theme_prefs", MODE_PRIVATE).getBoolean("standby_red_mode", false);
+    }
+
+    public void setNightstandRedModeEnabled(boolean enabled) {
+        getSharedPreferences("theme_prefs", MODE_PRIVATE).edit().putBoolean("standby_red_mode", enabled).apply();
+    }
+
     void showDockColumnsDialog(Runnable onDismiss) {
         SoundEffects.playSelect();
         final String[] columnOptions = new String[]{
@@ -2598,12 +2606,33 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
     }
 
+    public static WeatherSkyView.Condition mapWeatherToSkyCondition(int weatherCode) {
+        // OpenWeather / Open-Meteo WMO weather codes:
+        // 95, 96, 99: Thunderstorm
+        // 51..67, 80..82: Drizzle, Rain, Rain showers
+        if (weatherCode >= 95 || (weatherCode >= 51 && weatherCode <= 67) || (weatherCode >= 80 && weatherCode <= 82)) {
+            return WeatherSkyView.Condition.STORM;
+        }
+        return WeatherSkyView.Condition.SUNNY;
+    }
+
     private void updateWeatherAqi() {
         HomeWeather.Line last = HomeWeather.last(this);
         if (last != null) {
             showHomeWeather(last);
         } else if (weatherAirQualityView != null) {
             weatherAirQualityView.setText(WeatherAirQuality.getFormatted(this));
+            int code = WeatherAirQuality.getCurrentCode(this);
+            WeatherSkyView.Condition skyCondition = mapWeatherToSkyCondition(code);
+            int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+            boolean isDay = (hour >= 7 && hour < 19);
+            Drawable d = getDrawable(WeatherAirQuality.getIconRes(code, isDay));
+            if (d != null) {
+                int px = Math.round(20 * density);
+                d.setBounds(0, 0, px, px);
+                weatherAirQualityView.setCompoundDrawables(d, null, null, null);
+                weatherAirQualityView.setCompoundDrawablePadding(Math.round(8 * density));
+            }
         }
         updateWeatherWarning();
         updateHomeWeather();
@@ -2628,12 +2657,37 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (weatherAirQualityView == null) return;
         if (line == null) {
             weatherAirQualityView.setText(WeatherAirQuality.getFormatted(this));
+            int code = WeatherAirQuality.getCurrentCode(this);
+            int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+            boolean isDay = (hour >= 7 && hour < 19);
+            Drawable d = getDrawable(WeatherAirQuality.getIconRes(code, isDay));
+            if (d != null) {
+                int px = Math.round(20 * density);
+                d.setBounds(0, 0, px, px);
+                weatherAirQualityView.setCompoundDrawables(d, null, null, null);
+                weatherAirQualityView.setCompoundDrawablePadding(Math.round(8 * density));
+            }
             return;
         }
-        String sep = line.weather.isEmpty() || line.api.isEmpty() ? "" : "     ·     ";
-        android.text.SpannableString text = new android.text.SpannableString(line.weather + sep + line.api);
-        if (!line.api.isEmpty()) {
-            text.setSpan(new android.text.style.ForegroundColorSpan(line.apiColor), text.length() - line.api.length(),
+        String weatherStr = line.weather;
+        String apiStr = line.api;
+        int apiColor = line.apiColor;
+        if (apiStr == null || apiStr.isEmpty()) {
+            int aqi = WeatherAirQuality.getCurrentAqi(this);
+            boolean isMalay = HomeWeather.isMalayLanguage(this);
+            String prefix = isMalay ? "IPU " : "API ";
+            apiStr = prefix + aqi + " " + WeatherAirQuality.getAqiStatusName(aqi, isMalay);
+            apiColor = WeatherAirQuality.getAqiColorCode(aqi);
+        }
+        String sep = (weatherStr == null || weatherStr.isEmpty() || apiStr == null || apiStr.isEmpty()) ? "" : "   |   ";
+        android.text.SpannableString text = new android.text.SpannableString((weatherStr != null ? weatherStr : "") + sep + (apiStr != null ? apiStr : ""));
+        if (weatherStr != null && !weatherStr.isEmpty() && apiStr != null && !apiStr.isEmpty()) {
+            int divStart = weatherStr.length();
+            int divEnd = divStart + sep.length();
+            text.setSpan(new android.text.style.ForegroundColorSpan(0x66FFFFFF), divStart, divEnd, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        if (apiStr != null && !apiStr.isEmpty()) {
+            text.setSpan(new android.text.style.ForegroundColorSpan(apiColor), text.length() - apiStr.length(),
                     text.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         weatherAirQualityView.setText(text);
@@ -3064,22 +3118,35 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (prayerHeader != null) {
             String pPrefix = AppLanguage.getPrayerHeaderPrefix(this);
             prayerHeader.setText(pPrefix + " " + zoneTitle + "  •  " + PrayerTimes.getHijriDate(this).toUpperCase(Locale.ROOT));
+            prayerHeader.setGravity(Gravity.CENTER_HORIZONTAL);
+            prayerHeader.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            prayerHeader.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.home_prayer_header_size));
         }
 
         PrayerTimes.PrayerItem[] items = PrayerTimes.getPrayerItems(this);
         if (items != null && items.length >= 6) {
             TextView[] labels = {lblSubuh, lblSyuruk, lblZohor, lblAsar, lblMaghrib, lblIsyak};
             TextView[] times = {timeSubuh, timeSyuruk, timeZohor, timeAsar, timeMaghrib, timeIsyak};
+            int labelPx = getResources().getDimensionPixelSize(R.dimen.home_prayer_label_size);
+            int timePx = getResources().getDimensionPixelSize(R.dimen.home_prayer_time_size);
 
             for (int i = 0; i < 6; i++) {
-                if (times[i] != null) times[i].setText(items[i].timeStr);
+                if (times[i] != null) {
+                    times[i].setText(items[i].timeStr);
+                    times[i].setTextSize(TypedValue.COMPLEX_UNIT_PX, timePx);
+                    times[i].setGravity(Gravity.CENTER);
+                    times[i].setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                }
                 if (labels[i] != null) {
                     labels[i].setText(items[i].name);
-                    if (items[i].isNext) {
-                        labels[i].setTextColor(0xFFFFB300);
+                    labels[i].setTextSize(TypedValue.COMPLEX_UNIT_PX, labelPx);
+                    labels[i].setGravity(Gravity.CENTER);
+                    labels[i].setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                    if (items[i].isCurrent) {
+                        labels[i].setTextColor(0xFFFFC928); // Highlight active prayer time in yellow accent (#FFC928)
                         labels[i].setTypeface(Typeface.DEFAULT_BOLD);
                         if (times[i] != null) {
-                            times[i].setTextColor(0xFFFFB300);
+                            times[i].setTextColor(0xFFFFC928);
                             times[i].setTypeface(Typeface.DEFAULT_BOLD);
                         }
                     } else {
@@ -3121,48 +3188,44 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             return;
         }
 
-        int usable = getResources().getDisplayMetrics().widthPixels - (int) ((55 + 56) * density);
-        int islamicMaxWidth = Math.round(usable * 0.38f);
-        boolean is4K = (getResources().getDisplayMetrics().widthPixels >= 3840 || getResources().getDisplayMetrics().heightPixels >= 2160);
-
         if (ayahLabel != null) {
             ayahLabel.setText(AppLanguage.getAyahLabel(this, a.reference));
-            ayahLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, is4K ? 12f : 10f);
+            ayahLabel.setGravity(Gravity.CENTER_HORIZONTAL);
+            ayahLabel.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            ayahLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.home_ayah_heading_size));
         }
         if (ayahArabic != null) {
             String text = a.arabic.trim();
-            ayahArabic.setMaxWidth(islamicMaxWidth);
-            ayahArabic.setSingleLine(true);
-            ayahArabic.setMaxLines(1);
-            ayahArabic.setEllipsize(TextUtils.TruncateAt.END);
+            ayahArabic.setSingleLine(false);
+            ayahArabic.setMaxLines(2);
             ayahArabic.setTextDirection(View.TEXT_DIRECTION_RTL);
-            ayahArabic.setGravity(Gravity.END);
+            ayahArabic.setGravity(Gravity.CENTER);
+            ayahArabic.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             try {
                 ayahArabic.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.amiri_quran), Typeface.NORMAL);
             } catch (Exception ignored) {}
-            ayahArabic.setTextColor(0xFFFFC56B);
-
-            float baseSp = is4K ? 18f : 14.5f;
-            android.text.TextPaint paint = new android.text.TextPaint(ayahArabic.getPaint());
-            paint.setTextSize(baseSp * getResources().getDisplayMetrics().scaledDensity);
-            float textWidth = paint.measureText(text);
-
-            float targetSp = baseSp;
-            float maxAllowed = islamicMaxWidth * 0.95f;
-            while (textWidth > maxAllowed && targetSp > 11.5f) {
-                targetSp -= 0.5f;
-                paint.setTextSize(targetSp * getResources().getDisplayMetrics().scaledDensity);
-                textWidth = paint.measureText(text);
-            }
-            ayahArabic.setTextSize(TypedValue.COMPLEX_UNIT_SP, targetSp);
+            ayahArabic.setTextColor(0xFFFFFFFF);
+            ayahArabic.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.home_ayah_arabic_size));
             ayahArabic.setText(text);
         }
         if (ayahText != null) {
-            ayahText.setMaxWidth(islamicMaxWidth);
             String lang = AppLanguage.getLanguage(this);
             String tr = a.translation(lang);
-            ayahText.setText(tr != null ? tr.trim() : "");
-            ayahText.setTextSize(TypedValue.COMPLEX_UNIT_SP, is4K ? 12.5f : 10.5f);
+            if (tr != null && !tr.trim().isEmpty()) {
+                String cleanTr = tr.trim();
+                if (!cleanTr.startsWith("\"") && !cleanTr.startsWith("“")) {
+                    cleanTr = "“" + cleanTr + "”";
+                }
+                ayahText.setText(cleanTr);
+            } else {
+                ayahText.setText("");
+            }
+            ayahText.setSingleLine(false);
+            ayahText.setMaxLines(3);
+            ayahText.setGravity(Gravity.CENTER_HORIZONTAL);
+            ayahText.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            ayahText.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.home_ayah_text_size));
+            ayahText.setTextColor(0xE6FFFFFF);
             ayahText.setVisibility(tr != null && !tr.trim().isEmpty() ? View.VISIBLE : View.GONE);
         }
         ayahBlock.setVisibility(View.VISIBLE);
@@ -3179,50 +3242,37 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             return;
         }
 
-        int usable = getResources().getDisplayMetrics().widthPixels - (int) ((55 + 56) * density);
-        int islamicMaxWidth = Math.round(usable * 0.38f);
-        boolean is4K = (getResources().getDisplayMetrics().widthPixels >= 3840 || getResources().getDisplayMetrics().heightPixels >= 2160);
-
         if (ayahLabel != null) {
             String datePart = (k.date != null && !k.date.isEmpty()) ? "  •  " + k.date.toUpperCase(Locale.ROOT) : "";
             ayahLabel.setText("KHUTBAH MINBAR • " + k.authority.toUpperCase(Locale.ROOT) + datePart);
-            ayahLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, is4K ? 11.5f : 9.5f);
+            ayahLabel.setGravity(Gravity.CENTER_HORIZONTAL);
+            ayahLabel.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            ayahLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.home_ayah_heading_size));
         }
         if (ayahArabic != null) {
             String text = k.title.trim();
-            ayahArabic.setMaxWidth(islamicMaxWidth);
-            ayahArabic.setSingleLine(true);
-            ayahArabic.setMaxLines(1);
-            ayahArabic.setEllipsize(TextUtils.TruncateAt.END);
+            ayahArabic.setSingleLine(false);
+            ayahArabic.setMaxLines(2);
             ayahArabic.setTextDirection(View.TEXT_DIRECTION_LTR);
-            ayahArabic.setGravity(Gravity.END);
+            ayahArabic.setGravity(Gravity.CENTER);
+            ayahArabic.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             try {
                 ayahArabic.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.outfit), Typeface.BOLD);
             } catch (Exception e) {
                 ayahArabic.setTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD));
             }
             ayahArabic.setTextColor(0xFFFFC56B);
-
-            float baseSp = is4K ? 16f : 13.5f;
-            android.text.TextPaint paint = new android.text.TextPaint(ayahArabic.getPaint());
-            paint.setTextSize(baseSp * getResources().getDisplayMetrics().scaledDensity);
-            float textWidth = paint.measureText(text);
-
-            float targetSp = baseSp;
-            float maxAllowed = islamicMaxWidth * 0.95f;
-            while (textWidth > maxAllowed && targetSp > 11.0f) {
-                targetSp -= 0.5f;
-                paint.setTextSize(targetSp * getResources().getDisplayMetrics().scaledDensity);
-                textWidth = paint.measureText(text);
-            }
-            ayahArabic.setTextSize(TypedValue.COMPLEX_UNIT_SP, targetSp);
+            ayahArabic.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.home_ayah_arabic_size));
             ayahArabic.setText(text);
         }
         if (ayahText != null) {
-            ayahText.setMaxWidth(islamicMaxWidth);
             String summary = (k.subtitle != null && !k.subtitle.isEmpty()) ? k.subtitle + " — " + k.excerpt : k.excerpt;
             ayahText.setText(summary != null ? summary.trim() : "");
-            ayahText.setTextSize(TypedValue.COMPLEX_UNIT_SP, is4K ? 12.5f : 10.5f);
+            ayahText.setSingleLine(false);
+            ayahText.setMaxLines(3);
+            ayahText.setGravity(Gravity.CENTER_HORIZONTAL);
+            ayahText.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            ayahText.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.home_ayah_text_size));
             ayahText.setVisibility(summary != null && !summary.trim().isEmpty() ? View.VISIBLE : View.GONE);
         }
         ayahBlock.setVisibility(View.VISIBLE);
@@ -6575,10 +6625,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             content.setTranslationY(0f);
         }
 
-        // iPhone StandBy Wind Down Mode: 10:00 PM (22:00) to 6:00 AM (06:00) -> Red Monochrome
+        // iPhone StandBy Wind Down Mode: 10:00 PM (22:00) to 6:00 AM (06:00) -> Red Monochrome if enabled in settings
         java.util.Calendar cal = java.util.Calendar.getInstance();
         int hour = cal.get(java.util.Calendar.HOUR_OF_DAY);
-        boolean isNightMode = (hour >= 22 || hour < 6);
+        boolean redModeActive = isNightstandRedModeEnabled();
+        boolean isNightMode = redModeActive && (hour >= 22 || hour < 6);
 
         TextView clock = screensaverView.findViewById(R.id.nightstandClock);
         TextView ampm = screensaverView.findViewById(R.id.nightstandAmPm);

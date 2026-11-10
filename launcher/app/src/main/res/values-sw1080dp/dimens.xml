@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Profile A: 4K UHD (3840 × 2160) Television Profile -->
+<resources>
+    <dimen name="home_clock_text_size">72sp</dimen>
+    <dimen name="home_clock_ampm_size">16sp</dimen>
+    <dimen name="home_clock_date_size">16sp</dimen>
+    <dimen name="home_weather_text_size">16.5sp</dimen>
+    <dimen name="home_weather_warning_size">15.5sp</dimen>
+    <dimen name="home_top_button_height">50dp</dimen>
+    <dimen name="home_top_button_text_size">17sp</dimen>
+
+    <!-- Daily Prayer & Prayer Times Section (4K UHD Profile: 1152px panel) -->
+    <dimen name="islamic_panel_width">1152px</dimen>
+    <dimen name="home_ayah_heading_size">28px</dimen>
+    <dimen name="home_ayah_arabic_size">52px</dimen>
+    <dimen name="home_ayah_text_size">29px</dimen>
+    <dimen name="home_daily_prayer_gap">28px</dimen>
+    <dimen name="home_prayer_header_size">26px</dimen>
+    <dimen name="home_prayer_header_gap">24px</dimen>
+    <dimen name="home_prayer_label_size">28px</dimen>
+    <dimen name="home_prayer_time_size">36px</dimen>
+    <dimen name="home_prayer_time_gap">12px</dimen>
+
+    <dimen name="home_dock_tray_radius">36dp</dimen>
+    <dimen name="home_screen_padding_horizontal">74dp</dimen>
+    <dimen name="home_screen_padding_top">36dp</dimen>
+</resources>

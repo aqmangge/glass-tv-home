@@ -30,6 +30,7 @@ public class LocationActivity extends Activity {
     private ScrollView zoneScroll;
     private TextView hint;
     private String current;
+    private String currentTown;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +40,7 @@ public class LocationActivity extends Activity {
         Location.Zone now = Location.chosen(this);
         if (now == null) now = Location.byCode(getIntent().getStringExtra("zone"));
         current = now == null ? null : now.code;
+        currentTown = now == null ? null : now.town;
 
         LinearLayout page = new LinearLayout(this);
         page.setOrientation(LinearLayout.VERTICAL);
@@ -138,7 +140,7 @@ public class LocationActivity extends Activity {
             top.setGravity(Gravity.CENTER_VERTICAL);
             TextView town = text(z.town, 18, 0xFFFFFFFF, 500);
             top.addView(town, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-            boolean isNow = z.code.equals(current);
+            boolean isNow = z.code.equals(current) && (currentTown == null || z.town.equals(currentTown));
             String nowPrefix = AppLanguage.strNowBadge(this);
             TextView code = text(isNow ? nowPrefix + "  ·  " + z.code : z.code, 13, isNow ? 0xFF30D158 : 0x99FFFFFF, 600);
             top.addView(code);

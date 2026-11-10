@@ -31,11 +31,11 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
     DockDecoration(int dockSize, float density) {
         this.dockSize = dockSize;
         this.density = density;
-        // Same glass as the top-bar pills (GlassDrawable): an even veil and a shining edge.
-        band.setColor(0x12FFFFFF);
-        trayShadowPaint.setColor(0x38000000);
-        trayShadowPaint.setMaskFilter(new android.graphics.BlurMaskFilter(14f * density, android.graphics.BlurMaskFilter.Blur.NORMAL));
-        edge = new GlassRim(1.5f * density, 0xD9FFFFFF, 0x1AFFFFFF, 0.5f);
+        // Cinematic dark glassmorphism aesthetic matching premium TV redesign
+        band.setColor(0x59101826);
+        trayShadowPaint.setColor(0x55000000);
+        trayShadowPaint.setMaskFilter(new android.graphics.BlurMaskFilter(16f * density, android.graphics.BlurMaskFilter.Blur.NORMAL));
+        edge = new GlassRim(1.5f * density, 0xD9FFFFFF, 0x3367E8F9, 0.5f);
     }
 
     /** The focus shape: the tray's glass would hide it, so the tray paints it over the glass itself. */
@@ -50,6 +50,13 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
         if (pos >= 0 && pos < dockSize) {
             outRect.top = (int) (6 * density);
             outRect.bottom = (int) (12 * density);
+        } else if (pos >= dockSize && pos < dockSize * 2) {
+            // First row below the dock: keep it pushed fully below screen edge when dock is parked
+            outRect.top = (int) (60 * density);
+            outRect.bottom = (int) (8 * density);
+        } else {
+            outRect.top = (int) (8 * density);
+            outRect.bottom = (int) (8 * density);
         }
     }
 
@@ -74,10 +81,10 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
             }
         }
         if (!any) return;
-        float pad = 14 * density;
+        float pad = 16 * density;
         rect.inset(-pad, -pad);
         area.set(rect);
-        float radius = 26 * density;
+        float radius = 30 * density;
         // Soft drop shadow under the glass dock tray
         RectF trayShadow = new RectF(rect);
         trayShadow.offset(0, 4f * density);

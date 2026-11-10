@@ -118,6 +118,16 @@
             </intent-filter>
         </receiver>
 
+        <!-- Remaps the remote's app buttons (AppKeys); adb only: the shell holds DUMP, other apps do not. -->
+        <receiver
+            android:name=".AppKeys$Receiver"
+            android:exported="true"
+            android:permission="android.permission.DUMP">
+            <intent-filter>
+                <action android:name="com.gathin.tvhome.SET_APP_KEY" />
+            </intent-filter>
+        </receiver>
+
         <!-- The azan: prayer-time alarm and full-screen / floating azan card -->
         <receiver
             android:name=".AzanReceiver"

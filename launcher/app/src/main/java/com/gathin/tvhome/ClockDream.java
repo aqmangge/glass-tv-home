@@ -121,10 +121,11 @@ public class ClockDream extends DreamService {
 
         float density = getResources().getDisplayMetrics().density;
 
-        // StandBy Wind Down Mode: 10:00 PM (22:00) to 6:00 AM (06:00) -> Red Monochrome
+        // StandBy Wind Down Mode: 10:00 PM (22:00) to 6:00 AM (06:00) -> Red Monochrome if enabled in settings
         Calendar cal = Calendar.getInstance();
         int hour = cal.get(Calendar.HOUR_OF_DAY);
-        boolean isNightMode = (hour >= 22 || hour < 6);
+        boolean redModeActive = getSharedPreferences("theme_prefs", MODE_PRIVATE).getBoolean("standby_red_mode", false);
+        boolean isNightMode = redModeActive && (hour >= 22 || hour < 6);
 
         if (isNightMode) {
             int red = 0xFFFF453A;
