@@ -31,6 +31,15 @@ public class HomeKeyService extends AccessibilityService {
     private final Queue<String> forceStopQueue = new LinkedList<>();
     private boolean isProcessingForceStop = false;
     private boolean isWaitingForConfirmDialog = false;
+    private long lastHomePressTime = 0;
+
+    private void openRecentAppsGlobal() {
+        Intent recents = new Intent(this, RecentAppsActivity.class);
+        recents.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        try {
+            startActivity(recents);
+        } catch (Exception ignored) {}
+    }
 
     /** Scancodes of remote buttons that should open Settings (config.xml, settings_key_scancodes). */
     private int[] settingsScancodes = new int[0];
@@ -327,7 +336,10 @@ public class HomeKeyService extends AccessibilityService {
 
         int keyCode = event.getKeyCode();
         if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
-            return true; // Live apps disabled per request
+            if (event.getAction() == KeyEvent.ACTION_UP && !event.isCanceled()) {
+                openRecentAppsGlobal();
+            }
+            return true;
         }
 
         if (keyCode != KeyEvent.KEYCODE_ALL_APPS && keyCode != KeyEvent.KEYCODE_HOME) return false;
@@ -355,6 +367,16 @@ public class HomeKeyService extends AccessibilityService {
                 isHomeLongPressed = false;
                 return true;
             }
+
+            long now = SystemClock.uptimeMillis();
+            if (now - lastHomePressTime < 380) {
+                // Double tap Home: open Task Manager / Recent Apps (Skyworth, Xiaomi, Hisense)
+                lastHomePressTime = 0;
+                openRecentAppsGlobal();
+                return true;
+            }
+            lastHomePressTime = now;
+
             // Single Home press: return to Home
             if (RecentAppsActivity.isForeground()) {
                 RecentAppsActivity.dismissFromGlobal();
