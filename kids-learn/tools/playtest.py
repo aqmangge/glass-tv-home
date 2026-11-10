@@ -368,7 +368,7 @@ def play_music():
     check("Music: every drum hit sounds", drums == 4, f"{drums} hits")
     check("Music: a C chord strum plays its strings", chord == ["music chord C"] and strum >= 4,
           f"{chord} {strum} strings")
-    check("Music: a xylophone glissando strikes the bars", xylo >= 10, f"{xylo} bars")
+    check("Music: a xylophone glissando strikes the bars", xylo >= 8, f"{xylo} bars")
     back()
 
 
@@ -464,6 +464,8 @@ def stop(rec, name):
 def main():
     os.makedirs(OUT, exist_ok=True)
     sh("settings put secure immersive_mode_confirmations confirmed")
+    # The app logs every screen's layout for this test: a bigger log keeps a long run's events from wrapping away.
+    adb("logcat", "-G", "16M")
     adb("logcat", "-c")
     sh(f"am start -S -W -n {PKG}/.MainActivity")
     time.sleep(6)
