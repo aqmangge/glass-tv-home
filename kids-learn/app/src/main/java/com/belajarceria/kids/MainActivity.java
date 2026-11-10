@@ -91,7 +91,7 @@ public final class MainActivity extends Activity {
                     lastNav = 0;
                     push(zh.level(level));
                     // a third number opens one conversation (level 3) or speech (level 4) directly
-                    if (p.length > 2 && level >= 2) {
+                    if (p.length > 2 && (level == 2 || level == 3)) {
                         int item = Integer.parseInt(p[2].trim());
                         lastNav = 0;
                         push(level == 2 ? new ChatScreen(this, item) : new StageScreen(this, item));

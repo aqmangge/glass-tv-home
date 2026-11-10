@@ -106,7 +106,7 @@ final class PhraseScreen extends Screen {
         counter.setText((index + 1) + " / " + items.length);
         int best = ZhKit.stars(getContext(), key + index);
         starsView.setText(ZhKit.stars(best));
-        heardView.setText(best > 0 ? "Terbaik setakat ini" : "Dengar, kemudian sebut!");
+        heardView.setText(best > 0 ? "Terbaik setakat ini" : "Dengar 🔊, kemudian tekan 🎤 dan sebut!");
         mic.onTap(p.hanzi, (stars, heard) -> {
             starsView.setText(ZhKit.stars(stars));
             Ui.jelly(starsView, 3f);

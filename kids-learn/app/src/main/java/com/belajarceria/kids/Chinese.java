@@ -90,6 +90,52 @@ final class Chinese {
             p("今天", "jīntiān", "Hari ini", "Today"),
     };
 
+    // ---------------------------------------------------------------- games: things with a picture
+
+    /** Hanzi, pinyin, Malay, English and a picture: for Drag & drop, Match and the test. */
+    static final String[][] PICTURES = {
+            {"猫", "māo", "Kucing", "Cat", "🐱"},
+            {"兔子", "tùzi", "Arnab", "Rabbit", "🐰"},
+            {"鱼", "yú", "Ikan", "Fish", "🐟"},
+            {"鸟", "niǎo", "Burung", "Bird", "🐦"},
+            {"熊猫", "xióngmāo", "Panda", "Panda", "🐼"},
+            {"大象", "dàxiàng", "Gajah", "Elephant", "🐘"},
+            {"苹果", "píngguǒ", "Epal", "Apple", "🍎"},
+            {"香蕉", "xiāngjiāo", "Pisang", "Banana", "🍌"},
+            {"西瓜", "xīguā", "Tembikai", "Watermelon", "🍉"},
+            {"牛奶", "niúnǎi", "Susu", "Milk", "🥛"},
+            {"水", "shuǐ", "Air", "Water", "💧"},
+            {"书", "shū", "Buku", "Book", "📚"},
+            {"笔", "bǐ", "Pensel", "Pencil", "✏️"},
+            {"球", "qiú", "Bola", "Ball", "⚽"},
+            {"车", "chē", "Kereta", "Car", "🚗"},
+            {"飞机", "fēijī", "Kapal terbang", "Aeroplane", "✈️"},
+            {"房子", "fángzi", "Rumah", "House", "🏠"},
+            {"学校", "xuéxiào", "Sekolah", "School", "🏫"},
+            {"太阳", "tàiyáng", "Matahari", "Sun", "☀️"},
+            {"月亮", "yuèliang", "Bulan", "Moon", "🌙"},
+            {"星星", "xīngxing", "Bintang", "Star", "⭐"},
+            {"花", "huā", "Bunga", "Flower", "🌸"},
+            {"树", "shù", "Pokok", "Tree", "🌳"},
+            {"手", "shǒu", "Tangan", "Hand", "✋"},
+    };
+
+    /** 一 to 十, with pinyin. */
+    static final String[][] NUMBERS = {
+            {"一", "yī"}, {"二", "èr"}, {"三", "sān"}, {"四", "sì"}, {"五", "wǔ"},
+            {"六", "liù"}, {"七", "qī"}, {"八", "bā"}, {"九", "jiǔ"}, {"十", "shí"},
+    };
+
+    /** The picture words as a subject, so the Drag & drop and Match games can play them. */
+    static Content.Subject gameSubject() {
+        Content.Item[] items = new Content.Item[PICTURES.length];
+        for (int i = 0; i < items.length; i++) {
+            String[] w = PICTURES[i];
+            items[i] = new Content.Item(w[0], w[1], w[2], w[4]);
+        }
+        return new Content.Subject("华语", "Mandarin", "中文", ZhKit.RED_GOLD, Content.Kind.CHINESE, items);
+    }
+
     // ---------------------------------------------------------------- level 2: simple sentences
 
     static final Phrase[] SENTENCES = {

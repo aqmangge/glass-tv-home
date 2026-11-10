@@ -9,7 +9,7 @@ import java.util.Set;
 
 /** Everything the child learns: five subjects, each a list of items. */
 final class Content {
-    enum Kind { LETTERS, NUMBERS, HIJAIYAH, WORDS }
+    enum Kind { LETTERS, NUMBERS, HIJAIYAH, WORDS, CHINESE }
 
     static final class Item {
         /** What is shown big, traced and dragged: "A", "3", "ب", "مسجد". */
@@ -43,6 +43,11 @@ final class Content {
             this.colors = colors;
             this.kind = kind;
             this.items = items;
+        }
+
+        /** Words shown as a word over its reading (Arabic and Chinese words), rather than one big letter. */
+        boolean wordTiles() {
+            return kind == Kind.WORDS || kind == Kind.CHINESE;
         }
 
         boolean arabic() {

@@ -85,11 +85,18 @@ final class ZhKit {
     }
 
     /** The microphone button: listens (or records), shows a live level, then shows the stars earned. */
+    /**
+     * The microphone button. Tap: it turns red, beeps and says "Cakap sekarang!" with a live sound meter, so the
+     * child knows it is listening; tap again (or just stop talking) to finish. It always comes back to green.
+     */
     static final class Mic {
+        static final String IDLE = "🎤  Tekan & cakap";
         final TextView view;
         private final MainActivity act;
         private final Speech speech;
         private boolean busy;
+        private Done done;
+        private String target;
 
         interface Done {
             void done(int stars, String heard);
@@ -98,39 +105,70 @@ final class ZhKit {
         Mic(MainActivity a, Speech speech) {
             act = a;
             this.speech = speech;
-            view = button(a, "🎤  Giliran saya", new int[]{0xFF43A047, 0xFF00BFA5}, () -> {});
+            view = button(a, IDLE, new int[]{0xFF43A047, 0xFF00BFA5}, this::tapped);
             view.setContentDescription("mic");
         }
 
+        /** What to listen for next, and what to do with the stars. */
         void onTap(String target, Done done) {
-            Ui.press(view, () -> start(target, done));
+            this.target = target;
+            this.done = done;
         }
 
-        private void start(String target, Done done) {
+        private void tapped() {
             if (busy) {
-                speech.stop(); // a second tap ends a recording early
+                view.setText("⏳  Sekejap…");
+                speech.finishEarly(); // a second tap: "I've finished"
                 return;
             }
+            if (target == null) return;
             act.voice.stop();
-            act.withMic(() -> {
-                busy = true;
-                view.setText("👂  Saya mendengar…");
-                view.setBackground(Ui.gradient(new int[]{0xFFE53935, 0xFFFF7043}, Ui.dp(26)));
-                MainActivity.log("zh mic listening");
-                speech.listen(target, v -> {
-                    float s = 1f + v * 0.12f;
-                    view.setScaleX(s);
-                    view.setScaleY(s);
-                }, (stars, heard) -> {
-                    busy = false;
-                    view.setScaleX(1f);
-                    view.setScaleY(1f);
-                    view.setText("🎤  Giliran saya");
-                    view.setBackground(Ui.gradient(new int[]{0xFF43A047, 0xFF00BFA5}, Ui.dp(26)));
-                    MainActivity.log("zh mic stars " + stars);
-                    done.done(stars, heard);
-                });
+            act.withMic(this::begin);
+        }
+
+        private void begin() {
+            if (busy) return;
+            busy = true;
+            Sfx.tick();
+            view.setText("🔴  Cakap sekarang!");
+            view.setBackground(Ui.gradient(new int[]{0xFFE53935, 0xFFFF7043}, Ui.dp(26)));
+            Ui.jelly(view, 1.2f);
+            pulse();
+            MainActivity.log("zh mic listening");
+            Done d = done;
+            speech.listen(target, v -> {
+                if (!busy) return;
+                int bars = Math.round(v * 4);
+                StringBuilder b = new StringBuilder("🔴  Cakap sekarang! ");
+                for (int i = 0; i < 4; i++) b.append(i < bars ? '▮' : '▯');
+                view.setText(b);
+            }, (stars, heard) -> {
+                busy = false;
+                view.removeCallbacks(pulser);
+                view.setText(IDLE);
+                view.setBackground(Ui.gradient(new int[]{0xFF43A047, 0xFF00BFA5}, Ui.dp(26)));
+                view.setAlpha(1f);
+                if (stars < 0) {
+                    MainActivity.log("zh mic cancelled");
+                    return; // stopped by a new card or leaving: nothing to judge
+                }
+                MainActivity.log("zh mic stars " + stars);
+                if (d != null) d.done(stars, heard);
             });
+        }
+
+        private final Runnable pulser = new Runnable() {
+            @Override
+            public void run() {
+                if (!busy) return;
+                view.setAlpha(view.getAlpha() < 1f ? 1f : 0.82f);
+                view.postDelayed(this, 450);
+            }
+        };
+
+        private void pulse() {
+            view.removeCallbacks(pulser);
+            view.postDelayed(pulser, 450);
         }
     }
 }

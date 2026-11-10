@@ -12,11 +12,13 @@ import java.util.Random;
  * time, so a child can take it again without learning the answers by heart.
  */
 final class Exam {
-    static final int BM = 0, EN = 1, MT = 2, JW = 3;
-    static final String[] NAMES = {"Bahasa Melayu", "Bahasa Inggeris", "Matematik", "Jawi"};
-    static final String[] ICONS = {"📖", "🔤", "🧮", "🕌"};
+    static final int BM = 0, EN = 1, MT = 2, JW = 3, ZH = 4;
+    /** The Year 1 paper's four parts; Mandarin (ZH) is a test of its own, in Cakap Mandarin. */
+    static final int[] YEAR_ONE = {BM, EN, MT, JW};
+    static final String[] NAMES = {"Bahasa Melayu", "Bahasa Inggeris", "Matematik", "Jawi", "Bahasa Cina"};
+    static final String[] ICONS = {"📖", "🔤", "🧮", "🕌", "🏮"};
     static final int[][] COLORS = {{0xFFE53935, 0xFFFF7A59}, {0xFF1E6FE0, 0xFF3FB6FF}, {0xFF14A05A, 0xFF5BD68F},
-            {0xFF7B3FD6, 0xFFB57BFF}};
+            {0xFF7B3FD6, 0xFFB57BFF}, {0xFFC62828, 0xFFFFA000}};
     static final int PER_SECTION = 25;
 
     enum Stem { TEXT, PICTURE, SWATCH, SHAPE, JAWI }
@@ -26,6 +28,8 @@ final class Exam {
         /** The instruction in Malay and in English, as on the paper; shown and read aloud in the chosen one. */
         String promptMs, promptEn;
         Stem kind;
+        /** Mandarin read aloud after the instruction (the word or the friend's line), or null. */
+        String zh;
         /** Text, emoji, or Jawi shown big; for SWATCH and SHAPE see color and shape. */
         String stem = "";
         /** A line under the stem, such as "_ _ ju" or "2 + 1 = ?". May be empty. */
@@ -54,6 +58,7 @@ final class Exam {
             case BM: bm(out); break;
             case EN: en(out); break;
             case MT: mt(out); break;
+            case ZH: zh(out); break;
             default: jw(out); break;
         }
         for (Q q : out) q.section = s;
@@ -311,6 +316,63 @@ final class Exam {
             q.caption = w[1];
             pair(q, w[2], w[3]);
             q.jawiOptions = true;
+            out.add(q);
+        }
+    }
+
+    // ---------------------------------------------------------------- Bahasa Cina (Cakap Mandarin)
+
+    private void zh(List<Q> out) {
+        String[][] pics = Chinese.PICTURES;
+        // 1. A picture to its Chinese word.
+        List<String> picWords = new ArrayList<>();
+        for (String[] w : pics) picWords.add(w[0] + "  " + w[1]);
+        for (String[] w : pick(pics, 5)) {
+            Q q = q("Pilih perkataan Cina bagi gambar ini.", "Choose the Chinese word for this picture.", Stem.PICTURE, w[4]);
+            choices(q, w[0] + "  " + w[1], picWords, 3);
+            out.add(q);
+        }
+        // 2. What a word means (in Malay).
+        List<String> meanings = new ArrayList<>();
+        for (Chinese.Phrase p : Chinese.WORDS) meanings.add(p.malay);
+        for (Chinese.Phrase p : pick(Chinese.WORDS, 5)) {
+            Q q = q("Apakah maksud perkataan ini?", "What does this word mean?", Stem.TEXT, p.hanzi);
+            q.caption = p.pinyin;
+            q.zh = p.hanzi;
+            choices(q, p.malay, meanings, 3);
+            out.add(q);
+        }
+        // 3. Count, and choose the Chinese number.
+        List<String> numerals = new ArrayList<>();
+        for (String[] n : Chinese.NUMBERS) numerals.add(n[0] + "  " + n[1]);
+        for (int n : distinct(1, 10, 5)) {
+            Q q = q("Kira gambar. Pilih nombor dalam bahasa Cina.", "Count the pictures. Choose the Chinese number.",
+                    Stem.PICTURE, rows(thing(), n));
+            List<String> near = new ArrayList<>();
+            for (int d = -2; d <= 2; d++) if (d != 0 && n + d >= 1 && n + d <= 10) near.add(numerals.get(n + d - 1));
+            choices(q, numerals.get(n - 1), near, 3);
+            out.add(q);
+        }
+        // 4. Read the pinyin, choose the characters.
+        List<String> hanzi = new ArrayList<>();
+        for (Chinese.Phrase p : Chinese.WORDS) hanzi.add(p.hanzi);
+        for (Chinese.Phrase p : pick(Chinese.WORDS, 5)) {
+            Q q = q("Baca pinyin ini. Pilih perkataan Cina yang betul.", "Read the pinyin. Choose the right Chinese word.",
+                    Stem.TEXT, p.pinyin);
+            q.zh = p.hanzi;
+            choices(q, p.hanzi, hanzi, 3);
+            out.add(q);
+        }
+        // 5. A friend speaks: choose the right reply, as in a real conversation.
+        List<Chinese.Turn> turns = new ArrayList<>();
+        for (Chinese.Talk t : Chinese.TALKS) turns.addAll(Arrays.asList(t.turns));
+        Collections.shuffle(turns, rnd);
+        for (Chinese.Turn t : turns.subList(0, 5)) {
+            Q q = q("Kawan berkata begini. Apakah jawapan yang betul?", "Your friend says this. What is the right reply?",
+                    Stem.TEXT, "🐼 " + t.friend.hanzi);
+            q.caption = t.friend.pinyin + "  ·  " + t.friend.malay;
+            q.zh = t.friend.hanzi;
+            pair(q, t.reply.hanzi, t.wrong.hanzi);
             out.add(q);
         }
     }

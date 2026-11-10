@@ -64,7 +64,7 @@ final class DragScreen extends Screen {
         int n = items.length;
         Content.Item[] tilesOrder = Content.shuffled(items, rnd);
 
-        boolean wide = s.kind == Content.Kind.WORDS;
+        boolean wide = s.wordTiles();
         int gap = Ui.dp(18), pad = Ui.dp(10);
         float colW = (w - gap * (n + 1)) / (float) n;
         // t: tile height. A card is a picture (0.8 t) over a slot (t); the tiles sit in a row under the cards.
@@ -131,7 +131,7 @@ final class DragScreen extends Screen {
         tile.setForeground(Ui.shine(r));
         Ui.lift(tile, 8, s.colors[0]);
         tile.setContentDescription("tile:" + it.word);
-        if (s.kind == Content.Kind.WORDS) {
+        if (s.wordTiles()) {
             LinearLayout v = new LinearLayout(c);
             v.setOrientation(LinearLayout.VERTICAL);
             v.setPadding(Ui.dp(8), Ui.dp(4), Ui.dp(8), Ui.dp(4));

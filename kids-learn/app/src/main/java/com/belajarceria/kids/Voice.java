@@ -61,6 +61,11 @@ final class Voice implements TextToSpeech.OnInitListener {
             case HIJAIYAH:
                 arabicOr(it.big, it.word);
                 break;
+            case CHINESE:
+                // the Chinese voice reads the word; without one, its meaning in Malay
+                if (!chinese) sayMalay(it.sub);
+                else sayChinese(it.big, false);
+                break;
             default:
                 arabicOr(it.big, it.word);
                 if (it.sub != null) speak(it.sub, ENGLISH, false);
@@ -90,6 +95,11 @@ final class Voice implements TextToSpeech.OnInitListener {
         speak(text, CHINESE, true);
         tts.setSpeechRate(0.85f);
         return true;
+    }
+
+    /** Reads Mandarin after whatever is being said now (the test reads its instruction, then the word). */
+    void queueChinese(String text) {
+        if (ready && chinese) speak(text, CHINESE, false);
     }
 
     boolean hasMalay() {

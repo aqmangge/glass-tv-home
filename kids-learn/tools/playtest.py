@@ -110,9 +110,10 @@ def play_learn():
     back()
 
 
-def play_drag():
-    print("Drag & drop: one wrong drop, then every tile into its slot")
-    tap("Drag", 4.5)
+def play_drag(opened=False, label="Drag", picture="p2-drag-done"):
+    print(f"{label}: one wrong drop, then every tile into its slot")
+    if not opened:
+        tap("Drag", 4.5)
     before = len(events())
     tiles = [(d[5:], b) for d, b in nodes() if d.startswith("tile:")]
     slots = {d[5:]: b for d, b in nodes() if d.startswith("slot:")}
@@ -126,19 +127,20 @@ def play_drag():
                 swipe(center(tb), center(slots[word]), 1200)
                 time.sleep(1.6)
         time.sleep(0.2)
-        shot("p2-drag-done")
-    check("Drag: a wrong drop is refused", count("drag wrong", before) == 1, f"{count('drag wrong', before)}")
-    check("Drag: every tile lands in its slot", count("drag right", before) == len(tiles) > 0,
+        shot(picture)
+    check(f"{label}: a wrong drop is refused", count("drag wrong", before) == 1, f"{count('drag wrong', before)}")
+    check(f"{label}: every tile lands in its slot", count("drag right", before) == len(tiles) > 0,
           f"{count('drag right', before)} of {len(tiles)}")
     time.sleep(1.5)
-    check("Drag: the round ends with a celebration", count("celebrate", before) >= 1)
+    check(f"{label}: the round ends with a celebration", count("celebrate", before) >= 1)
     time.sleep(3)
     back()
 
 
-def play_match(tap_mode=False):
-    print("Match: " + ("tap one, then its partner" if tap_mode else "one wrong line, then a line for every pair"))
-    tap("Match", 4.5)
+def play_match(tap_mode=False, opened=False, label="Match", picture=None):
+    print(f"{label}: " + ("tap one, then its partner" if tap_mode else "one wrong line, then a line for every pair"))
+    if not opened:
+        tap("Match", 4.5)
     before = len(events())
     lefts = [(d[5:], b) for d, b in nodes() if d.startswith("left:")]
     rights = {d[6:]: b for d, b in nodes() if d.startswith("right:")}
@@ -159,13 +161,13 @@ def play_match(tap_mode=False):
                 swipe(center(lb), center(rights[word]), 900)
             time.sleep(1.4)
         time.sleep(0.2)
-        shot("p4-match-tap" if tap_mode else "p3-match-done")
+        shot(picture or ("p4-match-tap" if tap_mode else "p3-match-done"))
     if not tap_mode:
-        check("Match: a wrong line is refused", count("match wrong", before) == 1, f"{count('match wrong', before)}")
-    check("Match: every pair joins" + (" by tapping" if tap_mode else " by drawing a line"),
+        check(f"{label}: a wrong line is refused", count("match wrong", before) == 1, f"{count('match wrong', before)}")
+    check(f"{label}: every pair joins" + (" by tapping" if tap_mode else " by drawing a line"),
           count("match right", before) == len(lefts) > 0, f"{count('match right', before)} of {len(lefts)}")
     time.sleep(1.5)
-    check("Match: the round ends with a celebration", count("celebrate", before) >= 1)
+    check(f"{label}: the round ends with a celebration", count("celebrate", before) >= 1)
     time.sleep(3)
     back()
 
@@ -204,6 +206,26 @@ def wait_question(i, timeout=15):
             return int(ev[mark[-1]].split()[-1])
         time.sleep(0.5)
     return None
+
+
+def answer_test(wrong, picture, at):
+    """Answers the 25 questions on screen, all right but question wrong + 1; returns how many were answered."""
+    before = len(events())
+    for i in range(25):
+        right = wait_question(i)
+        if right is None:
+            print(f"  ! question {i + 1} never appeared")
+            break
+        if i == at:
+            shot(picture)
+        opts = {d: b for d, b in nodes() if d.startswith("opt:")}
+        pick = right if i != wrong else (right + 1) % max(1, len(opts))
+        b = opts.get(f"opt:{pick}")
+        if b:
+            sh("input tap %d %d" % center(b))
+        time.sleep(0.4)
+    time.sleep(1)
+    return count("exam answer", before)
 
 
 def play_exam():
@@ -360,9 +382,19 @@ def play_mandarin():
     tap("next", 1.5)
     tap("next", 1.5)
     tap("mic", 1)
-    # the emulator has no recogniser, so the app records instead; it stops on its own after five seconds
-    time.sleep(7)
+    # the emulator has no recogniser, so the app records instead; it stops on its own after six seconds
+    time.sleep(8)
     shot("p18-zh-words")
+    # A second tap while listening means "I've finished": it must answer, and the microphone must work again after.
+    m0 = len(events())
+    tap("mic", 1.5)
+    tap("mic", 3)
+    tap("mic", 1.5)
+    tap("mic", 3)
+    mev = events()[m0:]
+    check("Mandarin: tapping the microphone again finishes, and it listens again every time",
+          sum(e.startswith("zh mic listening") for e in mev) == 2 and sum(e.startswith("zh mic stars") for e in mev) == 2,
+          " / ".join(e for e in mev if e.startswith("zh mic")))
     back()
     back()
     sh(f"am start -S -W -n {PKG}/.MainActivity --es open zh,2,0")
@@ -383,6 +415,23 @@ def play_mandarin():
         tap("next", 1.2)
     time.sleep(1.5)
     shot("p22-zh-applause")
+    sh(f"am start -S -W -n {PKG}/.MainActivity --es open zh,4")
+    time.sleep(6)
+    play_drag(opened=True, label="Mandarin drag", picture="p23-zh-drag")
+    sh(f"am start -S -W -n {PKG}/.MainActivity --es open zh,5")
+    time.sleep(6)
+    play_match(opened=True, label="Mandarin match", picture="p24-zh-match")
+    sh(f"am start -S -W -n {PKG}/.MainActivity --es open zh,6")
+    time.sleep(6)
+    e0 = len(events())
+    tap("start:4", 1)
+    answered = answer_test(wrong=7, picture="p25-zh-exam-question", at=4)
+    time.sleep(2.5)
+    shot("p26-zh-exam-result")
+    xev = events()[e0:]
+    check("Mandarin test: all 25 questions answered", answered == 25, f"{answered}")
+    check("Mandarin test: the mark is 24/25 (one wrong on purpose)", "exam result 4 24/25" in xev,
+          next((e for e in xev if e.startswith("exam result")), "no result"))
     ev = events()[before:]
     phrases = [e for e in ev if e.startswith("zh phrase")]
     check("Mandarin: word cards go forward", len(phrases) >= 3, f"{len(phrases)} cards")

@@ -35,14 +35,21 @@ final class ExamScreen extends Screen {
     private String mode;
     private TextView voiceButton, promptView;
     private Exam.Q current;
+    /** The parts this test offers: the Year 1 paper's four, or Mandarin alone. */
+    private final int[] parts;
 
     ExamScreen(MainActivity a) {
+        this(a, Exam.YEAR_ONE, "Ujian Diagnostik Tahun 1");
+    }
+
+    ExamScreen(MainActivity a, int[] parts, String title) {
         super(a);
+        this.parts = parts;
         LinearLayout col = new LinearLayout(a);
         col.setOrientation(LinearLayout.VERTICAL);
         Ui.noClip(col);
         mode = prefs().getString("exam_voice", "ms");
-        LinearLayout bar = header("Ujian Diagnostik Tahun 1", Theme.current.title[0]);
+        LinearLayout bar = header(title, Theme.current.title[0]);
         addSpacer(bar);
         voiceButton = Ui.text(a, "", 17, Ui.INK, Ui.BLACK);
         voiceButton.setBackground(Ui.round(Ui.GLASS, Ui.dp(26)));
@@ -75,7 +82,8 @@ final class ExamScreen extends Screen {
         col.setGravity(Gravity.CENTER);
         Ui.noClip(col);
 
-        TextView hint = Ui.text(c, "Pilih satu bahagian, atau jawab semua · 25 markah setiap bahagian", 16, Ui.MUTED, Ui.BOLD);
+        TextView hint = Ui.text(c, parts.length > 1 ? "Pilih satu bahagian, atau jawab semua · 25 markah setiap bahagian"
+                : "25 soalan · 25 markah · Tekan untuk mula!", 16, Ui.MUTED, Ui.BOLD);
         col.addView(hint, new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 
         int tileH = (int) Math.min(Math.max(Ui.shortSide(c) * 0.4f, Ui.dp(140)), Ui.dp(230));
@@ -89,7 +97,7 @@ final class ExamScreen extends Screen {
         row.setPadding(Ui.dp(20), Ui.dp(14), Ui.dp(20), Ui.dp(14));
         Ui.noClip(row);
         ArrayList<View> tiles = new ArrayList<>();
-        for (int s = 0; s < 4; s++) {
+        for (int s : parts) {
             View t = sectionTile(s, tileW, tileH);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(tileW, tileH);
             lp.leftMargin = lp.rightMargin = Ui.dp(9);
@@ -105,9 +113,11 @@ final class ExamScreen extends Screen {
         all.setPadding(Ui.dp(30), 0, Ui.dp(30), 0);
         Ui.lift(all, 8, Theme.current.title[0]);
         all.setContentDescription("start:all");
-        Ui.press(all, () -> start(new int[]{Exam.BM, Exam.EN, Exam.MT, Exam.JW}));
-        col.addView(all, new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, Ui.dp(60)));
-        tiles.add(all);
+        Ui.press(all, () -> start(parts));
+        if (parts.length > 1) {
+            col.addView(all, new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, Ui.dp(60)));
+            tiles.add(all);
+        }
 
         body.addView(col, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         Ui.enter(tiles, 60);
@@ -257,6 +267,7 @@ final class ExamScreen extends Screen {
 
     private void sayPrompt(Exam.Q q) {
         talk(q.promptMs, q.promptEn);
+        if (q.zh != null) act.voice.queueChinese(q.zh); // then the Mandarin itself
     }
 
     /** The instruction in the chosen language (Malay when muted, as on the paper). */
@@ -374,7 +385,7 @@ final class ExamScreen extends Screen {
     private void showResult() {
         Context c = getContext();
         body.removeAllViews();
-        int[] score = new int[4];
+        int[] score = new int[Exam.NAMES.length];
         List<Exam.Q> wrong = new ArrayList<>();
         for (Exam.Q q : questions) {
             if (q.right()) score[q.section]++;

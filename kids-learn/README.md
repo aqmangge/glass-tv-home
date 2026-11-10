@@ -31,9 +31,15 @@ Five subjects, each with four ways to play:
 panda (meeting someone, at school, family, being asked to introduce yourself at an event: pick the right reply, then
 say it), and 4 short speeches given on a stage with curtains, a spotlight and an audience (a teleprompter lights up as
 the model reads each line, then the child says it; the audience stands and claps at the end). Simplified characters
-with Hanyu Pinyin, meanings in Malay and English, read by the phone's Chinese voice. The microphone uses the phone's
-own speech recogniser to give up to three stars; without one it records the child and plays it back. Nothing heard
-is kept or sent.
+with Hanyu Pinyin, meanings in Malay and English, read by the phone's Chinese voice. Under the four steps: **🧩 Seret &
+Lepas** and **🔗 Padankan** with 24 picture words (猫 māo, 苹果 píngguǒ, 太阳 tàiyáng…), and a **📝 25-question test**
+with a mark and band like the Year 1 paper (picture to word, what a word means, counting in Chinese, pinyin to
+characters, and choosing the right reply to a friend).
+
+The microphone: tap **🎤 Tekan & cakap**; it beeps, turns red and says **Cakap sekarang!** with a sound meter while it
+listens, and finishes by itself when the child stops talking (or when they tap it again). It uses the phone's own
+speech recogniser for up to three stars; on a phone whose recogniser has no Mandarin, it records the child and plays
+it back instead. Nothing heard is kept or sent.
 
 **🎵 Muzik** (top left of the home screen) is a break from learning: a piano (C4–C6, chords and slides), a drum kit
 (kick, snare, hi-hats, three toms, crash), a guitar (six strings in standard tuning, chord buttons C G D Am Em F, tap a

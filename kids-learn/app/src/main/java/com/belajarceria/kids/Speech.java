@@ -10,6 +10,7 @@ import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -35,7 +36,14 @@ final class Speech {
     private final Context context;
     private final Handler main = new Handler(Looper.getMainLooper());
     private SpeechRecognizer recognizer;
-    private volatile boolean recording;
+    /** Which listen is current: a late answer from an older one (cancelled, or a new card) is ignored. */
+    private int session;
+    private Result pending;
+    private Level meter;
+    private boolean ready, spoke;
+    private long startedAt;
+    /** The current recording's own "keep going" flag, so stopping one never stops the next. */
+    private boolean[] recordingFlag;
     private short[] last;
 
     Speech(Context c) {
@@ -46,24 +54,48 @@ final class Speech {
         return SpeechRecognizer.isRecognitionAvailable(context);
     }
 
-    /** Listens once for the target phrase and scores it. Falls back to recording when no recogniser works. */
+    /**
+     * Listens once for the target phrase and scores it; result gets exactly one answer, always. Falls back to
+     * recording when the phone's recogniser doesn't work for Mandarin (no Chinese, no connection, busy...).
+     */
     void listen(String target, Level meter, Result result) {
+        stop();
+        int me = ++session;
+        pending = result;
+        this.meter = meter;
         if (!canRecognise()) {
-            record(meter, result);
+            record(me);
             return;
         }
-        stop();
-        recognizer = SpeechRecognizer.createSpeechRecognizer(context);
+        ready = false;
+        spoke = false;
+        startedAt = SystemClock.uptimeMillis();
+        try {
+            recognizer = SpeechRecognizer.createSpeechRecognizer(context);
+        } catch (RuntimeException e) {
+            record(me);
+            return;
+        }
         Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         i.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         i.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "zh-CN");
+        i.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "zh-CN");
         i.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
-        i.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true);
+        i.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.getPackageName());
+        // Children pause and start slowly: give them time before deciding they have finished.
+        i.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 1800L);
+        i.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1800L);
         recognizer.setRecognitionListener(new RecognitionListener() {
-            @Override public void onReadyForSpeech(Bundle b) {}
-            @Override public void onBeginningOfSpeech() {}
+            @Override public void onReadyForSpeech(Bundle b) {
+                ready = true;
+            }
+            @Override public void onBeginningOfSpeech() {
+                spoke = true;
+            }
             @Override public void onRmsChanged(float db) {
-                if (meter != null) meter.level(Math.max(0f, Math.min(1f, (db + 2f) / 12f)));
+                if (me == session && Speech.this.meter != null) {
+                    Speech.this.meter.level(Math.max(0f, Math.min(1f, (db + 2f) / 12f)));
+                }
             }
             @Override public void onBufferReceived(byte[] b) {}
             @Override public void onEndOfSpeech() {}
@@ -72,49 +104,114 @@ final class Speech {
 
             @Override
             public void onError(int error) {
-                stop();
-                if (error == SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS || error == SpeechRecognizer.ERROR_CLIENT
-                        || error == SpeechRecognizer.ERROR_SERVER || error == SpeechRecognizer.ERROR_NETWORK
-                        || error == SpeechRecognizer.ERROR_NETWORK_TIMEOUT) {
-                    record(meter, result); // no working recogniser here: record and play back instead
+                if (me != session) return;
+                destroyRecognizer();
+                boolean listenedProperly = ready && (spoke || SystemClock.uptimeMillis() - startedAt > 2500);
+                if (listenedProperly && (error == SpeechRecognizer.ERROR_NO_MATCH
+                        || error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT)) {
+                    finish(me, 0, ""); // it listened, but understood nothing
                 } else {
-                    result.done(0, ""); // heard nothing it understood
+                    // The recogniser gave up before really listening (no Mandarin on this phone, no connection,
+                    // busy, refused): record and play back instead, so the tap always does something.
+                    record(me);
                 }
             }
 
             @Override
             public void onResults(Bundle b) {
+                if (me != session) return;
                 ArrayList<String> heard = b.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-                stop();
                 String best = "";
                 float score = 0f;
                 if (heard != null) {
                     for (String h : heard) {
                         float s = similarity(target, h);
-                        if (s > score) {
-                            score = s;
+                        if (s > score || best.isEmpty()) {
+                            score = Math.max(score, s);
                             best = h;
                         }
                     }
                 }
-                result.done(stars(score), best);
+                finish(me, stars(score), best);
             }
         });
-        recognizer.startListening(i);
+        try {
+            recognizer.startListening(i);
+        } catch (RuntimeException e) {
+            destroyRecognizer();
+            record(me);
+            return;
+        }
+        // A recogniser that never gets ready is as good as none.
+        main.postDelayed(() -> {
+            if (me == session && recognizer != null && !ready) {
+                destroyRecognizer();
+                record(me);
+            }
+        }, 3000);
+        // Never listen for ever: after ten seconds, judge what was said.
+        main.postDelayed(() -> {
+            if (me == session && recognizer != null) finishEarly();
+        }, 10000);
     }
 
+    /** "I've finished": the child tapped the microphone again. Judges what was said so far. */
+    void finishEarly() {
+        int me = session;
+        if (recordingFlag != null) {
+            recordingFlag[0] = false; // the recording ends and is judged
+        } else if (recognizer != null) {
+            try {
+                recognizer.stopListening();
+            } catch (RuntimeException ignored) {
+                // already stopping
+            }
+            // Some recognisers never answer after a stop: don't leave the child waiting.
+            main.postDelayed(() -> finish(me, 0, ""), 2500);
+        }
+    }
+
+    /** Stops listening without judging (a new card, or leaving the screen). The result hears stars = -1. */
     void stop() {
-        recording = false;
+        int me = session;
+        destroyRecognizer();
+        if (recordingFlag != null) recordingFlag[0] = false;
+        recordingFlag = null;
+        Result r = pending;
+        pending = null;
+        session++;
+        if (r != null && me == session - 1) r.done(-1, null);
+    }
+
+    private void destroyRecognizer() {
         if (recognizer != null) {
-            recognizer.destroy();
+            try {
+                recognizer.destroy();
+            } catch (RuntimeException ignored) {
+                // already gone
+            }
             recognizer = null;
         }
     }
 
+    private void finish(int me, int stars, String heard) {
+        if (me != session) return;
+        destroyRecognizer();
+        recordingFlag = null;
+        Result r = pending;
+        pending = null;
+        session++;
+        if (r != null) r.done(stars, heard);
+    }
+
     // ---------------------------------------------------------------- record and play back
 
-    /** Records up to five seconds (or until {@link #stop}); a clear voice of a second or more earns three stars. */
-    private void record(Level meter, Result result) {
+    /** Records up to six seconds (or until the child taps again); a clear voice of a second or more earns three stars. */
+    private void record(int me) {
+        destroyRecognizer();
+        boolean[] go = {true};
+        recordingFlag = go;
+        Level meter = this.meter;
         new Thread(() -> {
             int rate = 16000;
             int min = AudioRecord.getMinBufferSize(rate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
@@ -122,16 +219,16 @@ final class Speech {
             try {
                 rec = new AudioRecord(MediaRecorder.AudioSource.MIC, rate, AudioFormat.CHANNEL_IN_MONO,
                         AudioFormat.ENCODING_PCM_16BIT, Math.max(min, rate));
+                if (rec.getState() != AudioRecord.STATE_INITIALIZED) throw new IllegalStateException("no mic");
                 rec.startRecording();
             } catch (RuntimeException e) { // includes SecurityException: no microphone permission
-                main.post(() -> result.done(0, null));
+                main.post(() -> finish(me, 0, null));
                 return;
             }
-            recording = true;
-            short[] all = new short[rate * 5];
+            short[] all = new short[rate * 6];
             short[] buf = new short[rate / 20];
             int n = 0, loud = 0, quietAfter = 0;
-            while (recording && n + buf.length <= all.length) {
+            while (go[0] && n + buf.length <= all.length) {
                 int got = rec.read(buf, 0, buf.length);
                 if (got <= 0) break;
                 System.arraycopy(buf, 0, all, n, got);
@@ -139,7 +236,9 @@ final class Speech {
                 double sum = 0;
                 for (int i = 0; i < got; i++) sum += buf[i] * (double) buf[i];
                 float rms = (float) Math.sqrt(sum / got) / 3000f;
-                if (meter != null) main.post(() -> meter.level(Math.min(1f, rms)));
+                if (meter != null) main.post(() -> {
+                    if (me == session) meter.level(Math.min(1f, rms));
+                });
                 if (rms > 0.15f) {
                     loud++;
                     quietAfter = 0;
@@ -147,17 +246,21 @@ final class Speech {
                     break; // a second and a half of quiet after speaking: they're done
                 }
             }
-            rec.stop();
+            try {
+                rec.stop();
+            } catch (RuntimeException ignored) {
+                // stopped already
+            }
             rec.release();
-            recording = false;
             short[] clip = new short[n];
             System.arraycopy(all, 0, clip, 0, n);
-            last = clip;
-            boolean spoke = loud > 0;
+            boolean spokeHere = loud > 0;
             int stars = loud >= 20 ? 3 : loud >= 10 ? 2 : loud >= 4 ? 1 : 0;
             main.post(() -> {
-                result.done(stars, null);
-                if (spoke) playBack();
+                if (me != session) return; // cancelled meanwhile
+                last = clip;
+                finish(me, stars, null);
+                if (spokeHere) playBack();
             });
         }, "record").start();
     }

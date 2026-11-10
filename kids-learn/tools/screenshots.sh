@@ -57,6 +57,9 @@ shot 61-zh-words "zh,0"
 shot 62-zh-sentences "zh,1"
 shot 63-zh-chat "zh,2,3"
 shot 64-zh-stage "zh,3,0"
+shot 65-zh-drag "zh,4"
+shot 66-zh-match "zh,5"
+shot 67-zh-test "zh,6"
 
 # The music corner: each instrument.
 shot 50-music-piano "music,0"
