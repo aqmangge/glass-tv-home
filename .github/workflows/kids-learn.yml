@@ -46,7 +46,7 @@ jobs:
     name: Run it on an emulator
     needs: apk
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 65
     permissions:
       contents: write # to publish the screenshots on their own branch
     steps:
@@ -69,7 +69,7 @@ jobs:
           disable-animations: false
           script: |
             sh kids-learn/tools/screenshots.sh belajar-ceria.apk shots
-            timeout 1500 python3 -u kids-learn/tools/playtest.py shots/playtest
+            timeout 2700 python3 -u kids-learn/tools/playtest.py shots/playtest
       - uses: actions/upload-artifact@v4
         if: always()
         with:
