@@ -196,11 +196,12 @@ def play_trace():
     back()
 
 
-def wait_question(i, timeout=15):
-    """Waits until question i is on screen and its buttons are logged; returns the right answer's index."""
+def wait_question(i, since, timeout=15):
+    """Waits until question i of the test started at event `since` is on screen and its buttons are logged;
+    returns the right answer's index. (Only this test's events: an earlier test logged the same numbers.)"""
     end = time.time() + timeout
     while time.time() < end:
-        ev = events()
+        ev = events()[since:]
         mark = [k for k, e in enumerate(ev) if e.startswith(f"exam q {i} ")]
         if mark and "layout" in ev[mark[-1]:]:
             return int(ev[mark[-1]].split()[-1])
@@ -208,11 +209,11 @@ def wait_question(i, timeout=15):
     return None
 
 
-def answer_test(wrong, picture, at):
-    """Answers the 25 questions on screen, all right but question wrong + 1; returns how many were answered."""
-    before = len(events())
+def answer_test(wrong, picture, at, before):
+    """Answers the 25 questions of the test started at event `before`, all right but question wrong + 1;
+    returns how many were answered."""
     for i in range(25):
-        right = wait_question(i)
+        right = wait_question(i, before)
         if right is None:
             print(f"  ! question {i + 1} never appeared")
             break
@@ -237,7 +238,7 @@ def play_exam():
     tap("start:0", 1)
     shot_taken = False
     for i in range(25):
-        right = wait_question(i)
+        right = wait_question(i, before)
         if right is None:
             print(f"  ! question {i + 1} never appeared")
             break
@@ -425,7 +426,7 @@ def play_mandarin():
     time.sleep(6)
     e0 = len(events())
     tap("start:4", 1)
-    answered = answer_test(wrong=7, picture="p25-zh-exam-question", at=4)
+    answered = answer_test(wrong=7, picture="p25-zh-exam-question", at=4, before=e0)
     time.sleep(2.5)
     shot("p26-zh-exam-result")
     xev = events()[e0:]
