@@ -839,7 +839,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         });
         grid.setHasFixedSize(true);
         grid.setItemAnimator(null);
-        grid.setItemViewCacheSize(12);
+        grid.setItemViewCacheSize(DevicePerformance.isUltraLowRam(this) ? 6 : 12);
         tray = new DockDecoration(COLUMNS, density);
         grid.addItemDecoration(tray);
         // The top-right buttons line up with the dock, which is only known once the tiles are laid out.
@@ -1497,6 +1497,18 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         updateSettingsBadge();
         applyDarkModeFilter();
         handler.postDelayed(() -> AppUpdateManager.checkForUpdates(this, false), 1500);
+        // Background Security & 1GB RAM Health Check (Delayed 10s to ensure zero UI impact on boot)
+        handler.postDelayed(() -> {
+            if (isFinishing() || isDestroyed()) return;
+            BoxSecurityScanner.scanAsync(this, result -> {
+                if (result != null && !result.isClean()) {
+                    updateSettingsBadge();
+                }
+            });
+            if (DevicePerformance.isUltraLowRam(this)) {
+                DevicePerformance.applyAggressiveMemoryTrims(this);
+            }
+        }, 10000);
         Location.Zone chosenPlace = Location.chosen(this);
         String zoneCode = (chosenPlace != null) ? chosenPlace.code : "WLY01";
         Azan.schedule(this, zoneCode);
@@ -3707,7 +3719,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         runOnUiThread(() -> {
             if (badgeSettingsUpdate != null) {
                 boolean hasUpdate = AppUpdateManager.isUpdateAvailable(this);
-                badgeSettingsUpdate.setVisibility(hasUpdate ? View.VISIBLE : View.GONE);
+                boolean hasThreat = BoxSecurityScanner.getLastResult() != null && !BoxSecurityScanner.getLastResult().isClean();
+                badgeSettingsUpdate.setVisibility((hasUpdate || hasThreat) ? View.VISIBLE : View.GONE);
             }
         });
     }

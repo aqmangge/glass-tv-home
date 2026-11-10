@@ -984,6 +984,22 @@ public final class ModernSettingsDialog {
                 // === TAB 7: GENERAL ===
                 addHeader(rightContent, outfit, "General");
 
+                BoxSecurityScanner.ScanResult secResult = BoxSecurityScanner.getLastResult();
+                String secBadge;
+                if (secResult == null) {
+                    secBadge = "🔍 Imbas";
+                } else if (secResult.isClean()) {
+                    secBadge = "✅ Selamat";
+                } else {
+                    secBadge = "⚠️ " + secResult.threatCount() + " Ancaman!";
+                }
+
+                rightContent.addView(buildCardRowWithBadge(activity, density, outfit,
+                        "🛡️ Keselamatan & Pengimbas Malware Box",
+                        "Periksa malware XCPE, BadBox, botnet firmware kilang & pelindung TV 1GB RAM",
+                        secBadge,
+                        () -> BoxSecurityDialog.show(activity)));
+
                 rightContent.addView(buildCardRow(activity, density, outfit,
                         "🔄 Mulakan Semula TV (Restart TV)", "Mula semula sistem Android TV secara lancar",
                         activity::showRestartDialog));
@@ -1003,6 +1019,13 @@ public final class ModernSettingsDialog {
             } else if (tab == TAB_TV) {
                 // === TAB 8: TV & SISTEM (NATIVE 4K RECOGNITION) ===
                 addHeader(rightContent, outfit, "TV & Sistem");
+
+                boolean is1GbBox = DevicePerformance.isUltraLowRam(activity);
+                String ramProfile = is1GbBox
+                        ? "⚡ Mod 1GB RAM Aktif (Kelancaran UI 60fps Rendah Memori)"
+                        : "⚡ Standard TV Mode (" + DevicePerformance.getTotalRamMb(activity) + "MB RAM)";
+                rightContent.addView(buildInfoCard(activity, density, outfit,
+                        "🚀 Profil Prestasi Peranti", ramProfile));
 
                 Display display = activity.getWindowManager().getDefaultDisplay();
                 Display.Mode mode = (display != null) ? display.getMode() : null;
