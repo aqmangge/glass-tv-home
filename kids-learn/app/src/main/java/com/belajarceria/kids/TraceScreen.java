@@ -97,6 +97,7 @@ final class TraceScreen extends Screen {
         col.addView(body, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f));
         addView(col, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
+        trace.required = s.kind == Content.Kind.LETTERS || s.kind == Content.Kind.NUMBERS ? 0.9f : 0.7f;
         trace.listener = new TraceView.Listener() {
             @Override
             public void onTraced() {

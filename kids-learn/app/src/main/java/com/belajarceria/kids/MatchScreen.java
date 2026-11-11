@@ -38,6 +38,8 @@ final class MatchScreen extends Screen {
     }
 
     private final Content.Subject s;
+    /** The Chinese words' English meaning, shown on request. */
+    private final EnglishHint hint = new EnglishHint();
     private final FrameLayout board;
     private final Lines lines;
     private final Random rnd = new Random();
@@ -51,7 +53,9 @@ final class MatchScreen extends Screen {
         LinearLayout col = new LinearLayout(a);
         col.setOrientation(LinearLayout.VERTICAL);
         Ui.noClip(col);
-        col.addView(header(s.title + "  ·  Match", s),
+        LinearLayout bar = header(s.title + "  ·  Match", s);
+        if (s.kind == Content.Kind.CHINESE) hint.addButton(this, bar);
+        col.addView(bar,
                 new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         FrameLayout area = new FrameLayout(a) {
             @Override
@@ -75,6 +79,7 @@ final class MatchScreen extends Screen {
         int w = board.getWidth(), h = board.getHeight();
         if (w == 0 || h == 0) return;
         board.removeAllViews();
+        hint.clear();
         cards.clear();
         links.clear();
         lines.reset();
@@ -160,6 +165,7 @@ final class MatchScreen extends Screen {
                 v.addView(big, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f));
                 TextView small = Ui.fit(c, it.word, 15, Ui.MUTED, Ui.BOLD);
                 small.setMaxLines(1);
+                hint.track(small, it);
                 v.addView(small, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, Ui.dp(20)));
                 return v;
             }

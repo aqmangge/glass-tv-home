@@ -131,7 +131,7 @@ final class Chinese {
         Content.Item[] items = new Content.Item[PICTURES.length];
         for (int i = 0; i < items.length; i++) {
             String[] w = PICTURES[i];
-            items[i] = new Content.Item(w[0], w[1], w[2], w[4]);
+            items[i] = new Content.Item(w[0], w[1], w[2], w[4], w[3]);
         }
         return new Content.Subject("华语", "Mandarin", "中文", ZhKit.RED_GOLD, Content.Kind.CHINESE, items);
     }

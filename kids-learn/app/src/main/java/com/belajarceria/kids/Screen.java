@@ -82,8 +82,11 @@ abstract class Screen extends FrameLayout {
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setPadding(Ui.dp(20), Ui.dp(12), Ui.dp(20), Ui.dp(4));
         Ui.noClip(bar);
-        bar.addView(Ui.chevronButton(getContext(), true, accent, act::back),
-                new LinearLayout.LayoutParams(Ui.dp(52), Ui.dp(52)));
+        View back = Ui.chevronButton(getContext(), true, accent, act::back);
+        back.setContentDescription("nav back");
+        // A child lock: going back needs the button held for five seconds, so a stray tap never leaves a game.
+        HoldRing.attach(back, 5000, accent, act::back, () -> act.backHint());
+        bar.addView(back, new LinearLayout.LayoutParams(Ui.dp(52), Ui.dp(52)));
         TextView t = Ui.text(getContext(), title, 22, Ui.INK, Ui.BLACK);
         t.setBackground(Ui.round(Ui.GLASS, Ui.dp(26)));
         t.setPadding(Ui.dp(24), 0, Ui.dp(24), 0);
@@ -92,6 +95,17 @@ abstract class Screen extends FrameLayout {
         lp.leftMargin = Ui.dp(12);
         bar.addView(t, lp);
         return bar;
+    }
+
+    /** Adds v at the right of a bar: just before the mascot when there is one. */
+    void addRight(LinearLayout bar, View v, LinearLayout.LayoutParams lp) {
+        if (mascot != null && mascot.getParent() == bar) {
+            lp.rightMargin = Ui.dp(12);
+            bar.addView(v, bar.indexOfChild(mascot), lp);
+        } else {
+            addSpacer(bar);
+            bar.addView(v, lp);
+        }
     }
 
     /** A flexible gap that pushes what follows to the right end of a bar. */

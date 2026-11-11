@@ -201,7 +201,20 @@ public final class MainActivity extends Activity {
     @SuppressWarnings("deprecation")
     @Override
     public void onBackPressed() {
-        back();
+        // The phone's own back gesture is locked too: only holding the ⬅ button for five seconds goes back.
+        backHint();
+    }
+
+    private android.widget.Toast hintToast;
+
+    /** "Hold for five seconds": shown when back is tapped instead of held. */
+    void backHint() {
+        log("nav back tap");
+        if (hintToast != null) hintToast.cancel();
+        hintToast = android.widget.Toast.makeText(this, stack.size() <= 1
+                ? "Tekan butang Home telefon untuk keluar 🏠"
+                : "Tekan & tahan ⬅ selama 5 saat untuk kembali ⏳", android.widget.Toast.LENGTH_SHORT);
+        hintToast.show();
     }
 
     /** Confetti, a star, a fanfare and a cheer; then {@code after} runs (usually the next round). */

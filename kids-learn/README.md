@@ -22,7 +22,7 @@ Five subjects, each with four ways to play:
 | Activity | How it plays |
 |---|---|
 | 👀 **Learn** | Big flash cards, read aloud. Swipe them like photos on an iPhone; tap to hear again. |
-| ✏️ **Draw** | Trace the dashed letter with a finger in a crayon colour. No need to colour it all in: following the letter's shape is enough (the app checks the crayon ran along most of the letter's centre line). Then it fills with colour and confetti flies. Messy scribbles get a hint to wipe with the sponge. |
+| ✏️ **Draw** | Trace the dashed letter with a finger in a crayon colour. No need to colour it all in: following the letter's shape is enough. For ABC and 123 the crayon must run along 90% of the letter's centre line (the whole letter); for Arabic, 70%. Then it fills with colour and confetti flies. Messy scribbles get a hint to wipe with the sponge. |
 | 🧩 **Drag** | Drag each tile into the slot of its picture: 🍎 takes A, three ducklings take 3, the shadow of ب takes ب. |
 | 🔗 **Match** | Draw a line from each picture to its word (or tap one, then the other). |
 
@@ -32,7 +32,8 @@ panda (meeting someone, at school, family, being asked to introduce yourself at 
 say it), and 4 short speeches given on a stage with curtains, a spotlight and an audience (a teleprompter lights up as
 the model reads each line, then the child says it; the audience stands and claps at the end). Simplified characters
 with Hanyu Pinyin, meanings in Malay and English, read by the phone's Chinese voice. Under the four steps: **🧩 Seret &
-Lepas** and **🔗 Padankan** with 24 picture words (猫 māo, 苹果 píngguǒ, 太阳 tàiyáng…), and a **📝 25-question test**
+Lepas** and **🔗 Padankan** with 24 picture words (猫 māo, 苹果 píngguǒ, 太阳 tàiyáng…), with a **💡 Hint** button
+at the top that shows each word's English meaning, and a **📝 25-question test**
 with a mark and band like the Year 1 paper (picture to word, what a word means, counting in Chinese, pinyin to
 characters, and choosing the right reply to a friend).
 
@@ -69,6 +70,9 @@ donut, play with a ball or sneeze; one pops up and sends hearts at each right an
 round is won).
 They change every subject and every game. The heroes are original designs and the babies are the owner's own artwork: no characters or logos from films,
 comics or cartoons, which belong to their studios.
+
+**Child lock:** the ⬅ back button at the top of every screen works only when held for five seconds (a ring fills
+around it); a tap, or the phone's own back gesture, just shows how. So a stray tap never ends a game.
 
 The feel is meant to be like Apple's: spring physics on every movement (buttons press in and bounce back,
 cards follow the finger and tilt, tiles lift with a deeper shadow), soft drifting colour blobs behind

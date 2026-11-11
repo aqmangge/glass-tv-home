@@ -29,6 +29,8 @@ final class DragScreen extends Screen {
     }
 
     private final Content.Subject s;
+    /** The Chinese words' English meaning, shown on request. */
+    private final EnglishHint hint = new EnglishHint();
     private final FrameLayout board;
     private final Random rnd = new Random();
     private final ArrayList<Slot> slots = new ArrayList<>();
@@ -40,7 +42,9 @@ final class DragScreen extends Screen {
         LinearLayout col = new LinearLayout(a);
         col.setOrientation(LinearLayout.VERTICAL);
         Ui.noClip(col);
-        col.addView(header(s.title + "  ·  Drag & drop", s),
+        LinearLayout bar = header(s.title + "  ·  Drag & drop", s);
+        if (s.kind == Content.Kind.CHINESE) hint.addButton(this, bar);
+        col.addView(bar,
                 new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         board = new FrameLayout(a) {
             @Override
@@ -58,6 +62,7 @@ final class DragScreen extends Screen {
         int w = board.getWidth(), h = board.getHeight();
         if (w == 0 || h == 0) return;
         board.removeAllViews();
+        hint.clear();
         slots.clear();
         placed = 0;
         Content.Item[] items = Content.pick(s.items, COUNT, rnd);
@@ -140,6 +145,7 @@ final class DragScreen extends Screen {
             v.addView(big, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f));
             TextView small = Ui.fit(c, it.word, 14, 0xEEFFFFFF, Ui.BOLD);
             small.setMaxLines(1);
+            hint.track(small, it);
             v.addView(small, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, (int) (h * 0.26f)));
             tile.addView(v, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         } else {

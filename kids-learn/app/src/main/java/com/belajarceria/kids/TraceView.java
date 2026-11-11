@@ -70,6 +70,12 @@ final class TraceView extends View {
     private ValueAnimator doneAnim;
     Listener listener;
 
+    /**
+     * How much of the letter's centre line the crayon must run along: 90% for ABC and 123 (the whole letter, more
+     * or less), 70% for Arabic, whose letters are smaller and harder for small hands.
+     */
+    float required = 0.7f;
+
     TraceView(Context c) {
         super(c);
         outline.setStyle(Paint.Style.STROKE);
@@ -303,7 +309,7 @@ final class TraceView extends View {
         if (letter == 0 || inked == 0) return;
         float coverage = followed / (float) letter, precision = onLetter / (float) inked;
         MainActivity.log(String.format(java.util.Locale.US, "trace check coverage=%.2f precision=%.2f", coverage, precision));
-        if (coverage >= 0.7f && precision >= 0.55f) {
+        if (coverage >= required && precision >= 0.55f) {
             traced = true;
             doneAnim = ValueAnimator.ofFloat(0f, 1f);
             doneAnim.setDuration(550);

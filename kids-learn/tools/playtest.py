@@ -70,8 +70,27 @@ def swipe(a, b, ms):
 
 
 def back(wait=2.5):
-    sh("input keyevent 4")
+    """Goes back the way the app allows: holding the ⬅ button for five seconds (a child lock)."""
+    v = find("nav back", exact=True)
+    if v:
+        x, y = center(v[0])
+        sh(f"input swipe {x} {y} {x} {y} 5600")  # a swipe that doesn't move is a long press
+    else:
+        sh("input keyevent 4")
     time.sleep(wait)
+
+
+def check_back_lock():
+    print("Back: a tap or the phone's back gesture must not leave; a five-second hold does")
+    before = len(events())
+    tap("nav back", 1.5)
+    sh("input keyevent 4")
+    time.sleep(1.5)
+    check("Back: a quick tap and the back gesture stay on the screen",
+          count("nav back tap", before) == 2 and count("nav back held", before) == 0,
+          f"{count('nav back tap', before)} taps, {count('nav back held', before)} held")
+    back()
+    check("Back: holding the button for five seconds goes back", count("nav back held", before) == 1)
 
 
 def shot(name):
@@ -194,6 +213,24 @@ def play_trace():
     time.sleep(2.5)
     shot("p6-trace-next")
     back()
+
+
+def play_trace_number():
+    print("Draw 123: half of the 1 is not enough any more (90% of the shape)")
+    sh(f"am start -S -W -n {PKG}/.MainActivity --es open 1,1")
+    time.sleep(6)
+    before = len(events())
+    board = find("board", exact=True)
+    if board:
+        l, t, r, b = board[0]
+        x, h = (l + r) // 2, b - t
+        swipe((x, t + int(h * 0.2)), (x, t + int(h * 0.5)), 700)  # only the top half of the 1
+        time.sleep(1.5)
+        shot("p6b-trace-half")
+    scores = [e for e in events()[before:] if e.startswith("trace check")]
+    check("Draw 123: half a number is not accepted", count("traced", before) == 0 and len(scores) > 0, "; ".join(scores))
+    sh(f"am start -S -W -n {PKG}/.MainActivity")
+    time.sleep(4)
 
 
 def wait_question(i, since, timeout=15):
@@ -418,9 +455,16 @@ def play_mandarin():
     shot("p22-zh-applause")
     sh(f"am start -S -W -n {PKG}/.MainActivity --es open zh,4")
     time.sleep(6)
+    h0 = len(events())
+    tap("hint", 1.5)
+    shot("p23a-zh-drag-hint")
+    check("Mandarin drag: the hint button shows the English meanings", count("zh hint on", h0) == 1)
     play_drag(opened=True, label="Mandarin drag", picture="p23-zh-drag")
     sh(f"am start -S -W -n {PKG}/.MainActivity --es open zh,5")
     time.sleep(6)
+    h0 = len(events())
+    tap("hint", 1.5)
+    check("Mandarin match: the hint button shows the English meanings", count("zh hint on", h0) == 1)
     play_match(opened=True, label="Mandarin match", picture="p24-zh-match")
     sh(f"am start -S -W -n {PKG}/.MainActivity --es open zh,6")
     time.sleep(6)
@@ -476,6 +520,8 @@ def main():
 
     print("Home: open ABC")
     tap("ABC", 3)
+    tap("Learn", 4.5)
+    check_back_lock()
     play_learn()
     play_drag()
     play_match()
@@ -491,6 +537,7 @@ def main():
     play_match(tap_mode=True)
     back()
 
+    play_trace_number()
     stop(rec, "playtest")
 
     rec = record("mandarin")

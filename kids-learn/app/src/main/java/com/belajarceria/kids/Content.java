@@ -21,11 +21,19 @@ final class Content {
         /** The picture (emoji, or a row of them to count). Null for Hijaiyah letters. */
         final String pic;
 
+        /** The English meaning, for the Chinese games' hint button. May be null. */
+        final String en;
+
         Item(String big, String word, String sub, String pic) {
+            this(big, word, sub, pic, null);
+        }
+
+        Item(String big, String word, String sub, String pic, String en) {
             this.big = big;
             this.word = word;
             this.sub = sub;
             this.pic = pic;
+            this.en = en;
         }
     }
 
