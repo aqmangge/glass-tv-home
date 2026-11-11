@@ -141,6 +141,11 @@ final class TraceScreen extends Screen {
     }
 
     @Override
+    boolean holdToGoBack() {
+        return true;
+    }
+
+    @Override
     int[] palette() {
         return s.palette();
     }

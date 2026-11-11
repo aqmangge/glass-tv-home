@@ -19,6 +19,14 @@ abstract class Screen extends FrameLayout {
     /** The background colours while this screen is in front. */
     abstract int[] palette();
 
+    /**
+     * Games and the music corner say true: their back button must be held for two seconds (a child lock, so a
+     * stray tap never ends a game), and the phone's back gesture is ignored there. Menus go back with a tap.
+     */
+    boolean holdToGoBack() {
+        return false;
+    }
+
     void onShown() {}
 
     void onHidden() {}
@@ -84,8 +92,8 @@ abstract class Screen extends FrameLayout {
         Ui.noClip(bar);
         View back = Ui.chevronButton(getContext(), true, accent, act::back);
         back.setContentDescription("nav back");
-        // A child lock: going back needs the button held for five seconds, so a stray tap never leaves a game.
-        HoldRing.attach(back, 5000, accent, act::back, () -> act.backHint());
+        // A child lock in games: going back needs the button held for two seconds.
+        if (holdToGoBack()) HoldRing.attach(back, 2000, accent, act::back, () -> act.backHint());
         bar.addView(back, new LinearLayout.LayoutParams(Ui.dp(52), Ui.dp(52)));
         TextView t = Ui.text(getContext(), title, 22, Ui.INK, Ui.BLACK);
         t.setBackground(Ui.round(Ui.GLASS, Ui.dp(26)));

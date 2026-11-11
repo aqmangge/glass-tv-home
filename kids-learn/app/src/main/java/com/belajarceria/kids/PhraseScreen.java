@@ -152,6 +152,11 @@ final class PhraseScreen extends Screen {
     }
 
     @Override
+    boolean holdToGoBack() {
+        return true;
+    }
+
+    @Override
     int[] palette() {
         return ZhKit.PALETTE;
     }

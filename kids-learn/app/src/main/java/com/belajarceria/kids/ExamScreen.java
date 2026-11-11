@@ -68,6 +68,11 @@ final class ExamScreen extends Screen {
     }
 
     @Override
+    boolean holdToGoBack() {
+        return true;
+    }
+
+    @Override
     int[] palette() {
         return Theme.current.home;
     }

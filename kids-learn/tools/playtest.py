@@ -70,18 +70,19 @@ def swipe(a, b, ms):
 
 
 def back(wait=2.5):
-    """Goes back the way the app allows: holding the ⬅ button for five seconds (a child lock)."""
+    """Goes back the way the app allows: holding the ⬅ button for two seconds (a child lock in games; a menu's
+    button just takes the hold as a tap)."""
     v = find("nav back", exact=True)
     if v:
         x, y = center(v[0])
-        sh(f"input swipe {x} {y} {x} {y} 5600")  # a swipe that doesn't move is a long press
+        sh(f"input swipe {x} {y} {x} {y} 2600")  # a swipe that doesn't move is a long press
     else:
         sh("input keyevent 4")
     time.sleep(wait)
 
 
 def check_back_lock():
-    print("Back: a tap or the phone's back gesture must not leave; a five-second hold does")
+    print("Back: in a game a tap or the phone's back gesture must not leave; a two-second hold does")
     before = len(events())
     tap("nav back", 1.5)
     sh("input keyevent 4")
@@ -90,7 +91,7 @@ def check_back_lock():
           count("nav back tap", before) == 2 and count("nav back held", before) == 0,
           f"{count('nav back tap', before)} taps, {count('nav back held', before)} held")
     back()
-    check("Back: holding the button for five seconds goes back", count("nav back held", before) == 1)
+    check("Back: holding the button for two seconds goes back", count("nav back held", before) == 1)
 
 
 def shot(name):
@@ -525,7 +526,9 @@ def main():
     play_learn()
     play_drag()
     play_match()
-    back()
+    m0 = len(events())
+    tap("nav back", 3)  # a menu goes back with a plain tap
+    check("Back: a menu goes back with a plain tap", count("nav back tap", m0) == 0 and count("screen back", m0) == 1)
 
     print("Home: open Alif Ba Ta")
     tap("Alif Ba Ta", 3)

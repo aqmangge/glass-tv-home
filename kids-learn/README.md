@@ -71,8 +71,9 @@ round is won).
 They change every subject and every game. The heroes are original designs and the babies are the owner's own artwork: no characters or logos from films,
 comics or cartoons, which belong to their studios.
 
-**Child lock:** the ⬅ back button at the top of every screen works only when held for five seconds (a ring fills
-around it); a tap, or the phone's own back gesture, just shows how. So a stray tap never ends a game.
+**Child lock:** in the games, the music corner and the tests, the ⬅ back button works only when held for two seconds
+(a ring fills around it); a tap, or the phone's own back gesture, just shows how, so a stray tap never ends a game.
+Menus go back with a normal tap.
 
 The feel is meant to be like Apple's: spring physics on every movement (buttons press in and bounce back,
 cards follow the finger and tilt, tiles lift with a deeper shadow), soft drifting colour blobs behind

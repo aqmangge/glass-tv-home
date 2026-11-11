@@ -79,6 +79,11 @@ final class MusicScreen extends Screen {
     }
 
     @Override
+    boolean holdToGoBack() {
+        return true;
+    }
+
+    @Override
     int[] palette() {
         return new int[]{0xFFFFF4FB, 0xFFEFF4FF, 0xFFFF9BD2, 0xFF9CC9FF, 0xFFFFE08A, 0xFFB5E8C8};
     }

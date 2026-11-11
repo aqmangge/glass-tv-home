@@ -172,6 +172,11 @@ final class LearnScreen extends Screen {
     }
 
     @Override
+    boolean holdToGoBack() {
+        return true;
+    }
+
+    @Override
     int[] palette() {
         return s.palette();
     }

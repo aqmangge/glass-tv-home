@@ -181,6 +181,7 @@ public final class MainActivity extends Activity {
         if (now - lastNav < 250) return;
         lastNav = now;
         voice.stop();
+        log("screen back");
         final Screen top = stack.remove(stack.size() - 1);
         top.onHidden();
         Spring.stop(top);
@@ -201,19 +202,19 @@ public final class MainActivity extends Activity {
     @SuppressWarnings("deprecation")
     @Override
     public void onBackPressed() {
-        // The phone's own back gesture is locked too: only holding the ⬅ button for five seconds goes back.
-        backHint();
+        // In a game the phone's own back gesture is locked too: only holding the ⬅ button goes back.
+        if (!stack.isEmpty() && stack.get(stack.size() - 1).holdToGoBack()) backHint();
+        else back();
     }
 
     private android.widget.Toast hintToast;
 
-    /** "Hold for five seconds": shown when back is tapped instead of held. */
+    /** "Hold for two seconds": shown in a game when back is tapped instead of held. */
     void backHint() {
         log("nav back tap");
         if (hintToast != null) hintToast.cancel();
-        hintToast = android.widget.Toast.makeText(this, stack.size() <= 1
-                ? "Tekan butang Home telefon untuk keluar 🏠"
-                : "Tekan & tahan ⬅ selama 5 saat untuk kembali ⏳", android.widget.Toast.LENGTH_SHORT);
+        hintToast = android.widget.Toast.makeText(this, "Tekan & tahan ⬅ selama 2 saat untuk kembali ⏳",
+                android.widget.Toast.LENGTH_SHORT);
         hintToast.show();
     }
 

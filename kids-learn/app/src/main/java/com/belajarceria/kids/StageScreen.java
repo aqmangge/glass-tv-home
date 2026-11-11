@@ -185,6 +185,11 @@ final class StageScreen extends Screen {
     }
 
     @Override
+    boolean holdToGoBack() {
+        return true;
+    }
+
+    @Override
     int[] palette() {
         return new int[]{0xFF2B1B24, 0xFF140C12, 0xFF7B1F2E, 0xFF3B1E4A, 0xFF5A2A1A, 0xFF2A1A3A};
     }
