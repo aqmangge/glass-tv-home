@@ -9,17 +9,17 @@
     <dimen name="home_top_button_height">50dp</dimen>
     <dimen name="home_top_button_text_size">17sp</dimen>
 
-    <!-- Daily Prayer & Prayer Times Section (4K UHD Profile: 1152px panel) -->
-    <dimen name="islamic_panel_width">1152px</dimen>
-    <dimen name="home_ayah_heading_size">28px</dimen>
-    <dimen name="home_ayah_arabic_size">52px</dimen>
-    <dimen name="home_ayah_text_size">29px</dimen>
-    <dimen name="home_daily_prayer_gap">28px</dimen>
-    <dimen name="home_prayer_header_size">26px</dimen>
-    <dimen name="home_prayer_header_gap">24px</dimen>
-    <dimen name="home_prayer_label_size">28px</dimen>
-    <dimen name="home_prayer_time_size">36px</dimen>
-    <dimen name="home_prayer_time_gap">12px</dimen>
+    <!-- Daily Prayer & Prayer Times Section (4K UHD Profile: Sp Units) -->
+    <dimen name="islamic_panel_width">560dp</dimen>
+    <dimen name="home_ayah_heading_size">12sp</dimen>
+    <dimen name="home_ayah_arabic_size">18sp</dimen>
+    <dimen name="home_ayah_text_size">14sp</dimen>
+    <dimen name="home_daily_prayer_gap">12dp</dimen>
+    <dimen name="home_prayer_header_size">14sp</dimen>
+    <dimen name="home_prayer_header_gap">6dp</dimen>
+    <dimen name="home_prayer_label_size">14sp</dimen>
+    <dimen name="home_prayer_time_size">20sp</dimen>
+    <dimen name="home_prayer_time_gap">4dp</dimen>
 
     <dimen name="home_dock_tray_radius">36dp</dimen>
     <dimen name="home_screen_padding_horizontal">74dp</dimen>
