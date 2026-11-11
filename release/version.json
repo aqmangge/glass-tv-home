@@ -1,7 +1,7 @@
 {
-  "versionCode": 46,
-  "versionName": "4.1.1",
-  "apkUrl": "https://github.com/aqmangge/glass-tv-home/raw/main/release/glass-tv-home.apk",
-  "changelog": "✨ Glass TV v4.1.1 (Pembetulan Pepijat & Peningkatan):\n• Baiki Isu Kemas Kini OTA: Membuang sekatan kebenaran pemasangan awal yang menghalang muat turun kemas kini pada Xiaomi Mi TV / Android 11 (#9).\n• Baiki Jubin Aplikasi Pendua (Duplicate App Tiles): Menyah-pendua (de-duplicate) aplikasi yang mendaftarkan lebih daripada satu aktiviti LEANBACK_LAUNCHER (seperti Sooka com.astro.sott) mengikut aktiviti pelancar rasmi sistem Android TV (#10).\n• Baiki Fungsi Sembunyikan Aplikasi (Hide Apps): Memastikan aplikasi yang dipilih dalam 'Sembunyikan Aplikasi' disembunyikan serta-merta dari skrin utama tanpa bergantung kepada status PIN (#10).",
-  "releaseDate": "2026-11-07"
+  "versionCode": 47,
+  "versionName": "4.2",
+  "apkUrl": "https://raw.githubusercontent.com/aqmangge/glass-tv-home/main/release/glass-tv-home.apk",
+  "changelog": "✨ Glass TV Home v4.2:\n• Reka Bentuk Minimal Weather Dashboard & Animasi Sky Canvas dinamik.\n• Reka Bentuk Baharu Dark Navy Glassmorphism untuk Profil & Tetapan.\n• Pengoptimuman prestasi dan paparan responsif dwi-resolusi 4K & Full HD.\n• Pembedaan jelas status profil aktif dan fokus D-pad alat kawalan TV.",
+  "releaseDate": "2026-11-10"
 }

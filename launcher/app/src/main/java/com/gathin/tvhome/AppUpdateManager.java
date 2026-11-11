@@ -279,11 +279,24 @@ public final class AppUpdateManager {
 
             try {
                 URL url = new URL(apkUrl);
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                conn.setConnectTimeout(10000);
-                conn.setReadTimeout(15000);
-                conn.connect();
+                while (true) {
+                    conn = (HttpURLConnection) url.openConnection();
+                    conn.setInstanceFollowRedirects(true);
+                    conn.setRequestMethod("GET");
+                    conn.setConnectTimeout(10000);
+                    conn.setReadTimeout(15000);
+                    int status = conn.getResponseCode();
+                    if (status == HttpURLConnection.HTTP_MOVED_TEMP || status == HttpURLConnection.HTTP_MOVED_PERM 
+                            || status == HttpURLConnection.HTTP_SEE_OTHER || status == 307 || status == 308) {
+                        String newUrl = conn.getHeaderField("Location");
+                        if (newUrl != null && !newUrl.isEmpty()) {
+                            url = new URL(newUrl);
+                            conn.disconnect();
+                            continue;
+                        }
+                    }
+                    break;
+                }
 
                 int fileLength = conn.getContentLength();
                 is = conn.getInputStream();
