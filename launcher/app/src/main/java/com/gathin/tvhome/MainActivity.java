@@ -3032,9 +3032,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         ensureWeatherOverlayView();
         if (weatherOverlayView == null) return;
 
-        boolean animEnabled = isAnimationsEnabled();
-        boolean enabled = getSharedPreferences("wallpaper_prefs", MODE_PRIVATE).getBoolean("dynamic_weather_overlay", true);
-        if (!enabled || !animEnabled) {
+        boolean isLowSpec = DevicePerformance.isLowSpec(this);
+        boolean animEnabled = isAnimationsEnabled() && !isLowSpec;
+        boolean enabled = getSharedPreferences("wallpaper_prefs", MODE_PRIVATE).getBoolean("dynamic_weather_overlay", !isLowSpec);
+        if (!enabled || !animEnabled || isLowSpec) {
             weatherOverlayView.setCondition(WeatherBackgroundView.ConditionType.NONE);
             weatherOverlayView.stopAnimation();
             weatherOverlayView.setVisibility(View.GONE);

@@ -85,10 +85,12 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
         rect.inset(-pad, -pad);
         area.set(rect);
         float radius = 30 * density;
-        // Soft drop shadow under the glass dock tray
-        RectF trayShadow = new RectF(rect);
-        trayShadow.offset(0, 4f * density);
-        c.drawRoundRect(trayShadow, radius, radius, trayShadowPaint);
+        // Soft drop shadow under the glass dock tray (bypassed on low-spec TV hardware to eliminate CPU blur rasterization)
+        if (!DevicePerformance.isLowSpec(parent.getContext())) {
+            RectF trayShadow = new RectF(rect);
+            trayShadow.offset(0, 4f * density);
+            c.drawRoundRect(trayShadow, radius, radius, trayShadowPaint);
+        }
 
         blur.draw(c, parent, rect, radius, 1f);
         c.drawRoundRect(rect, radius, radius, band);

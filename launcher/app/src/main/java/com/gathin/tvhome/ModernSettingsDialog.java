@@ -1204,14 +1204,17 @@ public final class ModernSettingsDialog {
             card.addView(tvSub);
         }
 
+        final boolean isLowSpec = DevicePerformance.isLowSpec(ctx);
         card.setOnFocusChangeListener((v, hasFocus) -> {
             applySoapBubbleCardBg(v, density, hasFocus);
-            v.animate()
-                    .scaleX(hasFocus ? 1.015f : 1.0f)
-                    .scaleY(hasFocus ? 1.015f : 1.0f)
-                    .setInterpolator(hasFocus ? new OvershootInterpolator(1.4f) : new DecelerateInterpolator())
-                    .setDuration(hasFocus ? 160 : 100)
-                    .start();
+            if (!isLowSpec) {
+                v.animate()
+                        .scaleX(hasFocus ? 1.015f : 1.0f)
+                        .scaleY(hasFocus ? 1.015f : 1.0f)
+                        .setInterpolator(hasFocus ? new OvershootInterpolator(1.4f) : new DecelerateInterpolator())
+                        .setDuration(hasFocus ? 160 : 100)
+                        .start();
+            }
         });
 
         card.setOnKeyListener((v, keyCode, event) -> {
@@ -1288,14 +1291,17 @@ public final class ModernSettingsDialog {
             card.addView(badge, badgeLp);
         }
 
+        final boolean isLowSpec = DevicePerformance.isLowSpec(ctx);
         card.setOnFocusChangeListener((v, hasFocus) -> {
             applySoapBubbleCardBg(v, density, hasFocus);
-            v.animate()
-                    .scaleX(hasFocus ? 1.015f : 1.0f)
-                    .scaleY(hasFocus ? 1.015f : 1.0f)
-                    .setInterpolator(hasFocus ? new OvershootInterpolator(1.4f) : new DecelerateInterpolator())
-                    .setDuration(hasFocus ? 160 : 100)
-                    .start();
+            if (!isLowSpec) {
+                v.animate()
+                        .scaleX(hasFocus ? 1.015f : 1.0f)
+                        .scaleY(hasFocus ? 1.015f : 1.0f)
+                        .setInterpolator(hasFocus ? new OvershootInterpolator(1.4f) : new DecelerateInterpolator())
+                        .setDuration(hasFocus ? 160 : 100)
+                        .start();
+            }
         });
 
         card.setOnKeyListener((v, keyCode, event) -> {
@@ -1356,14 +1362,17 @@ public final class ModernSettingsDialog {
         sw.setClickable(false);
         card.addView(sw);
 
+        final boolean isLowSpec = DevicePerformance.isLowSpec(ctx);
         card.setOnFocusChangeListener((v, hasFocus) -> {
             applySoapBubbleCardBg(v, density, hasFocus);
-            v.animate()
-                    .scaleX(hasFocus ? 1.015f : 1.0f)
-                    .scaleY(hasFocus ? 1.015f : 1.0f)
-                    .setInterpolator(hasFocus ? new OvershootInterpolator(1.4f) : new DecelerateInterpolator())
-                    .setDuration(hasFocus ? 160 : 100)
-                    .start();
+            if (!isLowSpec) {
+                v.animate()
+                        .scaleX(hasFocus ? 1.015f : 1.0f)
+                        .scaleY(hasFocus ? 1.015f : 1.0f)
+                        .setInterpolator(hasFocus ? new OvershootInterpolator(1.4f) : new DecelerateInterpolator())
+                        .setDuration(hasFocus ? 160 : 100)
+                        .start();
+            }
         });
 
         card.setOnKeyListener((v, keyCode, event) -> {

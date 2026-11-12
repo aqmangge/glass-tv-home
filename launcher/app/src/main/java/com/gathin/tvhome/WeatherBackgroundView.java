@@ -162,6 +162,9 @@ public class WeatherBackgroundView extends View {
 
     private boolean isAnimationsEnabled() {
         try {
+            if (DevicePerformance.isLowSpec(getContext())) {
+                return false;
+            }
             return !getContext().getSharedPreferences("theme_prefs", Context.MODE_PRIVATE)
                     .getBoolean("reduced_motion", false);
         } catch (Exception e) {

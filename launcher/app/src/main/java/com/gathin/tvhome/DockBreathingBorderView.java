@@ -223,22 +223,27 @@ public class DockBreathingBorderView extends View {
         float strokeW = (1.6f + (1.0f * breathProgress)) * density;
         rimPaint.setStrokeWidth(strokeW);
 
-        // 1. Soft Outer Atmospheric Breathing Glow (Cyan-Sky bloom)
-        int glowAlpha = (int) (65 * alphaFactor);
-        glowPaint.setStrokeWidth((4.0f + (3.0f * breathProgress)) * density);
-        glowPaint.setColor(Color.argb(glowAlpha, 56, 189, 248)); // Cyan #38BDF8
-        canvas.drawRoundRect(glowBounds, cornerRadius + (2f * density), cornerRadius + (2f * density), glowPaint);
+        boolean animEnabled = isAnimationsEnabled();
+        if (animEnabled) {
+            // 1. Soft Outer Atmospheric Breathing Glow (Cyan-Sky bloom)
+            int glowAlpha = (int) (65 * alphaFactor);
+            glowPaint.setStrokeWidth((4.0f + (3.0f * breathProgress)) * density);
+            glowPaint.setColor(Color.argb(glowAlpha, 56, 189, 248)); // Cyan #38BDF8
+            canvas.drawRoundRect(glowBounds, cornerRadius + (2f * density), cornerRadius + (2f * density), glowPaint);
+        }
 
         // 2. Main Glass Rim Border with Vertical Specular Gradient
-        int rimAlpha = (int) (225 * alphaFactor);
+        int rimAlpha = animEnabled ? (int) (225 * alphaFactor) : 225;
         rimPaint.setAlpha(rimAlpha);
         canvas.drawRoundRect(bounds, cornerRadius, cornerRadius, rimPaint);
 
-        // 3. Delicate Soap-Bubble Top Edge Specular Glint
-        int sheenAlpha = (int) (190 * (0.4f + (0.6f * breathProgress)));
-        topSheenPaint.setStrokeWidth(1.2f * density);
-        topSheenPaint.setAlpha(sheenAlpha);
-        canvas.drawLine(bounds.left + cornerRadius, bounds.top + (0.5f * density),
-                bounds.right - cornerRadius, bounds.top + (0.5f * density), topSheenPaint);
+        if (animEnabled) {
+            // 3. Delicate Soap-Bubble Top Edge Specular Glint
+            int sheenAlpha = (int) (190 * (0.4f + (0.6f * breathProgress)));
+            topSheenPaint.setStrokeWidth(1.2f * density);
+            topSheenPaint.setAlpha(sheenAlpha);
+            canvas.drawLine(bounds.left + cornerRadius, bounds.top + (0.5f * density),
+                    bounds.right - cornerRadius, bounds.top + (0.5f * density), topSheenPaint);
+        }
     }
 }

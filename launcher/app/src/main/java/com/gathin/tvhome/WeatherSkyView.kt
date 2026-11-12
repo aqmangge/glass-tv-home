@@ -218,13 +218,15 @@ class WeatherSkyView @JvmOverloads constructor(
         // 6) Readability scrim
         canvas.drawRect(0f, 0f, w, h, scrimPaint)
 
-        if (isAttachedToWindow) postInvalidateOnAnimation()
+        if (isAttachedToWindow && visibility == VISIBLE) postInvalidateOnAnimation()
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         lastFrameNs = 0L
-        postInvalidateOnAnimation()
+        if (visibility == VISIBLE) {
+            postInvalidateOnAnimation()
+        }
     }
 
     override fun onDetachedFromWindow() {

@@ -15,19 +15,6 @@
         android:layout_height="match_parent"
         android:alpha="0" />
 
-    <!-- Weather custom view declarations -->
-    <com.gathin.tvhome.WeatherSkyView
-        android:id="@+id/mainWeatherSkyView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone" />
-
-    <com.gathin.tvhome.HourlyChartView
-        android:id="@+id/mainWeatherHourlyChartView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone" />
-
     <!-- Top shelf: the place's name, its country and what it is about, positioned above the dock in code.
          The width is capped in code to a share of the space between the side paddings, so the
          description wraps in a column instead of running the width of the screen. -->

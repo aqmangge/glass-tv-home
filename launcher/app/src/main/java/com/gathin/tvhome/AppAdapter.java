@@ -367,7 +367,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         boolean focused = h.card.isFocused();   // a rebind after reload() can hit the focused tile
         if (h.breathingBorder != null) {
             h.breathingBorder.setReducedMotion(this.reducedMotion);
-            if (focused) {
+            if (focused && !this.reducedMotion) {
                 float r = cornerRadius(h.card.getWidth(), h.card.getResources().getDisplayMetrics().density);
                 h.breathingBorder.setCornerRadiusDp(r / h.card.getResources().getDisplayMetrics().density);
                 h.breathingBorder.setVisibility(View.VISIBLE);
@@ -612,7 +612,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
 
             card.setOnFocusChangeListener((view, focused) -> {
                 if (breathingBorder != null) {
-                    if (focused) {
+                    if (focused && !this.reducedMotion) {
                         float r = cornerRadius(view.getWidth(), density);
                         breathingBorder.setCornerRadiusDp(r / density);
                         breathingBorder.setVisibility(View.VISIBLE);
