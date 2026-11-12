@@ -185,17 +185,37 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         PackageManager pm = ctx.getPackageManager();
         Intent probe = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
         List<ResolveInfo> found = new ArrayList<>(pm.queryIntentActivities(probe, 0));
-        // A phone-only app named in dock_apps (e.g. the phone Play Store some boxes ship) has no leanback
-        // entry; take its ordinary launcher activity instead. Apps not named stay hidden.
+
         Set<String> listed = new HashSet<>();
         for (ResolveInfo ri : found) if (ri.activityInfo != null) listed.add(ri.activityInfo.packageName);
-        for (String pkg : favourites) {
-            if (listed.contains(pkg)) continue;
-            Intent phone = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setPackage(pkg);
-            List<ResolveInfo> more = pm.queryIntentActivities(phone, 0);
-            if (!more.isEmpty() && more.get(0).activityInfo != null) {
-                found.add(more.get(0));
-                listed.add(pkg);
+
+        boolean showMobileApps = ctx.getSharedPreferences("theme_prefs", Context.MODE_PRIVATE)
+                .getBoolean("pref_show_mobile_apps", true);
+
+        if (showMobileApps) {
+            Intent phoneProbe = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);
+            List<ResolveInfo> mobileApps = pm.queryIntentActivities(phoneProbe, 0);
+            if (mobileApps != null) {
+                for (ResolveInfo ri : mobileApps) {
+                    if (ri.activityInfo == null) continue;
+                    String pkg = ri.activityInfo.packageName;
+                    if (!listed.contains(pkg) && !pkg.equals(ctx.getPackageName())) {
+                        found.add(ri);
+                        listed.add(pkg);
+                    }
+                }
+            }
+        } else {
+            // A phone-only app named in dock_apps (e.g. the phone Play Store some boxes ship) has no leanback
+            // entry; take its ordinary launcher activity instead. Apps not named stay hidden.
+            for (String pkg : favourites) {
+                if (listed.contains(pkg)) continue;
+                Intent phone = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setPackage(pkg);
+                List<ResolveInfo> more = pm.queryIntentActivities(phone, 0);
+                if (!more.isEmpty() && more.get(0).activityInfo != null) {
+                    found.add(more.get(0));
+                    listed.add(pkg);
+                }
             }
         }
         // De-duplicate launcher activities by package name (e.g. Sooka com.astro.sott declares multiple LEANBACK_LAUNCHER activities)
@@ -478,10 +498,17 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
     }
 
     private void performLaunch(Entry e) {
-        Intent i = new Intent(Intent.ACTION_MAIN)
-                .addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER)
-                .setComponent(e.component)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        Intent i = ctx.getPackageManager().getLeanbackLaunchIntentForPackage(e.pkg);
+        if (i == null) {
+            i = ctx.getPackageManager().getLaunchIntentForPackage(e.pkg);
+        }
+        if (i == null) {
+            i = new Intent(Intent.ACTION_MAIN)
+                    .setComponent(e.component)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        } else {
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        }
         try {
             RecentAppsManager.recordAppLaunch(ctx, e.pkg);
             ctx.startActivity(i);

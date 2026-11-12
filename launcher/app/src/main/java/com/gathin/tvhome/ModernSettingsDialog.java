@@ -811,6 +811,13 @@ public final class ModernSettingsDialog {
                             if (renderRightPane[0] != null) renderRightPane[0].run();
                         }));
 
+                rightContent.addView(buildSwitchRow(activity, density, outfit,
+                        "📱 Papar Aplikasi Mobile (Show Sideloaded Apps)",
+                        "Papar aplikasi telefon pintar & tablet yang dipasang melalui APK di skrin utama TV",
+                        activity.isMobileAppsEnabled(), isChecked -> {
+                            activity.setMobileAppsEnabled(isChecked);
+                        }));
+
                 rightContent.addView(buildCardRow(activity, density, outfit,
                         "🔊 Kesan Bunyi Antaramuka (UI Sound)", "Pilih bunyi pilihan: PS5, Nintendo Switch, Xbox, atau Matikan",
                         activity::showSoundEffectsDialog));
@@ -876,6 +883,13 @@ public final class ModernSettingsDialog {
                             DevicePerformance.setOptimizationOverride(activity, isChecked);
                             activity.setAnimationsEnabled(!isChecked);
                             if (renderRightPane[0] != null) renderRightPane[0].run();
+                        }));
+
+                rightContent.addView(buildSwitchRow(activity, density, outfit,
+                        "📱 Papar Aplikasi Mobile (Show Sideloaded Apps)",
+                        "Papar aplikasi telefon pintar & tablet yang dipasang melalui APK di skrin utama TV",
+                        activity.isMobileAppsEnabled(), isChecked -> {
+                            activity.setMobileAppsEnabled(isChecked);
                         }));
 
             } else if (tab == TAB_STATUS_WEATHER) {
@@ -1484,11 +1498,12 @@ public final class ModernSettingsDialog {
         PackageManager pm = activity.getPackageManager();
         Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
-        List<ResolveInfo> apps = pm.queryIntentActivities(mainIntent, 0);
-        if (apps == null || apps.isEmpty()) {
-            mainIntent = new Intent(Intent.ACTION_MAIN, null);
-            mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-            apps = pm.queryIntentActivities(mainIntent, 0);
+        List<ResolveInfo> apps = new ArrayList<>(pm.queryIntentActivities(mainIntent, 0));
+        if (activity.isMobileAppsEnabled()) {
+            Intent mobileIntent = new Intent(Intent.ACTION_MAIN, null);
+            mobileIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            List<ResolveInfo> mob = pm.queryIntentActivities(mobileIntent, 0);
+            if (mob != null) apps.addAll(mob);
         }
 
         String selfPkg = activity.getPackageName();

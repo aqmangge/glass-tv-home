@@ -461,6 +461,15 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         getSharedPreferences("theme_prefs", MODE_PRIVATE).edit().putBoolean("standby_red_mode", enabled).apply();
     }
 
+    public boolean isMobileAppsEnabled() {
+        return getSharedPreferences("theme_prefs", MODE_PRIVATE).getBoolean("pref_show_mobile_apps", true);
+    }
+
+    public void setMobileAppsEnabled(boolean enabled) {
+        getSharedPreferences("theme_prefs", MODE_PRIVATE).edit().putBoolean("pref_show_mobile_apps", enabled).apply();
+        reloadTiles();
+    }
+
     void showDockColumnsDialog(Runnable onDismiss) {
         SoundEffects.playSelect();
         final String[] columnOptions = new String[]{

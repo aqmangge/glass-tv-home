@@ -1,7 +1,7 @@
 {
-  "versionCode": 49,
-  "versionName": "4.2.2",
+  "versionCode": 50,
+  "versionName": "4.2.3",
   "apkUrl": "https://raw.githubusercontent.com/aqmangge/glass-tv-home/main/release/glass-tv-home.apk",
-  "changelog": "✨ Glass TV Home v4.2.2 (Ultra-Smooth Low-Spec Engine):\n• Peningkatan prestasi menyeluruh & kelancaran 60fps untuk TV Box 1GB/2GB RAM (Amlogic, Allwinner, Rockchip).\n• Menghentikan pemprosesan bayang-bayang berat CPU BlurMaskFilter pada dulang aplikasi.\n• Mengoptimumkan kesan fokus kad Dock dan mematikan zarah cuaca berat di skrin utama secara automatik untuk kelajuan maksimum.\n• Navigasi D-Pad pantas dan responsif tanpa lag pada skrin utama dan menu tetapan.",
+  "changelog": "✨ Glass TV Home v4.2.3:\n• Sokongan penuh untuk aplikasi telefon pintar / sideloaded mobile APK di Android TV.\n• Mengimbas dan memaparkan semua aplikasi mobile dengan ikon kemas secara automatik.\n• Pelancaran aplikasi selamat menggunakan getLaunchIntentForPackage untuk mengelakkan ralat.\n• Suis kawalan baharu di Tetapan > Home Screen: 'Papar Aplikasi Mobile'.",
   "releaseDate": "2026-11-12"
 }
